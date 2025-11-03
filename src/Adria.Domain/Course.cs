@@ -12,7 +12,7 @@ public class Course
 
     private string Description { get; } //simpele uitleg over de cursus
     
-    private List<string> LearnList { get; } //TODO Dit is voor nu een list maar zal later omgezet moeten worden naar een string met comma's die ze splitsen.  
+    private List<string> LearnList { get; } //Dit is voor nu een list maar zal later omgezet moeten worden naar een string met comma's die ze splitsen.  
     
     public DateTime Duration { get; private set; }
     
