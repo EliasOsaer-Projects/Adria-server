@@ -8,6 +8,9 @@ public class User
     public DateTime LastPayment { get; set; }
     public int Streak { get; set; }
 
+    //public IReadOnlyCollection<Course> Courses = _courses.AsReadOnly();
+    //private readonly List<Course> _courses = [];
+
     public User(Guid id, string name, DateTime lastPayment)
     {
         EnsureUserIdIsValid(id);
