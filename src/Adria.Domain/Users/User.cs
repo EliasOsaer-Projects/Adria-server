@@ -27,6 +27,11 @@ public class User
         PointsBalance += points;
     }
 
+    public void RemovePoints(int points)
+    {
+        PointsBalance -= points;
+    }
+
     public void ChangeLastPaymentDate(DateTime lastpayment)
     {
         LastPayment = lastpayment;
@@ -37,10 +42,21 @@ public class User
         Streak++;
     }
 
-    private void EnsureUserIdIsValid(Guid id)
+    public void ResetStreak()
+    {
+        Streak = 0;
+    }
+
+    //Security
+    private static void EnsureUserIdIsValid(Guid id)
     {
         if (id == Guid.Empty)
             throw new ArgumentException("This user id is empty");
+    }
+
+    private static void EnsureEnoughPoints()
+    {
+
     }
 
 }
