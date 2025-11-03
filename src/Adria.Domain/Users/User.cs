@@ -19,7 +19,20 @@ public class User
         Streak = 0;
     }
 
+    public void addPoints(int points)
+    {
+        PointsBalance += points;
+    }
 
+    public void ChangeLastPaymentDate(DateTime lastpayment)
+    {
+        LastPayment = lastpayment;
+    }
+
+    public void Enlargestreak()
+    {
+        Streak++;
+    }
 
     private void EnsureUserIdIsValid(Guid id)
     {
