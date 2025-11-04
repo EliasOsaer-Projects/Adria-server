@@ -2,7 +2,7 @@
 
 public class CustomerCourse
 {
-    public Guid CustomerCourseId { get; private set; }
+    public Guid Id { get; private set; }
 
     public Course Course { get; }
 
@@ -11,11 +11,16 @@ public class CustomerCourse
     public Decimal Progress { get; private set; }
 
 
-    public CustomerCourse(Guid customerCourseId, Course course)
+    public CustomerCourse(Guid id, Course course)
     {
-        CustomerCourseId = customerCourseId;
+        Id = id;
         Course = course;
         Progress = 0;
         CompletionStatus = false;
+    }
+    
+    public CustomerCourse(Course course) :  this(Guid.NewGuid(), course)
+    {
+     
     }
 }
