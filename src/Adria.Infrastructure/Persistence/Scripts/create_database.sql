@@ -306,6 +306,20 @@ VALUES (
            3
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Baking Bread for a Modern Household',
+           'Moderate',
+           'Learn the science and art of bread-making adapted for everyday kitchens. This course covers yeast behavior, modern appliances, and time-efficient techniques. Students will create a variety of breads while understanding flavor, texture, and fermentation basics.',
+           150,
+           4,
+           1
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
