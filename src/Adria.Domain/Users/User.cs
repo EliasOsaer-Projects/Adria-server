@@ -60,6 +60,16 @@ public class User
         UserWallet.AdriaCoinAmount = CurrentSubscription.PaySubscription(UserWallet.AdriaCoinAmount, DateTime.Today);
     }
 
+    public void ChangeSubscription(Subscritpion subscritpion)
+    {
+
+        LastPayment = DateTime.Today;
+
+        PaySubscription();
+
+        CurrentSubscription.ChangeSubscripion(subscritpion, LastPayment);
+    }
+
     public void Enlargestreak()
     {
         Streak++;
