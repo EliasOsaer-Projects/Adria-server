@@ -37,6 +37,19 @@ public class CustomerSubscription
         Status = status;
     }
 
+    public decimal PaySubscription(decimal price, DateTime date)
+    {
+        if (price >= Subscritpion.PriceCycle)
+        {
+            IsSubscriptionPaid(true);
+            ChangeDates(date);
+            return price - Subscritpion.PriceCycle;
+        }
+
+        IsSubscriptionPaid(false);
+        return price;
+    }
+
     private static void EnsureValidDate(CustomerSubscription subscription, DateTime date)
     {
         if (date > subscription.EndDate)
