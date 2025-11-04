@@ -17,4 +17,17 @@ public class CustomerSubscription
         Status = false;
     }
 
+    public void ChangeDates(DateTime date)
+    {
+        StartDate = date;
+        EndDate = StartDate.Add(new TimeSpan(30, 0, 0, 0));
+    }
+
+    public void IsSubscriptionPaid(bool status)
+    {
+        Status = status;
+    }
+
+
+
 }

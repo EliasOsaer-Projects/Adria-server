@@ -1,6 +1,6 @@
 ﻿namespace Adria.Domain;
 
-public class SubscritpionType
+public enum SubscritpionType
 {
-
+    Basis, Standaart, Premium, Ultra
 }
