@@ -17,7 +17,7 @@ public class User
     //TODO Still need to add Cosmetics which doesn't exist;
 
 
-    public User(Guid id, string name, DateTime lastPayment)
+    public User(Guid id, string name, DateTime lastPayment, Wallet wallet)
     {
         EnsureUserIdIsValid(id);
 
@@ -26,6 +26,7 @@ public class User
         PointsBalance = 0;
         LastPayment = lastPayment;
         Streak = 0;
+        UserWallet = wallet;
     }
 
     public void addPoints(int points)
@@ -37,6 +38,12 @@ public class User
     {
         EnsureEnoughPoints(this, points);
         PointsBalance -= points;
+    }
+
+    //Add Money in wallet
+    public void PayDay()
+    {
+        UserWallet.AddMonthlyIncome();
     }
 
     public void ChangeLastPaymentDate(DateTime lastpayment)

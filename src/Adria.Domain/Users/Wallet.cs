@@ -2,9 +2,9 @@
 
 public class Wallet
 {
-    public string Name { get; set; }
-    public decimal AdriaCoinAmount { get; set; }
-    public decimal Income { get; set; }
+    private string Name { get; set; }
+    private decimal AdriaCoinAmount { get; set; }
+    private decimal Income { get; set; }
 
     public Wallet(string name, decimal amount, decimal income)
     {
