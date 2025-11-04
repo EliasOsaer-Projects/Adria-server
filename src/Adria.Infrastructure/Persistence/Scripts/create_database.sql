@@ -193,6 +193,20 @@ VALUES (
            3
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Fishing 101',
+           'Moderate',
+           'Study the basics of aquatic ecosystems and the cultural importance of fishing traditions. Students learn about fish species, ethical angling principles, and environmental stewardship. Techniques are discussed conceptually with a focus on conservation.',
+           250,
+           8,
+           1
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
