@@ -74,9 +74,10 @@ public class User
             throw new ElementNotFoundException($"This id called {id} doesn't exist in the database");
     }
 
-    private static void EnsureEnoughPoints()
+    private static void EnsureEnoughPoints(User user, int points)
     {
-
+        if (points > user.PointsBalance)
+            throw new ArgumentException("User is too poor");
     }
 
 }
