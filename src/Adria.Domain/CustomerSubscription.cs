@@ -18,6 +18,7 @@ public class CustomerSubscription
         Status = false;
     }
 
+    //Change current subscription and all data.
     public void ChangeSubscripion(Subscritpion subscritpion, DateTime date)
     {
         Subscritpion = subscritpion;
@@ -25,6 +26,7 @@ public class CustomerSubscription
         Status = false;
     }
 
+    //Changing dates.
     public void ChangeDates(DateTime date)
     {
         EnsureValidDate(this, date);
@@ -32,11 +34,13 @@ public class CustomerSubscription
         EndDate = StartDate.Add(new TimeSpan(30, 0, 0, 0));
     }
 
+    //To check if subscription is still valid.
     public void IsSubscriptionPaid(bool status)
     {
         Status = status;
     }
 
+    //Montly Payment
     public decimal PaySubscription(decimal price, DateTime date)
     {
         if (price >= Subscritpion.PriceCycle)
@@ -50,6 +54,7 @@ public class CustomerSubscription
         return price;
     }
 
+    //Security
     private static void EnsureValidDate(CustomerSubscription subscription, DateTime date)
     {
         if (date > subscription.EndDate)
