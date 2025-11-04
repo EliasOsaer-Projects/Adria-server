@@ -48,14 +48,16 @@ public class User
         UserWallet.AddMonthlyIncome();
     }
 
-    public void PaySubscription()
-    {
-        UserWallet.AdriaCoinAmount = CurrentSubscription.PaySubscription(UserWallet.AdriaCoinAmount, DateTime.Today);
-    }
+
 
     public void ChangeLastPaymentDate(DateTime lastpayment)
     {
         LastPayment = lastpayment;
+    }
+
+    public void PaySubscription()
+    {
+        UserWallet.AdriaCoinAmount = CurrentSubscription.PaySubscription(UserWallet.AdriaCoinAmount, DateTime.Today);
     }
 
     public void Enlargestreak()
@@ -77,6 +79,7 @@ public class User
     public void RemoveCourse(Guid id)
     {
         EnsureUserIdIsValid(id);
+        DoesIdExist(this, id);
 
         _courses.RemoveAll(course => course.Id.Equals(id));
     }
