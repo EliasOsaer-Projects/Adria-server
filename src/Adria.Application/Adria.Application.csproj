@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Adria.Domain\Adria.Domain.csproj" />
+    <ProjectReference Include="../Adria.Domain/Adria.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
