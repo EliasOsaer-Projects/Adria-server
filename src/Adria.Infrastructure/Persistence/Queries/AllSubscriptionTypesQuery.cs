@@ -3,6 +3,7 @@ using Adria.Application;
 using Microsoft.Extensions.Logging;
 using Adria.Application;
 using Adria.Application.Contracts;
+using Adria.Application.Contracts.Data;
 
 
 namespace Adria.Infrastructure;

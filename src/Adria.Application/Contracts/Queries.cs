@@ -1,4 +1,4 @@
-namespace Adria.Application.Contracts;
+namespace Adria.Application.Contracts.Data;
 
 public interface IAllSubscriptionTypes
 {
