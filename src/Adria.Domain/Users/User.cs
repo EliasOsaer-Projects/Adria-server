@@ -10,6 +10,7 @@ public class User
     public DateTime LastPayment { get; set; }
     public int Streak { get; set; }
     public Wallet UserWallet { get; set; }
+    public CustomerSubscription CurrentSubscription { get; set; }
     public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
     private readonly List<Course> _courses = [];
 
@@ -17,7 +18,7 @@ public class User
     //TODO Still need to add Cosmetics which doesn't exist;
 
 
-    public User(Guid id, string name, DateTime lastPayment, Wallet wallet)
+    public User(Guid id, string name, DateTime lastPayment, Wallet wallet, Subscritpion subscritpion)
     {
         EnsureUserIdIsValid(id);
 
@@ -27,6 +28,8 @@ public class User
         LastPayment = lastPayment;
         Streak = 0;
         UserWallet = wallet;
+
+        CurrentSubscription = new(subscritpion, lastPayment);
     }
 
     public void addPoints(int points)
