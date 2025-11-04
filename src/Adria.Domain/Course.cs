@@ -5,16 +5,16 @@ namespace Adria.Domain;
 public class Course
 {
     public Guid Id { get; }
-    private string Name { get; }
-    private string Category { get; }
-    private string Description { get; } 
+    public string Name { get; private set; }
+    public string Category { get; private set; }
+    public string Description { get; private set; } 
     //simpele uitleg over de cursus
-    private List<string> LearnList { get; } 
+    public List<string> LearnList { get; private set; } 
     //Dit is voor nu een list maar zal later omgezet moeten worden naar een string met comma's die ze splitsen.  
-    private int Duration { get; } 
+    public int Duration { get; private set; } 
     //Duratie van een cursus in uur
-    private CourseLevel Level { get; }
-    private List<CourseModule> Modules { get; }
+    public CourseLevel Level { get; private set; }
+    public List<CourseModule> Modules { get; private set; }
 
     
     
