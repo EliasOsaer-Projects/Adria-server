@@ -14,7 +14,6 @@ public class User
     public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
     private readonly List<Course> _courses = [];
 
-    //TODO Still need to add subscription which doesn't exist;
     //TODO Still need to add Cosmetics which doesn't exist;
 
 
@@ -51,7 +50,7 @@ public class User
 
     public void PaySubscription()
     {
-
+        UserWallet.AdriaCoinAmount = CurrentSubscription.PaySubscription(UserWallet.AdriaCoinAmount, DateTime.Today);
     }
 
     public void ChangeLastPaymentDate(DateTime lastpayment)
