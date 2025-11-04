@@ -10,6 +10,7 @@ public class CustomerSubscription
 
     public CustomerSubscription(Subscritpion subscritpion, DateTime date)
     {
+        EnsureValidDate(this, date);
         Subscritpion = subscritpion;
         StartDate = date;
         EndDate = StartDate.Add(new TimeSpan(30, 0, 0, 0));
@@ -17,8 +18,16 @@ public class CustomerSubscription
         Status = false;
     }
 
+    public void ChangeSubscripion(Subscritpion subscritpion, DateTime date)
+    {
+        Subscritpion = subscritpion;
+        ChangeDates(date);
+        Status = false;
+    }
+
     public void ChangeDates(DateTime date)
     {
+        EnsureValidDate(this, date);
         StartDate = date;
         EndDate = StartDate.Add(new TimeSpan(30, 0, 0, 0));
     }
@@ -28,6 +37,9 @@ public class CustomerSubscription
         Status = status;
     }
 
-
-
+    private static void EnsureValidDate(CustomerSubscription subscription, DateTime date)
+    {
+        if (date > subscription.EndDate)
+            throw new ArgumentException("new Date is ypunger than End date");
+    }
 }
