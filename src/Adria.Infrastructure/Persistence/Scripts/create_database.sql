@@ -348,6 +348,20 @@ VALUES (
            0
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Intro to Bricklaying',
+           'Hard',
+           '...',
+           325,
+           4,
+           1
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
