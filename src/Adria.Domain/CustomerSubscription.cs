@@ -3,15 +3,15 @@
 //This is a value object for User.
 public class CustomerSubscription
 {
-    public Subscritpion Subscritpion { get; set; }
+    public Subscritpion CurrentSubscription { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public bool Status { get; set; }
 
-    public CustomerSubscription(Subscritpion subscritpion, DateTime date)
+    public CustomerSubscription(Subscritpion currentSubscription, DateTime date)
     {
         EnsureValidDate(this, date);
-        Subscritpion = subscritpion;
+        CurrentSubscription = currentSubscription;
         StartDate = date;
         EndDate = StartDate.Add(new TimeSpan(30, 0, 0, 0));
 
@@ -21,7 +21,7 @@ public class CustomerSubscription
     //Change current subscription and all data.
     public void ChangeSubscripion(Subscritpion subscritpion, DateTime date)
     {
-        Subscritpion = subscritpion;
+        CurrentSubscription = subscritpion;
         ChangeDates(date);
         Status = true;
     }
@@ -43,11 +43,11 @@ public class CustomerSubscription
     //Montly Payment
     public decimal PaySubscription(decimal price, DateTime date)
     {
-        if (price >= Subscritpion.PriceCycle)
+        if (price >= CurrentSubscription.PriceCycle)
         {
             IsSubscriptionPaid(true);
             ChangeDates(date);
-            return price - Subscritpion.PriceCycle;
+            return price - CurrentSubscription.PriceCycle;
         }
 
         IsSubscriptionPaid(false);

@@ -70,6 +70,11 @@ public class User
         CurrentSubscription.ChangeSubscripion(subscritpion, LastPayment);
     }
 
+    public void EndSubscription()
+    {
+        CurrentSubscription.IsSubscriptionPaid(false);
+    }
+
     public void Enlargestreak()
     {
         Streak++;
