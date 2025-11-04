@@ -6,9 +6,14 @@ public class CourseModule
     
     public string Name { get; }
 
-    public CourseModule(string name)
+    public CourseModule(Guid id, string name)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Name = name;
+    }
+    
+    public CourseModule(string name) :  this(Guid.NewGuid(), name)
+    {
+       
     }
 }

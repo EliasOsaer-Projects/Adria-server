@@ -11,11 +11,16 @@ public class CustomerCourse
     public Decimal Progress { get; private set; }
 
 
-    public CustomerCourse(Guid customerCourseId, Course course)
+    public CustomerCourse(Guid id, Course course)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Course = course;
         Progress = 0;
         CompletionStatus = false;
+    }
+    
+    public CustomerCourse(Course course) :  this(Guid.NewGuid(), course)
+    {
+     
     }
 }
