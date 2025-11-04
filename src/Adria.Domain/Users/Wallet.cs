@@ -8,11 +8,17 @@ public class Wallet
 
     public Wallet(string name, decimal amount, decimal income)
     {
+        EnsureValidAmount(amount);
+        EnsureValidAmount(income);
         Name = name;
         AdriaCoinAmount = amount;
         Income = income;
     }
 
-
+    public void EnsureValidAmount(decimal amount)
+    {
+        if (amount < 0)
+            throw new ArgumentException("You aren't allowed to add a negative amount");
+    }
 
 }
