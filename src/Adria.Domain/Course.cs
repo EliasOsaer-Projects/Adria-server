@@ -14,7 +14,6 @@ public class Course
     private int Duration { get; } 
     //Duratie van een cursus in uur
     private CourseLevel Level { get; }
-    private Decimal Progress { get; }
     private List<CourseModule> Modules { get; }
     private Guid ImageId { get; }
 
@@ -28,7 +27,6 @@ public class Course
         LearnList = learnList;
         Duration = duration;
         Level = level;
-        Progress = 0;
         Modules = modules;
         ImageId = imageId;
     }
