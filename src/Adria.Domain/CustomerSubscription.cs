@@ -58,6 +58,6 @@ public class CustomerSubscription
     private static void EnsureValidDate(CustomerSubscription subscription, DateTime date)
     {
         if (date > subscription.EndDate)
-            throw new ArgumentException("new Date is ypunger than End date");
+            throw new ArgumentException("new Date is younger than End date");
     }
 }
