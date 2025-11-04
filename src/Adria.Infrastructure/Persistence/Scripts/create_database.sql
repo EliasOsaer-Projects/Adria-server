@@ -274,8 +274,22 @@ VALUES (
            'Moderate',
            'An introduction to the major theories, research methods, and thinkers in psychology. Students explore cognition, behavior, development, and mental processes. Case studies and foundational concepts prepare learners for more advanced psychology coursework.',
            500,
-           3,
-           1
+           16,
+           3
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'King Von-ism: A History',
+           'Hard',
+           'Study the cultural influence, storytelling style, and legacy of rapper King Von within modern hip-hop history. This course examines themes of urban narratives, lyrical realism, and music as social commentary. Students will analyze artistry, controversy, and community impact in contemporary music culture.',
+           800,
+           9,
+           3
        );
 
 -- COURSE MODULE
