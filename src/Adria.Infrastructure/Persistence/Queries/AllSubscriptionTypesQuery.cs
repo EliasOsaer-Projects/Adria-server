@@ -1,10 +1,13 @@
 ﻿using System.Data.Common;
+using Adria.Application;
 using Microsoft.Extensions.Logging;
+using Adria.Application;
 using Adria.Application.Contracts;
+
 
 namespace Adria.Infrastructure;
 
-public class AllSubscriptionTypesQuery//: IAllSubscriptionTypes
+public class AllSubscriptionTypesQuery : IAllSubscriptionTypes
 {
     static private readonly string query = @"select * from  Subscription";
 
@@ -17,8 +20,32 @@ public class AllSubscriptionTypesQuery//: IAllSubscriptionTypes
         _factory = factory;
         _connectionString = connectionString;
         _logger = logger;
+
     }
 
+    public async Task<IReadOnlyCollection<SubscriptionData>> Fetch()
+    {
 
+        _logger.LogInformation("Fetching Subscription data ...");
+
+        using var connection = _factory.CreateConnection() ?? throw new InvalidOperationException("DbProviderFactory provided a null connection string");
+
+        connection.ConnectionString = _connectionString;
+
+        await connection.OpenAsync();
+
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = query;
+
+            using (var reader = command.ExecuteReader())
+            {
+                var subscriptions = new List<SubscriptionData>();
+                return subscriptions;
+            }
+
+        }
+
+    }
 
 }
