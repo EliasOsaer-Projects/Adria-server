@@ -249,6 +249,21 @@ VALUES (
            0
        );
 
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Bird Blindness: A Deep Dive',
+           'Hard',
+           'Examine the scientific, neurological, and perceptual mechanisms behind species-specific vision limitations—both real and theoretical. This course analyzes how certain animals, including humans in metaphorical contexts, may fail to perceive birds or avian-related data. Includes discussions on perception studies, evolutionary biology, and cognitive bias.',
+           450,
+           8,
+           2
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
