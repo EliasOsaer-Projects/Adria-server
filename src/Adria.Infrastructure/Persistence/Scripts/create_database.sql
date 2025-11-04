@@ -165,6 +165,20 @@ VALUES (
            0
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Wilderness Basics',
+           'Moderate',
+           'An introduction to the fundamental skills and knowledge required to safely experience the outdoors. Students will explore navigation, shelter concepts, weather awareness, and responsible environmental practices. Emphasis is placed on safety, planning, and respecting nature.',
+           550,
+           16,
+           2
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
