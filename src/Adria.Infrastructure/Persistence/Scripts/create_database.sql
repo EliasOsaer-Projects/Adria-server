@@ -207,6 +207,20 @@ VALUES (
            1
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Basic Culinary Skills',
+           'Easy',
+           'A beginner-friendly introduction to essential cooking methods and kitchen fundamentals. Students will learn knife safety theory, cooking terminology, and how to follow recipes confidently. Emphasis is placed on flavor building and nutritious meal planning.',
+           225,
+           4,
+           0
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
