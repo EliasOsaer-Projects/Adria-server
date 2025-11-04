@@ -15,7 +15,7 @@ public class CustomerSubscription
         StartDate = date;
         EndDate = StartDate.Add(new TimeSpan(30, 0, 0, 0));
 
-        Status = false;
+        Status = true;
     }
 
     //Change current subscription and all data.
@@ -23,7 +23,7 @@ public class CustomerSubscription
     {
         Subscritpion = subscritpion;
         ChangeDates(date);
-        Status = false;
+        Status = true;
     }
 
     //Changing dates.
