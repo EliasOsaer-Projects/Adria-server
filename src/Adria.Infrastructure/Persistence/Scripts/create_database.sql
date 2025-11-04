@@ -60,9 +60,7 @@ CREATE TABLE `Course` (
   `EstimatedDurationInHours` INT,
   `CoverImageID` VARCHAR(255),
   `BannerImageID` VARCHAR(255),
-  `SubscriptionRequired` VARCHAR(36) NOT NULL,
-    
-  FOREIGN KEY (`SubscriptionRequired`) REFERENCES `Subscription`(`SubscriptionID`)
+  `SubscriptionRequired` INT NOT NULL,
 );
 
 -- COURSE MODULES
@@ -131,12 +129,12 @@ INSERT INTO `Course` (
 )
     VALUES (
            UUID(),
-           'Basic culinary skills',
-           'Easy',
-           'This is a course description full of information about the course...',
-           300,
-           4,
-           (SELECT `SubscriptionID` FROM `Subscription` WHERE `Type` = 'Basic')
+           'A complete guide to cats',
+           'Hard',
+           'This course explores feline history, biology, and behavior, offering a comprehensive look at domestic and wild cats. Students will learn about communication, health, and human-cat relationships. Practical sections focus on responsible care and understanding cat psychology.',
+           450,
+           8,
+           1
        );
 
 -- COURSE MODULE
