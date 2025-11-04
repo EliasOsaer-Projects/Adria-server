@@ -334,6 +334,20 @@ VALUES (
            2
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Primates and Pizza',
+           'Easy',
+           'An interdisciplinary course exploring primate behavior alongside cultural food anthropology—especially pizza''s fascinating global evolution. Students compare primate social structures with human dining rituals. This playful but scholarly course blends biology, sociology, and culinary history.',
+           100,
+           6,
+           0
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
