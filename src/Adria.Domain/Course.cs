@@ -15,12 +15,12 @@ public class Course
     //Duratie van een cursus in uur
     private CourseLevel Level { get; }
     private List<CourseModule> Modules { get; }
-    private Guid ImageId { get; }
 
-    public Course(Guid id, string name, string category, string description, List<string> learnList, int duration,
-        CourseLevel level, List<CourseModule> modules,  Guid imageId)
+    
+    public Course(string name, string category, string description, List<string> learnList, int duration,
+        CourseLevel level, List<CourseModule> modules)
     {
-        Id = id;
+        Id = Guid.NewGuid();
         Name = name;
         Category = category;
         Description = description;
@@ -28,6 +28,5 @@ public class Course
         Duration = duration;
         Level = level;
         Modules = modules;
-        ImageId = imageId;
     }
 }

@@ -2,7 +2,7 @@
 
 public class CustomerCourse
 {
-    public Guid CustomerCourseId { get; private set; }
+    public Guid Id { get; private set; }
 
     public Course Course { get; }
 
@@ -13,7 +13,7 @@ public class CustomerCourse
 
     public CustomerCourse(Guid customerCourseId, Course course)
     {
-        CustomerCourseId = customerCourseId;
+        Id = Guid.NewGuid();
         Course = course;
         Progress = 0;
         CompletionStatus = false;
