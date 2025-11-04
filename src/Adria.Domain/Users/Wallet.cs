@@ -15,6 +15,18 @@ public class Wallet
         Income = income;
     }
 
+    public void AddMonthlyIncome()
+    {
+        AdriaCoinAmount += Income;
+    }
+
+    public void Transaction(decimal price)
+    {
+        EnsureValidAmount(price);
+
+        AdriaCoinAmount -= price;
+    }
+
     public void EnsureValidAmount(decimal amount)
     {
         if (amount < 0)
