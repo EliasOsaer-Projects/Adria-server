@@ -320,6 +320,20 @@ VALUES (
            1
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'World History',
+           'Moderate',
+           'A sweeping journey through major civilizations, global events, and cultural developments from ancient to modern times. Students examine political systems, trade networks, technological innovations, and social movements. Emphasis is placed on interconnected histories and global perspectives.',
+           200,
+           16,
+           2
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
