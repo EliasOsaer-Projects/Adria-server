@@ -264,6 +264,20 @@ VALUES (
            2
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Psych 101',
+           'Moderate',
+           'An introduction to the major theories, research methods, and thinkers in psychology. Students explore cognition, behavior, development, and mental processes. Case studies and foundational concepts prepare learners for more advanced psychology coursework.',
+           500,
+           3,
+           1
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
