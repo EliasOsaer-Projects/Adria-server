@@ -9,7 +9,7 @@ public class User
     public int PointsBalance { get; set; }
     public DateTime LastPayment { get; set; }
     public int Streak { get; set; }
-
+    public Wallet UserWallet { get; set; }
     public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
     private readonly List<Course> _courses = [];
 
