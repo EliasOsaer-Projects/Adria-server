@@ -35,6 +35,7 @@ public class User
 
     public void RemovePoints(int points)
     {
+        EnsureEnoughPoints(this, points);
         PointsBalance -= points;
     }
 
@@ -55,6 +56,7 @@ public class User
 
     public void AddCourse(Course course)
     {
+        EnsureUserIdIsValid(course.Id);
         _courses.Add(course);
     }
 
