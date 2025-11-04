@@ -235,6 +235,20 @@ VALUES (
            1
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'How To Train Your Dragon',
+           'Easy',
+           'A playful, fantasy-based exploration of dragon care inspired by mythology and literature. Students learn world-building, creature-design theory, and storytelling techniques. Perfect for writers, gamers, and imaginative thinkers.',
+           100,
+           4,
+           0
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
