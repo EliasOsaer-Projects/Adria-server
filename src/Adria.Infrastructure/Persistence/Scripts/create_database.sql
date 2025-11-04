@@ -151,6 +151,20 @@ VALUES (
            2
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Cleaning 101',
+           'Easy',
+           'Discover foundational cleaning principles for home, office, and personal spaces. This course covers organization strategies, essential cleaning methods, and choosing safe, effective products. Hands-on examples help students develop sustainable cleaning habits.',
+           125,
+           4,
+           0
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
