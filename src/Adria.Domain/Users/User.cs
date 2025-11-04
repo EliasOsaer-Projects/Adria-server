@@ -8,8 +8,8 @@ public class User
     public DateTime LastPayment { get; set; }
     public int Streak { get; set; }
 
-    //public IReadOnlyCollection<Course> Courses = _courses.AsReadOnly();
-    //private readonly List<Course> _courses = [];
+    public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
+    private readonly List<Course> _courses = [];
 
     public User(Guid id, string name, DateTime lastPayment)
     {
@@ -47,11 +47,29 @@ public class User
         Streak = 0;
     }
 
+    public void AddCourse(Course course)
+    {
+        _courses.Add(course);
+    }
+
+    public void RemoveCourse(Guid id)
+    {
+        EnsureUserIdIsValid(id);
+
+        _courses.RemoveAll(course => course.Id.Equals(id));
+    }
+
     //Security
     private static void EnsureUserIdIsValid(Guid id)
     {
         if (id == Guid.Empty)
             throw new ArgumentException("This user id is empty");
+    }
+
+    private static void DoesIdExist(User user, Guid id)
+    {
+        if (!user._courses.Any(course => course.Id.Equals(id)))
+            throw new Exception("");
     }
 
     private static void EnsureEnoughPoints()
