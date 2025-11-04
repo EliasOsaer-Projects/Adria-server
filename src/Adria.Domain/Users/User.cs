@@ -1,4 +1,6 @@
-﻿namespace Adria.Domain;
+﻿using Adria.Domain.Shared.Exceptions;
+
+namespace Adria.Domain;
 
 public class User
 {
@@ -69,7 +71,7 @@ public class User
     private static void DoesIdExist(User user, Guid id)
     {
         if (!user._courses.Any(course => course.Id.Equals(id)))
-            throw new Exception("");
+            throw new ElementNotFoundException($"This id called {id} doesn't exist in the database");
     }
 
     private static void EnsureEnoughPoints()
