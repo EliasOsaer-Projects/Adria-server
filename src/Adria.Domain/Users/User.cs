@@ -13,6 +13,10 @@ public class User
     public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
     private readonly List<Course> _courses = [];
 
+    //TODO Still need to add subscription which doesn't exist;
+    //TODO Still need to add Cosmetics which doesn't exist;
+
+
     public User(Guid id, string name, DateTime lastPayment)
     {
         EnsureUserIdIsValid(id);
