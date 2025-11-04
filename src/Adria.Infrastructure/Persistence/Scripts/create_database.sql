@@ -292,6 +292,20 @@ VALUES (
            3
        );
 
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Surgery for Dummies',
+           'Hard',
+           'A high-level overview of surgical history, ethics, and medical advances—strictly conceptual and informational. Students explore the evolution of surgical tools, the role of surgeons, and how operating rooms function as systems. This is not a practical training course and does not teach how to perform medical procedures.',
+           1200,
+           48,
+           3
+       );
+
 -- COURSE MODULE
 INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
