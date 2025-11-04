@@ -17,10 +17,11 @@ public class Course
     private List<CourseModule> Modules { get; }
 
     
-    public Course(string name, string category, string description, List<string> learnList, int duration,
+    
+    public Course(Guid id, string name, string category, string description, List<string> learnList, int duration,
         CourseLevel level, List<CourseModule> modules)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Name = name;
         Category = category;
         Description = description;
@@ -29,4 +30,12 @@ public class Course
         Level = level;
         Modules = modules;
     }
+
+    public Course(string name, string category, string description, List<string> learnList, int duration,
+        CourseLevel level, List<CourseModule> modules)
+        : this(Guid.NewGuid(), name, category, description, learnList, duration, level, modules)
+    {
+        
+    }
+    
 }
