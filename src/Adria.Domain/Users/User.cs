@@ -46,6 +46,11 @@ public class User
         UserWallet.AddMonthlyIncome();
     }
 
+    public void PaySubscription()
+    {
+
+    }
+
     public void ChangeLastPaymentDate(DateTime lastpayment)
     {
         LastPayment = lastpayment;
