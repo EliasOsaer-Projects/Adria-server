@@ -3,7 +3,7 @@
 public class Wallet
 {
     private string Name { get; set; }
-    private decimal AdriaCoinAmount { get; set; }
+    public decimal AdriaCoinAmount { get; set; }
     private decimal Income { get; set; }
 
     public Wallet(string name, decimal amount, decimal income)
@@ -20,6 +20,7 @@ public class Wallet
         AdriaCoinAmount += Income;
     }
 
+    //Use this for testing puposes I suppose.
     public void Transaction(decimal price)
     {
         EnsureValidAmount(price);

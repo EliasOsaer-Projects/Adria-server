@@ -10,14 +10,14 @@ public class User
     public DateTime LastPayment { get; set; }
     public int Streak { get; set; }
     public Wallet UserWallet { get; set; }
+    public CustomerSubscription CurrentSubscription { get; set; }
     public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
     private readonly List<Course> _courses = [];
 
-    //TODO Still need to add subscription which doesn't exist;
     //TODO Still need to add Cosmetics which doesn't exist;
 
 
-    public User(Guid id, string name, DateTime lastPayment, Wallet wallet)
+    public User(Guid id, string name, DateTime lastPayment, Wallet wallet, Subscritpion subscritpion)
     {
         EnsureUserIdIsValid(id);
 
@@ -27,6 +27,8 @@ public class User
         LastPayment = lastPayment;
         Streak = 0;
         UserWallet = wallet;
+
+        CurrentSubscription = new(subscritpion, lastPayment);
     }
 
     public void addPoints(int points)
@@ -46,14 +48,31 @@ public class User
         UserWallet.AddMonthlyIncome();
     }
 
-    public void PaySubscription()
-    {
 
-    }
 
     public void ChangeLastPaymentDate(DateTime lastpayment)
     {
         LastPayment = lastpayment;
+    }
+
+    public void PaySubscription()
+    {
+        UserWallet.AdriaCoinAmount = CurrentSubscription.PaySubscription(UserWallet.AdriaCoinAmount, DateTime.Today);
+    }
+
+    public void ChangeSubscription(Subscritpion subscritpion)
+    {
+
+        LastPayment = DateTime.Today;
+
+        PaySubscription();
+
+        CurrentSubscription.ChangeSubscripion(subscritpion, LastPayment);
+    }
+
+    public void EndSubscription()
+    {
+        CurrentSubscription.IsSubscriptionPaid(false);
     }
 
     public void Enlargestreak()
@@ -75,6 +94,7 @@ public class User
     public void RemoveCourse(Guid id)
     {
         EnsureUserIdIsValid(id);
+        DoesIdExist(this, id);
 
         _courses.RemoveAll(course => course.Id.Equals(id));
     }
