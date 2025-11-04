@@ -23,8 +23,15 @@ public class Wallet
     public void Transaction(decimal price)
     {
         EnsureValidAmount(price);
+        EnsurevalidTransaction(this, price);
 
         AdriaCoinAmount -= price;
+    }
+
+    public void EnsurevalidTransaction(Wallet wallet, decimal price)
+    {
+        if (price > wallet.AdriaCoinAmount)
+            throw new ArgumentException("You're too poor to pay this amount.");
     }
 
     public void EnsureValidAmount(decimal amount)
