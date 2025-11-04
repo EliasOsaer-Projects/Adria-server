@@ -8,6 +8,12 @@ DROP TABLE IF EXISTS `CustomerSubscription`;
 DROP TABLE IF EXISTS `Subscription`;
 DROP TABLE IF EXISTS `User`;
 
+/* declarations */
+DECLARE @BasicSubscriptionID VARCHAR(36) = NEWID()
+DECLARE @StandardSubscriptionID VARCHAR(36) = NEWID()
+DECLARE @PremiumSubscriptionID VARCHAR(36) = NEWID()
+DECLARE @UltraSubscriptionID VARCHAR(36) = NEWID()
+
 /* create tables */
 -- USERS
 CREATE TABLE `User` (
@@ -102,3 +108,40 @@ CREATE TABLE PointsPayment (
    FOREIGN KEY (AdriaID) REFERENCES User(AdriaID),
    FOREIGN KEY (CosmeticItemID) REFERENCES CosmeticItem(CosmeticItemID)
 );
+
+/* populate data */
+-- USERS
+INSERT INTO `users` (`AdriaID`, `Name`)
+    VALUES (NEWID(), 'TestUser');
+
+-- SUBSCRIPTIONS
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
+    VALUES (@BasicSubscriptionID, 'Basic', 15.99);
+
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
+    VALUES (@StandardSubscriptionID, 'Standard', 22.99);
+
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
+    VALUES (@PremiumSubscriptionID, 'Premium', 28.99);
+
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
+    VALUES (@UltraSubscriptionID, 'Ultra', 35.99);
+
+-- COURSES
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, CourseDescription, PointsOnCompletion, EstimatedDurationInHours, SubscriptionRequired)
+    VALUES (NEWID(),
+        'Basic culinary skills',
+        'Easy',
+        'This is a course description full of information about the course...',
+        300,
+        4,
+        @BasicSubscriptionID
+       );
+
+-- COURSEMODULES
+INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
+    VALUES (NEWID(), 'Lesson 1 - Frying', (SELECT CourseID FROM Course WHERE CourseName = 'Basic culinary skills'));
+
+-- COSMETICITEMS
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, PointsCost)
+    VALUES (NEWID(), 'Spooky time', 'Frame', 500);
