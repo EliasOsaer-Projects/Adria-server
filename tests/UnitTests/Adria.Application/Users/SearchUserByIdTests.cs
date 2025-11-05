@@ -31,7 +31,7 @@ public sealed class SearchUserByIdTests
         Assert.Equal(0, result.PointsBalance);
         Assert.Equal(0, result.Streak);
         Assert.Single(mockLogger.LoggedMessages);
-        Assert.Contains($"Fetching user with ID {userId}", mockLogger.LoggedMessages[0]);
+        Assert.Contains($"Fetching user with ID: {userId}", mockLogger.LoggedMessages[0]);
     }
     
     [Fact]
@@ -46,7 +46,7 @@ public sealed class SearchUserByIdTests
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ElementNotFoundException>(() => useCase.Execute(input));
-        Assert.Contains($"User with ID {userId} not found", exception.Message);
+        Assert.Contains($"User with Id {userId} not found", exception.Message);
     }
     
     [Fact]
@@ -61,6 +61,6 @@ public sealed class SearchUserByIdTests
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ElementNotFoundException>(() => useCase.Execute(input));
-        Assert.Contains($"User with ID {userId} not found", exception.Message);
+        Assert.Contains($"User with Id {userId} not found", exception.Message);
     }
 }
