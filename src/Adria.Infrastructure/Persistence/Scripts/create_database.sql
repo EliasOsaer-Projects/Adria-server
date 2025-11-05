@@ -60,9 +60,7 @@ CREATE TABLE `Course` (
   `EstimatedDurationInHours` INT,
   `CoverImageID` VARCHAR(255),
   `BannerImageID` VARCHAR(255),
-  `SubscriptionRequired` VARCHAR(36) NOT NULL,
-    
-  FOREIGN KEY (`SubscriptionRequired`) REFERENCES `Subscription`(`SubscriptionID`)
+  `SubscriptionRequired` INT NOT NULL,
 );
 
 -- COURSE MODULES
@@ -131,12 +129,237 @@ INSERT INTO `Course` (
 )
     VALUES (
            UUID(),
-           'Basic culinary skills',
+           'A complete guide to cats',
+           'Hard',
+           'This course explores feline history, biology, and behavior, offering a comprehensive look at domestic and wild cats. Students will learn about communication, health, and human-cat relationships. Practical sections focus on responsible care and understanding cat psychology.',
+           450,
+           8,
+           1
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'How to hunt',
+           'Moderate',
+           'Learn the cultural, historical, and ecological perspectives surrounding hunting practices across civilizations. This course emphasizes ethical considerations, wildlife conservation, and safe equipment handling theory. Students will understand how hunting fits into ecosystems and responsible sourcing traditions—no real-world hunting skills are taught.',
+           250,
+           12,
+           2
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Cleaning 101',
            'Easy',
-           'This is a course description full of information about the course...',
-           300,
+           'Discover foundational cleaning principles for home, office, and personal spaces. This course covers organization strategies, essential cleaning methods, and choosing safe, effective products. Hands-on examples help students develop sustainable cleaning habits.',
+           125,
            4,
-           (SELECT `SubscriptionID` FROM `Subscription` WHERE `Type` = 'Basic')
+           0
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Wilderness Basics',
+           'Moderate',
+           'An introduction to the fundamental skills and knowledge required to safely experience the outdoors. Students will explore navigation, shelter concepts, weather awareness, and responsible environmental practices. Emphasis is placed on safety, planning, and respecting nature.',
+           550,
+           16,
+           2
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'How to Mine',
+           'Hard',
+           'Learn about the history, science, and environmental impact of mining across the world. This course covers mineral types, geological processes, and mining technologies at a conceptual level. Ethical and sustainable resource management is a key focus.',
+           450,
+           10,
+           3
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Fishing 101',
+           'Moderate',
+           'Study the basics of aquatic ecosystems and the cultural importance of fishing traditions. Students learn about fish species, ethical angling principles, and environmental stewardship. Techniques are discussed conceptually with a focus on conservation.',
+           250,
+           8,
+           1
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Basic Culinary Skills',
+           'Easy',
+           'A beginner-friendly introduction to essential cooking methods and kitchen fundamentals. Students will learn knife safety theory, cooking terminology, and how to follow recipes confidently. Emphasis is placed on flavor building and nutritious meal planning.',
+           225,
+           4,
+           0
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'How to Raise Children',
+           'Easy',
+           'Explore developmental stages, emotional needs, and supportive caregiving approaches in childhood. The course draws from psychology, family studies, and cultural perspectives on parenting. Emphasis is placed on nurturing, communication, and ethical care—no medical or professional-level advice is given.',
+           300,
+           6,
+           1
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'How To Train Your Dragon',
+           'Easy',
+           'A playful, fantasy-based exploration of dragon care inspired by mythology and literature. Students learn world-building, creature-design theory, and storytelling techniques. Perfect for writers, gamers, and imaginative thinkers.',
+           100,
+           4,
+           0
+       );
+
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Bird Blindness: A Deep Dive',
+           'Hard',
+           'Examine the scientific, neurological, and perceptual mechanisms behind species-specific vision limitations—both real and theoretical. This course analyzes how certain animals, including humans in metaphorical contexts, may fail to perceive birds or avian-related data. Includes discussions on perception studies, evolutionary biology, and cognitive bias.',
+           450,
+           8,
+           2
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Psych 101',
+           'Moderate',
+           'An introduction to the major theories, research methods, and thinkers in psychology. Students explore cognition, behavior, development, and mental processes. Case studies and foundational concepts prepare learners for more advanced psychology coursework.',
+           500,
+           16,
+           3
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'King Von-ism: A History',
+           'Hard',
+           'Study the cultural influence, storytelling style, and legacy of rapper King Von within modern hip-hop history. This course examines themes of urban narratives, lyrical realism, and music as social commentary. Students will analyze artistry, controversy, and community impact in contemporary music culture.',
+           800,
+           9,
+           3
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Surgery for Dummies',
+           'Hard',
+           'A high-level overview of surgical history, ethics, and medical advances—strictly conceptual and informational. Students explore the evolution of surgical tools, the role of surgeons, and how operating rooms function as systems. This is not a practical training course and does not teach how to perform medical procedures.',
+           1200,
+           48,
+           3
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Baking Bread for a Modern Household',
+           'Moderate',
+           'Learn the science and art of bread-making adapted for everyday kitchens. This course covers yeast behavior, modern appliances, and time-efficient techniques. Students will create a variety of breads while understanding flavor, texture, and fermentation basics.',
+           150,
+           4,
+           1
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'World History',
+           'Moderate',
+           'A sweeping journey through major civilizations, global events, and cultural developments from ancient to modern times. Students examine political systems, trade networks, technological innovations, and social movements. Emphasis is placed on interconnected histories and global perspectives.',
+           200,
+           16,
+           2
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Primates and Pizza',
+           'Easy',
+           'An interdisciplinary course exploring primate behavior alongside cultural food anthropology—especially pizza''s fascinating global evolution. Students compare primate social structures with human dining rituals. This playful but scholarly course blends biology, sociology, and culinary history.',
+           100,
+           6,
+           0
+       );
+
+INSERT INTO `Course` (
+    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
+    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
+)
+VALUES (
+           UUID(),
+           'Intro to Bricklaying',
+           'Hard',
+           '...',
+           325,
+           4,
+           1
        );
 
 -- COURSE MODULE
