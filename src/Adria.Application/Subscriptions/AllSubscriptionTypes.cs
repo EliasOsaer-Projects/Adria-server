@@ -2,7 +2,7 @@
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
 
-namespace Adria.Application;
+namespace Adria.Application.Subscriptions;
 
 public sealed class AllSubscriptionTypes : IUseCase<Task<IReadOnlyCollection<SubscriptionData>>>
 {
