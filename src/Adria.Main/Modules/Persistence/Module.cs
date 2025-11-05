@@ -1,9 +1,12 @@
 using System.Data.Common;
+using Adria.Application.Contracts;
+using Taskly.Infrastructure.Persistence.Queries;
 
 namespace Adria.Main.Modules.Persistence;
 
 public static class PersistenceModule
 {
+    private static string _connectionString = string.Empty;
     public static IServiceCollection AddPersistenceModule(
         this IServiceCollection services,
         IConfiguration configuration
@@ -33,7 +36,15 @@ public static class PersistenceModule
     )
     {
         // Configure queries here.
-        return services;
+        return services
+            .AddScoped<IUserByIdQuery, UserByIdQuery>(serviceProvider =>
+            {
+                return new UserByIdQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<UserByIdQuery>>()
+                );
+            });
     }
 
     private static IServiceCollection AddAdoServices(
