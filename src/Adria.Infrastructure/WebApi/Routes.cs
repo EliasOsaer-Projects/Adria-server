@@ -1,10 +1,15 @@
+using Adria.Infrastructure.WebApi.Controllers;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 namespace Adria.Infrastructure.WebApi;
 
 public static class Routes
 {
+    private readonly static string APPLICATION_JSON = "application/json";
+    
     public static OpenApiInfo OpenApiInfo { get; } = new OpenApiInfo
     {
         Version = "v1",
@@ -19,6 +24,24 @@ public static class Routes
 
     public static WebApplication MapRoutes(this WebApplication app)
     {
+        MapUserRoutes(app);
+        
         return app;
+    }
+
+    private static void MapUserRoutes(WebApplication app)
+    {
+        var userRoutes = app
+            .MapGroup("/api/users")
+            .WithTags("Users")
+            .WithDescription("All endpoints related to Genesis users.")
+            .WithOpenApi();
+        
+        userRoutes
+            .MapGet("/{userId}", SearchUserByIdController.Invoke)
+            .WithDescription("Get a user by their ID.")
+            .WithName(nameof(SearchUserByIdController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 }
