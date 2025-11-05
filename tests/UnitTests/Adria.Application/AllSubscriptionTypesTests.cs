@@ -29,4 +29,20 @@ public class AllSubscriptionTypesTests
         Assert.Single(mocklogger.LoggedMessages);
     }
 
+    public async Task NoSubscriptions()
+    {
+        IList<SubscriptionData> subscriptions = new List<SubscriptionData>();
+
+        var mockquery = new MockAllSubscriptionQuerie();
+        mockquery.SetSubscriptions(subscriptions);
+        var mocklogger = new MockLogger<AllSubscriptionTypes>();
+        var usecase = new AllSubscriptionTypes(mockquery, mocklogger);
+
+        var result = await usecase.Execute();
+
+        Assert.NotNull(result);
+        Assert.Empty(result);
+        Assert.Single(mocklogger.LoggedMessages);
+    }
+
 }
