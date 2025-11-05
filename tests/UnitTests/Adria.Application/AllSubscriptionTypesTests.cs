@@ -29,6 +29,8 @@ public class AllSubscriptionTypesTests
         Assert.Single(mocklogger.LoggedMessages);
     }
 
+
+    [Fact]
     public async Task NoSubscriptions()
     {
         IList<SubscriptionData> subscriptions = new List<SubscriptionData>();
