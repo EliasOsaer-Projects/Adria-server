@@ -9,5 +9,6 @@ public sealed record UserData
     Wallet Wallet,
     int PointsBalance,
     DateTime LastPayment,
-    int Streak
+    int Streak,
+    Subscritpion Subscritpion
 );
