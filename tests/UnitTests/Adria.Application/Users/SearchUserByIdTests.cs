@@ -1,6 +1,7 @@
 ﻿using Adria.Application.Contracts.Data;
 using Adria.Application.Users;
 using Adria.Domain;
+using Adria.Domain.Shared.Exceptions;
 using UnitTests.Mocks;
 
 namespace UnitTests.Adria.Application.Users;
@@ -31,5 +32,20 @@ public sealed class SearchUserByIdTests
         Assert.Equal(0, result.Streak);
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains($"Fetching user with ID {userId}", mockLogger.LoggedMessages[0]);
+    }
+    
+    [Fact]
+    public async Task Execute_WithNonExistentUser_ThrowsElementNotFoundException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var mockQuery = new MockUserByIdQuery();
+        var mockLogger = new MockLogger<SearchUserById>();
+        var useCase = new SearchUserById(mockQuery, mockLogger);
+        var input = new SearchUserByIdInput(userId);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ElementNotFoundException>(() => useCase.Execute(input));
+        Assert.Contains($"User with ID {userId} not found", exception.Message);
     }
 }
