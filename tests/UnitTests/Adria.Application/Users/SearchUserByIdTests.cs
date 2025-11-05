@@ -48,4 +48,19 @@ public sealed class SearchUserByIdTests
         var exception = await Assert.ThrowsAsync<ElementNotFoundException>(() => useCase.Execute(input));
         Assert.Contains($"User with ID {userId} not found", exception.Message);
     }
+    
+    [Fact]
+    public async Task Execute_WithEmptyGuid_ThrowsElementNotFoundException()
+    {
+        // Arrange
+        var userId = Guid.Empty;
+        var mockQuery = new MockUserByIdQuery();
+        var mockLogger = new MockLogger<SearchUserById>();
+        var useCase = new SearchUserById(mockQuery, mockLogger);
+        var input = new SearchUserByIdInput(userId);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ElementNotFoundException>(() => useCase.Execute(input));
+        Assert.Contains($"User with ID {userId} not found", exception.Message);
+    }
 }
