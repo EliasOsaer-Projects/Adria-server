@@ -8,7 +8,7 @@ public sealed record UserData
     string Name,
     Wallet Wallet,
     int PointsBalance,
-    DateTime LastPayment,
+    DateTime? LastPayment,
     int Streak,
-    Subscritpion Subscritpion
+    Subscritpion? Subscription
 );
