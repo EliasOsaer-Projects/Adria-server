@@ -12,7 +12,7 @@ public class MockAllSubscriptionQuerie : IAllSubscriptionTypes
         return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(subscriptions.AsReadOnly());
     }
 
-    public void SetSubscriptions(List<SubscriptionData> subscriptions)
+    public void SetSubscriptions(IList<SubscriptionData> subscriptions)
     {
         this.subscriptions = subscriptions;
     }
