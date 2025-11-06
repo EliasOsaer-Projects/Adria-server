@@ -15,5 +15,5 @@ public interface IAllSubscriptionTypes
 
 public interface ITopUsersByPointsQuery
 {
-    Task<IEnumerable<UserData>> Fetch();
+    Task<IEnumerable<LeaderBoardData>> Fetch();
 }
