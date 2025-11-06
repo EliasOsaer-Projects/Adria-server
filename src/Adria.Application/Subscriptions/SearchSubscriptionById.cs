@@ -11,7 +11,6 @@ public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionType
 {
     private ILogger<SearchSubscriptionTypeById> _logger;
     private ISearchSubscriptionTypeByIdQuery _searchSubscriptionTypeById;
-    private Guid id;
 
     public SearchSubscriptionTypeById(ISearchSubscriptionTypeByIdQuery searchSubscriptionTypeById, ILogger<SearchSubscriptionTypeById> logger)
     {
