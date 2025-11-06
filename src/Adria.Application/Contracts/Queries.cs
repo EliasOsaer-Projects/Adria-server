@@ -5,7 +5,7 @@ public interface IAllSubscriptionTypes
     Task<IReadOnlyCollection<SubscriptionData>> Fetch();
 }
 
-public interface ISearchSubscriptionTypeById
+public interface ISearchSubscriptionTypeByIdQuery
 {
-    Task<IReadOnlyCollection<SubscriptionData>> Fetch();
+    Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id);
 }

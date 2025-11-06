@@ -10,11 +10,19 @@ public sealed record SearchSubscriptionTypeByIdInput(
 public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionTypeByIdInput, Task<IReadOnlyCollection<SubscriptionData>>>
 {
     private ILogger _logger;
-    private ISearchSubscriptionTypeById _searchSubscriptionTypeById;
+    private ISearchSubscriptionTypeByIdQuery _searchSubscriptionTypeById;
     private Guid id;
 
-    public async Task<IReadOnlyCollection<SubscriptionData>> Execute(SearchSubscriptionTypeByIdInput)
+    public SearchSubscriptionTypeById(ISearchSubscriptionTypeByIdQuery searchSubscriptionTypeById, ILogger logger)
     {
+        _searchSubscriptionTypeById = searchSubscriptionTypeById;
+        _logger = logger;
+    }
+
+    public async Task<IReadOnlyCollection<SubscriptionData>> Execute(SearchSubscriptionTypeByIdInput subscritpion)
+    {
+        _logger.LogInformation("Retrieving subscription ...");
+        return await _searchSubscriptionTypeById.Fetch(subscritpion.id);
 
     }
 }
