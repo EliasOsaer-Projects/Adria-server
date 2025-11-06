@@ -7,7 +7,7 @@ namespace Adria.Infrastructure;
 
 public class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByIdQuery
 {
-    private readonly string query = "select Type, PriceCycle from Subscription where id = @id";
+    private readonly string query = "select Type, PricePerCycle from Subscription where id = @id";
     private readonly ILogger _logger;
     private readonly string _connectionString;
     private readonly DbProviderFactory _factory;
@@ -44,7 +44,7 @@ public class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByIdQuery
             while (await reader.ReadAsync())
             {
                 var type = reader.GetOrdinal("Type");
-                var price = reader.GetOrdinal("PriceCycle");
+                var price = reader.GetOrdinal("PricePerCycle");
 
                 subscriptionTypes.Add(id, new(reader.GetString(type), reader.GetDecimal(price), "no Description"));
             }
