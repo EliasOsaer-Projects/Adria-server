@@ -12,3 +12,8 @@ public interface IAllSubscriptionTypes
 {
     Task<IReadOnlyCollection<SubscriptionData>> Fetch();
 }
+
+public interface ITopUsersByPointsQuery
+{
+    Task<IEnumerable<UserData>> Fetch();
+}
