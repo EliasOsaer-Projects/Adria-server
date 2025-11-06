@@ -8,6 +8,7 @@ public static class UseCases
 {
     public static IServiceCollection AddUseCases(this IServiceCollection services)
     {
-        return services.AddScoped<IUseCase<Task<IReadOnlyCollection<SubscriptionData>>>, AllSubscriptionTypes>();
+        return services.AddScoped<IUseCase<Task<IReadOnlyCollection<SubscriptionData>>>, AllSubscriptionTypes>()
+          .AddScoped<IUseCase<SearchSubscriptionTypeByIdInput, Task<IReadOnlyCollection<SubscriptionData>>>, SearchSubscriptionTypeById>();
     }
 }
