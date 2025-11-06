@@ -3,12 +3,12 @@
 //This is a value object for User.
 public class CustomerSubscription
 {
-    public Subscritpion CurrentSubscription { get; set; }
+    public Subscription CurrentSubscription { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public bool Status { get; set; }
 
-    public CustomerSubscription(Subscritpion currentSubscription, DateTime date)
+    public CustomerSubscription(Subscription currentSubscription, DateTime date)
     {
         EnsureValidDate(this, date);
         CurrentSubscription = currentSubscription;
@@ -19,9 +19,9 @@ public class CustomerSubscription
     }
 
     //Change current subscription and all data.
-    public void ChangeSubscripion(Subscritpion subscritpion, DateTime date)
+    public void ChangeSubscription(Subscription subscription, DateTime date)
     {
-        CurrentSubscription = subscritpion;
+        CurrentSubscription = subscription;
         ChangeDates(date);
         Status = true;
     }
