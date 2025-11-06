@@ -8,7 +8,7 @@ using Adria.Application.Contracts.Data;
 
 namespace Adria.Infrastructure;
 
-public class AllSubscriptionTypesQuery : IAllSubscriptionTypes
+public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
 {
     static private readonly string query = @"select * from  Subscription";
 
@@ -16,7 +16,7 @@ public class AllSubscriptionTypesQuery : IAllSubscriptionTypes
     private readonly string _connectionString;
     private readonly ILogger<IAllSubscriptionTypes> _logger;
 
-    AllSubscriptionTypesQuery(DbProviderFactory factory, string connectionString, ILogger<IAllSubscriptionTypes> logger)
+    public AllSubscriptionTypesQuery(DbProviderFactory factory, string connectionString, ILogger<IAllSubscriptionTypes> logger)
     {
         _factory = factory;
         _connectionString = connectionString;
