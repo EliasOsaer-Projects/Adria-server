@@ -51,7 +51,7 @@ CREATE TABLE `Payment` (
 );
 
 -- COURSES
-CREATE TABLE `Course` (
+CREATE TABLE `Courses` (
   `CourseID` VARCHAR(36) PRIMARY KEY NOT NULL,
   `CourseName` VARCHAR(255) NOT NULL,
   `CourseDifficulty` VARCHAR(50) NOT NULL,
