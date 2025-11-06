@@ -9,11 +9,11 @@ public sealed record SearchSubscriptionTypeByIdInput(
     );
 public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionTypeByIdInput, Task<IReadOnlyCollection<SubscriptionData>>>
 {
-    private ILogger _logger;
+    private ILogger<SearchSubscriptionTypeById> _logger;
     private ISearchSubscriptionTypeByIdQuery _searchSubscriptionTypeById;
     private Guid id;
 
-    public SearchSubscriptionTypeById(ISearchSubscriptionTypeByIdQuery searchSubscriptionTypeById, ILogger logger)
+    public SearchSubscriptionTypeById(ISearchSubscriptionTypeByIdQuery searchSubscriptionTypeById, ILogger<SearchSubscriptionTypeById> logger)
     {
         _searchSubscriptionTypeById = searchSubscriptionTypeById;
         _logger = logger;
