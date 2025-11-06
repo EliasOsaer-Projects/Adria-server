@@ -1,7 +1,7 @@
 using Adria.Infrastructure;
-using Adria.Application.Contracts.Data;
 using System.Data.Common;
 using Adria.Application.Contracts;
+using Adria.Infrastructure.Persistence.Queries;
 using Taskly.Infrastructure.Persistence.Queries;
 
 namespace Adria.Main.Modules.Persistence;
@@ -39,22 +39,32 @@ public static class PersistenceModule
     )
     {
         // Configure queries here.
+
         return services
-            .AddScoped<IUserByIdQuery, UserByIdQuery>(serviceProvider =>
-            {
-                return new UserByIdQuery(
-                    serviceProvider.GetRequiredService<DbProviderFactory>(),
-                    _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<UserByIdQuery>>()
-                );
-            })
-            .AddScoped<IAllSubscriptionTypes, AllSubscriptionTypesQuery>(serviceProvider =>
-        {
-            return new AllSubscriptionTypesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
-                _connectionString,
-                serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
-            );
-        });
+                .AddScoped<IAllSubscriptionTypes, AllSubscriptionTypesQuery>(serviceProvider =>
+                {
+                    return new AllSubscriptionTypesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                        _connectionString,
+                        serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
+                    );
+                })
+                .AddScoped<IAllCoursesQuery, AllCoursesQuery>(serviceProvider =>
+                {
+                    return new AllCoursesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                        _connectionString,
+                        serviceProvider.GetRequiredService<ILogger<AllCoursesQuery>>()
+                    );
+
+
+                })
+                .AddScoped<IUserByIdQuery, UserByIdQuery>(serviceProvider =>
+                {
+                    return new UserByIdQuery(
+                        serviceProvider.GetRequiredService<DbProviderFactory>(),
+                        _connectionString,
+                        serviceProvider.GetRequiredService<ILogger<UserByIdQuery>>()
+                    );
+                });
     }
 
     private static IServiceCollection AddAdoServices(

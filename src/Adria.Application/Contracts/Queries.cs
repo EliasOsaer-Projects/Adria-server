@@ -1,5 +1,4 @@
 using Adria.Application.Contracts.Data;
-using Adria.Application.Users;
 
 namespace Adria.Application.Contracts;
 
@@ -11,4 +10,10 @@ public interface IUserByIdQuery
 public interface IAllSubscriptionTypes
 {
     Task<IReadOnlyCollection<SubscriptionData>> Fetch();
+}
+
+
+public interface IAllCoursesQuery
+{
+    Task<IReadOnlyCollection<CourseData>> Fetch();
 }
