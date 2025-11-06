@@ -7,19 +7,14 @@ public class Course
     public Guid Id { get; }
     public string Name { get; private set; }
     public string Category { get; private set; }
-
     public string Description { get; private set; }
-
     //simpele uitleg over de cursus
     public List<string> LearnList { get; private set; }
-
     //Dit is voor nu een list maar zal later omgezet moeten worden naar een string met comma's die ze splitsen.  
     public int Duration { get; private set; }
-
     //Duratie van een cursus in uur
     public CourseLevel Level { get; private set; }
     public List<CourseModule> Modules { get; private set; }
-
     public int PointsOnCompletion { get; private set; }
 
 
