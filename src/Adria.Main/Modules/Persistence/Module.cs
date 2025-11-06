@@ -47,7 +47,7 @@ public static class PersistenceModule
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<UserByIdQuery>>()
                 );
-            });
+            })
             .AddScoped<IAllSubscriptionTypes, AllSubscriptionTypesQuery>(serviceProvider =>
         {
             return new AllSubscriptionTypesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
