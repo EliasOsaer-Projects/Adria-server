@@ -7,7 +7,7 @@ namespace Adria.Infrastructure;
 
 public class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByIdQuery
 {
-    private readonly string query = "select Type, PricePerCycle from Subscription where SubscriptionID = @id";
+    private readonly string query = "select Type, PricePerCycle from Subscription where SubscriptionID = '@id'";
     private readonly ILogger _logger;
     private readonly string _connectionString;
     private readonly DbProviderFactory _factory;
