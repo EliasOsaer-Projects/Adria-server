@@ -60,7 +60,7 @@ CREATE TABLE `Course` (
   `EstimatedDurationInHours` INT,
   `CoverImageID` VARCHAR(255),
   `BannerImageID` VARCHAR(255),
-  `SubscriptionRequired` INT NOT NULL,
+  `SubscriptionRequired` INT NOT NULL
 );
 
 -- COURSE MODULES
