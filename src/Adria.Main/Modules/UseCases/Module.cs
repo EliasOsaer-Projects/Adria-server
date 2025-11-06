@@ -11,6 +11,7 @@ public static class UseCases
     {
         return services
             .AddScoped<IUseCase<SearchUserByIdInput, Task<UserData>>, SearchUserById>()
-            .AddScoped<IUseCase<Task<IReadOnlyCollection<SubscriptionData>>>, AllSubscriptionTypes>();
+            .AddScoped<IUseCase<Task<IReadOnlyCollection<SubscriptionData>>>, AllSubscriptionTypes>()
+            .AddScoped<IUseCase<Top10UsersInput, Task<IEnumerable<LeaderBoardData>>>, Top10Users>();
     }
 }
