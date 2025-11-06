@@ -9,7 +9,7 @@ public class User
     public int PointsBalance { get; set; }
     public DateTime LastPayment { get; set; }
     public int Streak { get; set; }
-    public Wallet UserWallet { get; set; }
+    public decimal UserWallet { get; set; }
     public CustomerSubscription CurrentSubscription { get; set; }
     public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
     private readonly List<Course> _courses = [];
@@ -17,7 +17,7 @@ public class User
     //TODO Still need to add Cosmetics which doesn't exist;
 
 
-    public User(Guid id, string name, DateTime lastPayment, Wallet wallet, Subscritpion subscritpion)
+    public User(Guid id, string name, DateTime lastPayment, decimal wallet, Subscritpion subscritpion)
     {
         EnsureUserIdIsValid(id);
 
@@ -43,9 +43,9 @@ public class User
     }
 
     //Add Money in wallet
-    public void PayDay()
+    public void PayDay(decimal payment)
     {
-        UserWallet.AddMonthlyIncome();
+        UserWallet += payment;
     }
 
 
@@ -57,7 +57,7 @@ public class User
 
     public void PaySubscription()
     {
-        UserWallet.AdriaCoinAmount = CurrentSubscription.PaySubscription(UserWallet.AdriaCoinAmount, DateTime.Today);
+        UserWallet -= CurrentSubscription.PaySubscription(UserWallet, DateTime.Today);
     }
 
     public void ChangeSubscription(Subscritpion subscritpion)
