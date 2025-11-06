@@ -1,5 +1,4 @@
 using Adria.Infrastructure;
-using Adria.Application.Contracts.Data;
 using System.Data.Common;
 using Adria.Application.Contracts;
 using Adria.Infrastructure.Persistence.Queries;
@@ -40,6 +39,7 @@ public static class PersistenceModule
     )
     {
         // Configure queries here.
+
         return services
             .AddScoped<IUserByIdQuery, UserByIdQuery>(serviceProvider =>
             {
@@ -61,6 +61,13 @@ public static class PersistenceModule
                 return new TopUsersByPointsQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<TopUsersByPointsQuery>>()
+                );
+            })
+            .AddScoped<IAllCoursesQuery, AllCoursesQuery>(serviceProvider =>
+            {
+                return new AllCoursesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AllCoursesQuery>>()
                 );
             });
     }

@@ -1,5 +1,4 @@
 using Adria.Application.Contracts.Data;
-using Adria.Application.Users;
 
 namespace Adria.Application.Contracts;
 
@@ -16,4 +15,9 @@ public interface IAllSubscriptionTypes
 public interface ITopUsersByPointsQuery
 {
     Task<IEnumerable<LeaderBoardData>> Fetch();
+}
+
+public interface IAllCoursesQuery
+{
+    Task<IReadOnlyCollection<CourseData>> Fetch();
 }

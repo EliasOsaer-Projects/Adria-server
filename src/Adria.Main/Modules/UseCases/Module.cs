@@ -1,5 +1,6 @@
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
+using Adria.Application.Courses;
 using Adria.Application.Users;
 using Adria.Application.Subscriptions;
 
@@ -13,5 +14,6 @@ public static class UseCases
             .AddScoped<IUseCase<SearchUserByIdInput, Task<UserData>>, SearchUserById>()
             .AddScoped<IUseCase<Task<IReadOnlyCollection<SubscriptionData>>>, AllSubscriptionTypes>()
             .AddScoped<IUseCase<Top10UsersInput, Task<IEnumerable<LeaderBoardData>>>, Top10Users>();
+            .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
     }
 }
