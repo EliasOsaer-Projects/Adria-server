@@ -1,4 +1,5 @@
-﻿using Adria.Application.Contracts.Data;
+﻿using Adria.Application.Contracts;
+using Adria.Application.Contracts.Data;
 using Adria.Application.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -8,28 +9,14 @@ namespace Adria.Infrastructure.WebApi.Controllers;
 
 public sealed class Top10UsersController
 {
-    public static async Task<Results<Ok<IEnumerable<LeaderboardUser>>, NotFound>> Invoke(
-        [FromServices] Top10Users top10Users
+    public static async Task<Results<Ok<IEnumerable<LeaderBoardData>>, NotFound>> Invoke(
+        [FromServices] IUseCase<Top10UsersInput, Task<IEnumerable<LeaderBoardData>>> top10Users
     )
     {
-        var topUsers = await top10Users.Execute(new Top10UsersInput());
-
-        if (!topUsers.Any())
+        var leaderboard = await top10Users.Execute(new Top10UsersInput());
+        if (leaderboard == null || !leaderboard.Any())
             return TypedResults.NotFound();
 
-        return TypedResults.Ok(topUsers.Select(ToResponse));
+        return TypedResults.Ok(leaderboard);
     }
-
-    private static LeaderboardUser ToResponse(LeaderBoardData data)
-    {
-        return new LeaderboardUser(
-            Name: data.Name,
-            PointsBalance: data.PointsBalance
-        );
-    }
-    
-    public sealed record LeaderboardUser(
-        string Name,
-        int PointsBalance
-    );
 }
