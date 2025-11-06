@@ -1,6 +1,10 @@
-﻿namespace Adria.Application;
+﻿using Microsoft.Extensions.Logging;
+using Adria.Application.Contracts;
+using Adria.Application.Contracts.Data;
 
-public class SearchSubscriptionById
+namespace Adria.Application;
+
+public class SearchSubscriptionTypeById : ISearchSubscriptionTypeById<Task<IReadOnlyCollection<SubscriptionData>>>
 {
 
 }
