@@ -7,3 +7,8 @@ public interface IUserByIdQuery
 {
     Task<UserData> Fetch(Guid userId);
 }
+
+public interface IAllSubscriptionTypes
+{
+    Task<IReadOnlyCollection<SubscriptionData>> Fetch();
+}

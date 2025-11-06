@@ -1,15 +1,16 @@
 using Adria.Infrastructure.WebApi.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Mvc;
+using Adria.Infrastructure.WebApi;
 
 namespace Adria.Infrastructure.WebApi;
 
 public static class Routes
 {
     private readonly static string APPLICATION_JSON = "application/json";
-    
+
     public static OpenApiInfo OpenApiInfo { get; } = new OpenApiInfo
     {
         Version = "v1",
@@ -25,6 +26,7 @@ public static class Routes
     public static WebApplication MapRoutes(this WebApplication app)
     {
         MapUserRoutes(app);
+        MapSubscriptionRoutes(app);
         
         return app;
     }
@@ -43,5 +45,14 @@ public static class Routes
             .WithName(nameof(SearchUserByIdController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+    }
+
+    private static void MapSubscriptionRoutes(WebApplication app)
+    {
+        var subscriptionRoutes = app.MapGroup("api/subscriptions").WithTags("subscriptions").WithDescription("All endpoints todo with subscriptions").WithOpenApi();
+
+        subscriptionRoutes.MapGet("/all-subscriptions", AllSubscriptionTypesController.Invoke).WithDescription("All subscriptions types").
+          WithName(nameof(AllSubscriptionTypesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
+          WithOpenApi();
     }
 }

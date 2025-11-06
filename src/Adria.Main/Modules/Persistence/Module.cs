@@ -1,3 +1,5 @@
+using Adria.Infrastructure;
+using Adria.Application.Contracts.Data;
 using System.Data.Common;
 using Adria.Application.Contracts;
 using Taskly.Infrastructure.Persistence.Queries;
@@ -12,6 +14,7 @@ public static class PersistenceModule
         IConfiguration configuration
     )
     {
+        _connectionString = configuration["Persistence:ConnectionString"];
         return services
             .AddAdoServices(configuration)
             .AddRepositories()
@@ -45,6 +48,13 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<UserByIdQuery>>()
                 );
             });
+            .AddScoped<IAllSubscriptionTypes, AllSubscriptionTypesQuery>(serviceProvider =>
+        {
+            return new AllSubscriptionTypesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                _connectionString,
+                serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
+            );
+        });
     }
 
     private static IServiceCollection AddAdoServices(
@@ -61,7 +71,7 @@ public static class PersistenceModule
             return DbProviderFactories.GetFactory(provider);
         });
     }
-    
+
     private static WebApplication ApplyMigrations(this WebApplication app)
     {
         IServiceProvider serviceProvider = app.Services.CreateScope().ServiceProvider;
