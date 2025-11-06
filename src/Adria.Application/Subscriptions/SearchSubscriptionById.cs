@@ -21,7 +21,9 @@ public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionType
 
     public async Task<IReadOnlyCollection<SubscriptionData>> Execute(SearchSubscriptionTypeByIdInput subscritpion)
     {
+        //?
         _logger.LogInformation("Retrieving subscription ...");
+
         return await _searchSubscriptionTypeById.Fetch(subscritpion.id);
 
     }
