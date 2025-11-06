@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS `PointsPayment`;
 DROP TABLE IF EXISTS `CosmeticItem`;
 DROP TABLE IF EXISTS `CustomerCourse`;
 DROP TABLE IF EXISTS `CourseModule`;
-DROP TABLE IF EXISTS `Course`;
+DROP TABLE IF EXISTS `Courses`;
 DROP TABLE IF EXISTS `Payment`;
 DROP TABLE IF EXISTS `CustomerSubscription`;
 DROP TABLE IF EXISTS `Subscription`;
@@ -60,7 +60,7 @@ CREATE TABLE `Courses` (
   `EstimatedDurationInHours` INT,
   `CoverImageID` VARCHAR(255),
   `BannerImageID` VARCHAR(255),
-  `SubscriptionRequired` INT NOT NULL,
+  `SubscriptionRequired` INT NOT NULL
 );
 
 -- COURSE MODULES
@@ -68,7 +68,7 @@ CREATE TABLE `CourseModule` (
     `CourseModuleID` VARCHAR(36) PRIMARY KEY NOT NULL,
     `ModuleName` VARCHAR(255) NOT NULL,
     `CourseID` VARCHAR(36) NOT NULL,
-    FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`)
+    FOREIGN KEY (`CourseID`) REFERENCES `Courses`(`CourseID`)
 );
 
 -- CUSTOMER COURSES
@@ -81,7 +81,7 @@ CREATE TABLE `CustomerCourse` (
   `AdriaID` VARCHAR(36) NOT NULL,
   `CourseID` VARCHAR(36) NOT NULL,
   FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`),
-  FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`)
+  FOREIGN KEY (`CourseID`) REFERENCES `Courses`(`CourseID`)
 );
 
 -- COSMETICS
@@ -123,7 +123,7 @@ INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
     VALUES (UUID(), 'Ultra', 35.99);
 
 -- COURSE
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -137,7 +137,7 @@ INSERT INTO `Course` (
            1
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -151,7 +151,7 @@ VALUES (
            2
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -165,7 +165,7 @@ VALUES (
            0
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -179,7 +179,7 @@ VALUES (
            2
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -193,7 +193,7 @@ VALUES (
            3
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -207,7 +207,7 @@ VALUES (
            1
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -221,7 +221,7 @@ VALUES (
            0
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -235,7 +235,7 @@ VALUES (
            1
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -250,7 +250,7 @@ VALUES (
        );
 
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -264,7 +264,7 @@ VALUES (
            2
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -278,7 +278,7 @@ VALUES (
            3
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -292,7 +292,7 @@ VALUES (
            3
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -306,7 +306,7 @@ VALUES (
            3
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -320,7 +320,7 @@ VALUES (
            1
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -334,7 +334,7 @@ VALUES (
            2
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -348,7 +348,7 @@ VALUES (
            0
        );
 
-INSERT INTO `Course` (
+INSERT INTO `Courses` (
     `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`,
     `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`
 )
@@ -367,7 +367,7 @@ INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
     VALUES (
            UUID(),
            'Lesson 1 - Frying',
-           (SELECT `CourseID` FROM `Course` WHERE `CourseName` = 'Basic culinary skills')
+           (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Basic culinary skills')
        );
 
 -- COSMETIC ITEM
