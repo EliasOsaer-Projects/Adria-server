@@ -29,10 +29,17 @@ public static class Routes
 
     private static void MapSubscriptionRoutes(WebApplication app)
     {
+
         var subscriptionRoutes = app.MapGroup("api/subscriptions").WithTags("subscriptions").WithDescription("All endpoints todo with subscriptions").WithOpenApi();
 
         subscriptionRoutes.MapGet("/all-subscriptions", AllSubscriptionTypesController.Invoke).WithDescription("All subscriptions types").
           WithName(nameof(AllSubscriptionTypesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
           WithOpenApi();
+
+        subscriptionRoutes.MapGet("/{subscriptionId}", SearchSubscriptionTypeByIdController.Invoke)
+          .WithDescription("Get the certain subscription type")
+          .WithName(nameof(SearchSubscriptionTypeByIdController))
+          .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+          .WithOpenApi();
     }
 }
