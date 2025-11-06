@@ -44,6 +44,13 @@ public static class PersistenceModule
                 _connectionString,
                 serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
             );
+        })
+        .AddScoped<ISearchSubscriptionTypeByIdQuery, SearchSubscriptionTypeByIdQuery>(serviceProvider =>
+        {
+            return new SearchSubscriptionTypeByIdQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                _connectionString,
+                serviceProvider.GetRequiredService<ILogger<SearchSubscriptionTypeByIdQuery>>()
+                );
         });
     }
 
