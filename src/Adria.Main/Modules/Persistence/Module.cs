@@ -41,30 +41,35 @@ public static class PersistenceModule
         // Configure queries here.
 
         return services
-                .AddScoped<IAllSubscriptionTypes, AllSubscriptionTypesQuery>(serviceProvider =>
-                {
-                    return new AllSubscriptionTypesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
-                        _connectionString,
-                        serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
-                    );
-                })
-                .AddScoped<IAllCoursesQuery, AllCoursesQuery>(serviceProvider =>
-                {
-                    return new AllCoursesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
-                        _connectionString,
-                        serviceProvider.GetRequiredService<ILogger<AllCoursesQuery>>()
-                    );
-
-
-                })
-                .AddScoped<IUserByIdQuery, UserByIdQuery>(serviceProvider =>
-                {
-                    return new UserByIdQuery(
-                        serviceProvider.GetRequiredService<DbProviderFactory>(),
-                        _connectionString,
-                        serviceProvider.GetRequiredService<ILogger<UserByIdQuery>>()
-                    );
-                });
+            .AddScoped<IUserByIdQuery, UserByIdQuery>(serviceProvider =>
+            {
+                return new UserByIdQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<UserByIdQuery>>()
+                );
+            })
+            .AddScoped<IAllSubscriptionTypes, AllSubscriptionTypesQuery>(serviceProvider =>
+            {
+            return new AllSubscriptionTypesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                _connectionString,
+                serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
+            );
+            })
+            .AddScoped<ITopUsersByPointsQuery, TopUsersByPointsQuery>(serviceProvider =>
+            {
+                return new TopUsersByPointsQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<TopUsersByPointsQuery>>()
+                );
+            })
+            .AddScoped<IAllCoursesQuery, AllCoursesQuery>(serviceProvider =>
+            {
+                return new AllCoursesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AllCoursesQuery>>()
+                );
+            });
     }
 
     private static IServiceCollection AddAdoServices(

@@ -54,6 +54,13 @@ public static class Routes
             .WithName(nameof(SearchUserByIdController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+        
+        userRoutes
+            .MapGet("/leaderboard", Top10UsersController.Invoke)
+            .WithDescription("Get the top 10 users with the most points")
+            .WithName(nameof(Top10UsersController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)

@@ -43,3 +43,16 @@ public class MockAllSubscriptionQuerie : IAllSubscriptionTypes
         subscriptions.Clear();
     }
 }
+
+public class MockTopUsersByPointsQuery : ITopUsersByPointsQuery
+{
+    private readonly List<LeaderBoardData> _users = new();
+
+    public void AddUser(LeaderBoardData user) => _users.Add(user);
+
+    public Task<IEnumerable<LeaderBoardData>> Fetch()
+    {
+        var result = _users.OrderByDescending(u => u.PointsBalance).Take(10);
+        return Task.FromResult<IEnumerable<LeaderBoardData>>(result);
+    }
+}

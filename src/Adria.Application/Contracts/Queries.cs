@@ -12,6 +12,10 @@ public interface IAllSubscriptionTypes
     Task<IReadOnlyCollection<SubscriptionData>> Fetch();
 }
 
+public interface ITopUsersByPointsQuery
+{
+    Task<IEnumerable<LeaderBoardData>> Fetch();
+}
 
 public interface IAllCoursesQuery
 {
