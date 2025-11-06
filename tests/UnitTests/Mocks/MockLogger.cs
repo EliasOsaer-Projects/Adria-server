@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace UnitTests;
+namespace UnitTests.Mocks;
 
 public class MockLogger<T> : ILogger<T>
 {
@@ -26,4 +26,3 @@ public class MockLogger<T> : ILogger<T>
         LoggedMessages.Clear();
     }
 }
-

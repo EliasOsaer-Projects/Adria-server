@@ -1,15 +1,15 @@
+using Adria.Infrastructure.WebApi.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using Adria.Infrastructure.WebApi;
-using Adria.Infrastructure.WebApi.Controllers;
 
 namespace Adria.Infrastructure.WebApi;
 
 public static class Routes
 {
     private readonly static string APPLICATION_JSON = "application/json";
+
     public static OpenApiInfo OpenApiInfo { get; } = new OpenApiInfo
     {
         Version = "v1",
@@ -24,8 +24,10 @@ public static class Routes
 
     public static WebApplication MapRoutes(this WebApplication app)
     {
+        MapUserRoutes(app);
         MapSubscriptionRoutes(app);
         MapCourseRoutes(app);
+        
         return app;
     }
 
@@ -36,6 +38,22 @@ public static class Routes
         courseRoutes.MapGet("/all-courses", SearchAllCoursesController.Invoke).WithDescription("All courses").
             WithName(nameof(SearchAllCoursesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
             WithOpenApi();
+    }
+
+    private static void MapUserRoutes(WebApplication app)
+    {
+        var userRoutes = app
+            .MapGroup("/api/users")
+            .WithTags("Users")
+            .WithDescription("All endpoints related to Genesis users.")
+            .WithOpenApi();
+        
+        userRoutes
+            .MapGet("/{userId}", SearchUserByIdController.Invoke)
+            .WithDescription("Get a user by their ID.")
+            .WithName(nameof(SearchUserByIdController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)

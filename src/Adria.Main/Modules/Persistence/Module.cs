@@ -2,6 +2,7 @@ using Adria.Infrastructure;
 using System.Data.Common;
 using Adria.Application.Contracts;
 using Adria.Infrastructure.Persistence.Queries;
+using Taskly.Infrastructure.Persistence.Queries;
 
 namespace Adria.Main.Modules.Persistence;
 
@@ -55,6 +56,14 @@ public static class PersistenceModule
                     );
 
 
+                })
+                .AddScoped<IUserByIdQuery, UserByIdQuery>(serviceProvider =>
+                {
+                    return new UserByIdQuery(
+                        serviceProvider.GetRequiredService<DbProviderFactory>(),
+                        _connectionString,
+                        serviceProvider.GetRequiredService<ILogger<UserByIdQuery>>()
+                    );
                 });
     }
 

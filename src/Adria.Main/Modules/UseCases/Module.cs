@@ -1,7 +1,8 @@
-using Adria.Application.Subscriptions;
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
 using Adria.Application.Courses;
+using Adria.Application.Users;
+using Adria.Application.Subscriptions;
 
 namespace Adria.Main.Modules.UseCases;
 
@@ -11,6 +12,7 @@ public static class UseCases
     {
         return services
             .AddScoped<IUseCase<Task<IReadOnlyCollection<SubscriptionData>>>, AllSubscriptionTypes>()
-            .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>();
+            .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
+            .AddScoped<IUseCase<SearchUserByIdInput, Task<UserData>>, SearchUserById>();
     }
 }
