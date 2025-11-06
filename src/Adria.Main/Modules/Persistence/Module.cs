@@ -1,14 +1,18 @@
+using Adria.Infrastructure;
+using Adria.Application.Contracts.Data;
 using System.Data.Common;
 
 namespace Adria.Main.Modules.Persistence;
 
 public static class PersistenceModule
 {
+    private static string _connectionString = string.Empty;
     public static IServiceCollection AddPersistenceModule(
         this IServiceCollection services,
         IConfiguration configuration
     )
     {
+        _connectionString = configuration["Persistence:ConnectionString"];
         return services
             .AddAdoServices(configuration)
             .AddRepositories()
@@ -33,7 +37,14 @@ public static class PersistenceModule
     )
     {
         // Configure queries here.
-        return services;
+
+        return services.AddScoped<IAllSubscriptionTypes, AllSubscriptionTypesQuery>(serviceProvider =>
+        {
+            return new AllSubscriptionTypesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                _connectionString,
+                serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
+            );
+        });
     }
 
     private static IServiceCollection AddAdoServices(
@@ -50,7 +61,7 @@ public static class PersistenceModule
             return DbProviderFactories.GetFactory(provider);
         });
     }
-    
+
     private static WebApplication ApplyMigrations(this WebApplication app)
     {
         IServiceProvider serviceProvider = app.Services.CreateScope().ServiceProvider;
