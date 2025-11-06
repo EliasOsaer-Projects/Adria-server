@@ -9,7 +9,7 @@ public sealed record CourseData(
     string Description,
     List<string>? LearnList,
     int Duration,
-    string Level,
+    int Level,
     List<CourseModule>? Modules,
     int PointsOnCompletion
 );

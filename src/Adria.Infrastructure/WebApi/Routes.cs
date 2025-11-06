@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Adria.Infrastructure.WebApi;
+using Adria.Infrastructure.WebApi.Controllers;
 
 namespace Adria.Infrastructure.WebApi;
 
@@ -24,7 +25,17 @@ public static class Routes
     public static WebApplication MapRoutes(this WebApplication app)
     {
         MapSubscriptionRoutes(app);
+        MapCourseRoutes(app);
         return app;
+    }
+
+    private static void MapCourseRoutes(WebApplication app)
+    {
+        var courseRoutes = app.MapGroup("api/Courses").WithTags("courses").WithDescription("All endpoints todo with courses").WithOpenApi();
+
+        courseRoutes.MapGet("/all-courses", SearchAllCoursesController.Invoke).WithDescription("All courses").
+            WithName(nameof(SearchAllCoursesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
+            WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)
