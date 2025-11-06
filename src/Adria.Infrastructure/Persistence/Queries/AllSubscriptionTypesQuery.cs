@@ -10,7 +10,7 @@ namespace Adria.Infrastructure;
 
 public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
 {
-    static private readonly string query = @"select * from  Subscription";
+    static private readonly string query = @"select Type, PricePerCycle from Subscription";
 
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
@@ -42,6 +42,13 @@ public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
             using (var reader = command.ExecuteReader())
             {
                 var subscriptions = new List<SubscriptionData>();
+                while (await reader.ReadAsync())
+                {
+                    var name = reader.GetOrdinal("Type");
+                    var price = reader.GetOrdinal("PricePerCycle");
+                    var desc = "No description";
+                    subscriptions.Add(new SubscriptionData(Type: reader.GetString(name), PriceCycle: reader.GetDecimal(price), desc));
+                }
                 return subscriptions;
             }
 

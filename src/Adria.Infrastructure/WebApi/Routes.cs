@@ -23,6 +23,7 @@ public static class Routes
 
     public static WebApplication MapRoutes(this WebApplication app)
     {
+        MapSubscriptionRoutes(app);
         return app;
     }
 
