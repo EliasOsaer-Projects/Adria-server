@@ -13,9 +13,8 @@ public sealed class SearchUserByIdTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        Wallet wallet = new Wallet("NathanielWallet", 0, 10);
-        Subscritpion subscription = new Subscritpion("Basic", 15.99m, "test");
-        var userData = new UserData(userId, "Nathaniel", wallet, 0, DateTime.Today, 0, subscription);
+        var subscription = new SubscriptionData("Basic", 15.99m, "test");
+        var userData = new UserData(userId, "Nathaniel", 1700, 0, DateTime.Today, 0, subscription);
         var mockQuery = new MockUserByIdQuery();
         mockQuery.AddUser(userData);
         var mockLogger = new MockLogger<SearchUserById>();

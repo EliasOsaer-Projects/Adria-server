@@ -6,9 +6,9 @@ public sealed record UserData
 (
     Guid Id,
     string Name,
-    Wallet Wallet,
+    decimal Wallet,
     int PointsBalance,
-    DateTime? LastPayment,
+    DateTime LastPayment,
     int Streak,
-    Subscritpion? Subscription
+    SubscriptionData? Subscription
 );

@@ -8,7 +8,7 @@ namespace Taskly.Infrastructure.Persistence.Queries;
 public sealed class UserByIdQuery : IUserByIdQuery
 {
     private static readonly string QRY = @"
-        SELECT User.AdriaID, User.Name, User.Wallet, User.PointsBalance, User.LastPayment, User.Streak, cs.CustomerSubscriptionID, cs.Status, Subscription.SubscriptionID, Subscription.Type AS SubscriptionType, Subscription.PricePerCycle
+        SELECT User.AdriaID, User.Name, User.Wallet, User.PointsBalance, User.LastPayment, User.Streak, cs.CustomerSubscriptionID, cs.Status, Subscription.SubscriptionID, Subscription.Type AS SubscriptionType, Subscription.PricePerCycle, Subscription.Description
 FROM `User`
 LEFT JOIN `CustomerSubscription` cs 
     ON User.AdriaID = cs.AdriaID AND cs.Status = 'Active'
@@ -62,9 +62,7 @@ WHERE User.AdriaID = @Id;";
     var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
     var streak = reader.GetInt32(reader.GetOrdinal("Streak"));
 
-    DateTime? lastPayment = reader.IsDBNull(reader.GetOrdinal("LastPayment"))
-        ? null
-        : reader.GetDateTime(reader.GetOrdinal("LastPayment"));
+    DateTime lastPayment = reader.GetDateTime(reader.GetOrdinal("LastPayment"));
 
     Guid? subscriptionId = reader.IsDBNull(reader.GetOrdinal("SubscriptionID"))
         ? null
@@ -74,9 +72,9 @@ WHERE User.AdriaID = @Id;";
     if (subscriptionId.HasValue)
     {
         subscription = new SubscriptionData(
-            subscriptionId.Value,
             reader.GetString(reader.GetOrdinal("SubscriptionType")),
-            reader.GetDecimal(reader.GetOrdinal("PricePerCycle"))
+            reader.GetDecimal(reader.GetOrdinal("PricePerCycle")),
+            reader.GetString(reader.GetOrdinal("Description"))
         );
     }
 
