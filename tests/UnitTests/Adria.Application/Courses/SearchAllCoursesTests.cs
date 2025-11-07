@@ -4,11 +4,6 @@ using UnitTests.Mocks;
 
 namespace UnitTests.Courses;
 
-public sealed record SearchAllCoursesInput(
-    string Category,
-    string Tag
-    );
-
 public sealed class SearchAllCoursesTests
 {
     [Fact]
