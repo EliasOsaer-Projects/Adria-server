@@ -3,8 +3,8 @@
 namespace Adria.Application.Contracts.Data;
 
 public sealed record CourseData(
-    Guid Id,
-    string Name,
+    Guid CourseId,
+    string CourseName,
     string Category,
     string Description,
     List<string> Tags,

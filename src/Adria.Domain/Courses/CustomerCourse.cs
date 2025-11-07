@@ -23,4 +23,13 @@ public class CustomerCourse
     {
      
     }
+    
+    
+    public CustomerCourse(Guid id, Course course, Decimal progress, Boolean completionStatus)
+    {
+        Id = id;
+        Course = course;
+        Progress = progress;
+        CompletionStatus = completionStatus;
+    }
 }

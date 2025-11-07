@@ -26,8 +26,8 @@ public sealed class SearchUserByIdTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(userId, result.Id);
-        Assert.Equal("Nathaniel", result.Name);
+        Assert.Equal(userId, result.AdriaId);
+        Assert.Equal("Nathaniel", result.UserName);
         Assert.Equal(0, result.PointsBalance);
         Assert.Equal(0, result.Streak);
         Assert.Single(mockLogger.LoggedMessages);

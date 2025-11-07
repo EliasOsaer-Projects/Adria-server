@@ -42,8 +42,8 @@ public sealed class SearchAllCoursesController
     private static List<Course> ToResponse(IReadOnlyCollection<CourseData> CourseData)
     {
         return CourseData.Select(data => new Course(
-            id: data.Id,
-            name: data.Name,
+            id: data.CourseId,
+            name: data.CourseName,
             level: data.Level,
             category: data.Category,
             description: data.Description,

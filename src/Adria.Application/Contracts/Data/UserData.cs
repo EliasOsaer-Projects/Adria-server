@@ -4,11 +4,12 @@ namespace Adria.Application.Contracts.Data;
 
 public sealed record UserData
 (
-    string Id,
-    string Name,
+    string AdriaId,
+    string UserName,
     decimal Wallet,
     int PointsBalance,
     DateTime? LastPayment,
     int Streak,
-    SubscriptionData? Subscription
+    SubscriptionData? Subscription,
+    List<CustomerCourseData>? CustomerCourses
 );

@@ -76,7 +76,7 @@ CREATE TABLE `CourseModule` (
 -- CUSTOMER COURSES
 CREATE TABLE `CustomerCourse` (
   `CustomerCourseID` VARCHAR(36) PRIMARY KEY NOT NULL,
-  `CompletionStatus` VARCHAR(50) NOT NULL,
+  `CompletionStatus` BOOLEAN NOT NULL,
   `ProgressPercentage` INT NOT NULL DEFAULT 0,
   `StartDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `CompletionDate` DATETIME,
@@ -432,6 +432,20 @@ INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
            'Lesson 1 - Frying',
            (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Basic culinary skills')
        );
+
+--CustomerCourse
+INSERT INTO `CustomerCourse` (`CustomerCourseID`, `CompletionStatus`, `ProgressPercentage`, `StartDate`, `AdriaID`, `CourseID`)
+VALUES
+    (UUID(), FALSE, 20, NOW(), '8fcff41a-0342-4f57-a12f-3e771a6dcea1', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'A complete guide to cats')),
+    (UUID(), TRUE, 100, NOW() - INTERVAL 10 DAY, '8fcff41a-0342-4f57-a12f-3e771a6dcea1', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Basic Culinary Skills')),
+    (UUID(), FALSE, 50, NOW() - INTERVAL 5 DAY, '8fcff41a-0342-4f57-a12f-3e771a6dcea1', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Fishing 101'));
+
+INSERT INTO `CustomerCourse` (`CustomerCourseID`, `CompletionStatus`, `ProgressPercentage`, `StartDate`, `AdriaID`, `CourseID`)
+VALUES
+    (UUID(), FALSE, 40, NOW() - INTERVAL 3 DAY, 'c3d8b6a4-6a9a-4df0-9322-9b8c71f12a5d', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Wilderness Basics')),
+    (UUID(), FALSE, 0, NOW(), 'c3d8b6a4-6a9a-4df0-9322-9b8c71f12a5d', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'How to Mine')),
+    (UUID(), TRUE, 100, NOW() - INTERVAL 15 DAY, 'c3d8b6a4-6a9a-4df0-9322-9b8c71f12a5d', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Primates and Pizza'));
+
 
 -- COSMETIC ITEM
 INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`)

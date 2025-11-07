@@ -16,7 +16,7 @@ public class MockUserByIdQuery : IUserByIdQuery
 
     public void AddUser(UserData user)
     {
-        _users[user.Id] = user;
+        _users[user.AdriaId] = user;
     }
 
     public void clear()
