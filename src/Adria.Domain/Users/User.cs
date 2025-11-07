@@ -17,7 +17,7 @@ public class User
     //TODO Still need to add Cosmetics which doesn't exist;
 
 
-    public User(Guid id, string name, DateTime lastPayment, decimal wallet, Subscritpion subscritpion)
+    public User(Guid id, string name, DateTime lastPayment, decimal wallet, Subscription subscription)
     {
         EnsureUserIdIsValid(id);
 
@@ -28,7 +28,7 @@ public class User
         Streak = 0;
         UserWallet = wallet;
 
-        CurrentSubscription = new(subscritpion, lastPayment);
+        CurrentSubscription = new(subscription, lastPayment);
     }
 
     public void addPoints(int points)
@@ -50,9 +50,9 @@ public class User
 
 
 
-    public void ChangeLastPaymentDate(DateTime lastpayment)
+    public void ChangeLastPaymentDate(DateTime lastPayment)
     {
-        LastPayment = lastpayment;
+        LastPayment = lastPayment;
     }
 
     public void PaySubscription()
@@ -60,14 +60,14 @@ public class User
         UserWallet -= CurrentSubscription.PaySubscription(UserWallet, DateTime.Today);
     }
 
-    public void ChangeSubscription(Subscritpion subscritpion)
+    public void ChangeSubscription(Subscription subscription)
     {
 
         LastPayment = DateTime.Today;
 
         PaySubscription();
 
-        CurrentSubscription.ChangeSubscripion(subscritpion, LastPayment);
+        CurrentSubscription.ChangeSubscription(subscription, LastPayment);
     }
 
     public void EndSubscription()
@@ -75,7 +75,7 @@ public class User
         CurrentSubscription.IsSubscriptionPaid(false);
     }
 
-    public void Enlargestreak()
+    public void EnlargeStreak()
     {
         Streak++;
     }
