@@ -10,8 +10,8 @@ public class AllSubscriptionTypesTests
     [Fact]
     public async Task ReturnSubscriptions()
     {
-        SubscriptionData subscription = new("Base", 2, "base sub");
-        SubscriptionData subscription2 = new("Premium", 2, "base sub");
+        SubscriptionData subscription = new(new Guid("Test"), "Base", 2, "base sub", false);
+        SubscriptionData subscription2 = new(new Guid("Test2"), "Premium", 2, "base sub", true);
 
         IList<SubscriptionData> subscriptions = new List<SubscriptionData> { subscription, subscription2 };
 
