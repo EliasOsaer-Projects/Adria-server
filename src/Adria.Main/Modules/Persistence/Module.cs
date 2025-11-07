@@ -62,7 +62,7 @@ public static class PersistenceModule
                 _connectionString,
                 serviceProvider.GetRequiredService<ILogger<SearchSubscriptionTypeByIdQuery>>()
                 );
-        });
+        })
         .AddScoped<ITopUsersByPointsQuery, TopUsersByPointsQuery>(serviceProvider =>
         {
             return new TopUsersByPointsQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
