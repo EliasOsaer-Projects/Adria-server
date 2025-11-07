@@ -15,7 +15,7 @@ LEFT JOIN `CustomerSubscription` cs
 LEFT JOIN `Subscription` 
     ON cs.SubscriptionID = Subscription.SubscriptionID
 WHERE User.AdriaID = @Id;";
-    
+
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
     private readonly ILogger<UserByIdQuery> _logger;
@@ -31,63 +31,65 @@ WHERE User.AdriaID = @Id;";
     }
 
     public async Task<UserData?> Fetch(Guid userId)
-{
-    _logger.LogInformation("Starting to fetch user with ID {UserId}", userId);
-
-    using var connection = _factory.CreateConnection()
-        ?? throw new InvalidOperationException("DbProviderFactory returned a null DbConnection.");
-
-    connection.ConnectionString = _connectionString;
-    await connection.OpenAsync();
-
-    using var command = connection.CreateCommand();
-    command.CommandText = QRY;
-
-    var parameter = command.CreateParameter();
-    parameter.ParameterName = "@Id";
-    parameter.Value = userId.ToString();
-    command.Parameters.Add(parameter);
-
-    using var reader = await command.ExecuteReaderAsync();
-
-    if (!await reader.ReadAsync())
     {
-        _logger.LogInformation("User with ID {UserId} not found", userId);
-        return null;
-    }
+        _logger.LogInformation("Starting to fetch user with ID {UserId}", userId);
 
-    var id = Guid.Parse(reader.GetString(reader.GetOrdinal("AdriaID")));
-    var name = reader.GetString(reader.GetOrdinal("Name"));
-    var wallet = reader.GetDecimal(reader.GetOrdinal("Wallet"));
-    var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
-    var streak = reader.GetInt32(reader.GetOrdinal("Streak"));
+        using var connection = _factory.CreateConnection()
+            ?? throw new InvalidOperationException("DbProviderFactory returned a null DbConnection.");
 
-    DateTime lastPayment = reader.GetDateTime(reader.GetOrdinal("LastPayment"));
+        connection.ConnectionString = _connectionString;
+        await connection.OpenAsync();
 
-    Guid? subscriptionId = reader.IsDBNull(reader.GetOrdinal("SubscriptionID"))
-        ? null
-        : Guid.Parse(reader.GetString(reader.GetOrdinal("SubscriptionID")));
+        using var command = connection.CreateCommand();
+        command.CommandText = QRY;
 
-    SubscriptionData? subscription = null;
-    if (subscriptionId.HasValue)
-    {
-        subscription = new SubscriptionData(
-            reader.GetString(reader.GetOrdinal("SubscriptionType")),
-            reader.GetDecimal(reader.GetOrdinal("PricePerCycle")),
-            reader.GetString(reader.GetOrdinal("Description"))
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = "@Id";
+        parameter.Value = userId.ToString();
+        command.Parameters.Add(parameter);
+
+        using var reader = await command.ExecuteReaderAsync();
+
+        if (!await reader.ReadAsync())
+        {
+            _logger.LogInformation("User with ID {UserId} not found", userId);
+            return null;
+        }
+
+        var id = Guid.Parse(reader.GetString(reader.GetOrdinal("AdriaID")));
+        var name = reader.GetString(reader.GetOrdinal("Name"));
+        var wallet = reader.GetDecimal(reader.GetOrdinal("Wallet"));
+        var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
+        var streak = reader.GetInt32(reader.GetOrdinal("Streak"));
+
+        DateTime lastPayment = reader.GetDateTime(reader.GetOrdinal("LastPayment"));
+
+        Guid? subscriptionId = reader.IsDBNull(reader.GetOrdinal("SubscriptionID"))
+            ? null
+            : Guid.Parse(reader.GetString(reader.GetOrdinal("SubscriptionID")));
+
+        SubscriptionData? subscription = null;
+        if (subscriptionId.HasValue)
+        {
+            subscription = new SubscriptionData(
+                reader.GetGuid(reader.GetOrdinal("SubscriptionId")),
+                reader.GetString(reader.GetOrdinal("SubscriptionType")),
+                reader.GetDecimal(reader.GetOrdinal("PricePerCycle")),
+                reader.GetString(reader.GetOrdinal("Description")),
+                reader.GetBoolean(reader.GetOrdinal("IsMostPopular"))
+            );
+        }
+
+        _logger.LogInformation("Found user with ID {UserId}", userId);
+
+        return new UserData(
+            id,
+            name,
+            wallet,
+            points,
+            lastPayment,
+            streak,
+            subscription
         );
     }
-
-    _logger.LogInformation("Found user with ID {UserId}", userId);
-
-    return new UserData(
-        id,
-        name,
-        wallet,
-        points,
-        lastPayment,
-        streak,
-        subscription
-    );
-}
 }

@@ -13,7 +13,7 @@ public sealed class SearchUserByIdTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var subscription = new SubscriptionData("Basic", 15.99m, "test");
+        var subscription = new SubscriptionData(new Guid("test"), "Basic", 15.99m, "test", true);
         var userData = new UserData(userId, "Nathaniel", 1700, 0, DateTime.Today, 0, subscription);
         var mockQuery = new MockUserByIdQuery();
         mockQuery.AddUser(userData);
@@ -33,7 +33,7 @@ public sealed class SearchUserByIdTests
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains($"Fetching user with ID: {userId}", mockLogger.LoggedMessages[0]);
     }
-    
+
     [Fact]
     public async Task Execute_WithNonExistentUser_ThrowsElementNotFoundException()
     {
@@ -48,7 +48,7 @@ public sealed class SearchUserByIdTests
         var exception = await Assert.ThrowsAsync<ElementNotFoundException>(() => useCase.Execute(input));
         Assert.Contains($"User with Id {userId} not found", exception.Message);
     }
-    
+
     [Fact]
     public async Task Execute_WithEmptyGuid_ThrowsElementNotFoundException()
     {
