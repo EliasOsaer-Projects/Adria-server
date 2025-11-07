@@ -12,7 +12,7 @@ public sealed record SearchAllCoursesInput(
 public sealed class SearchAllCoursesTests
 {
     [Fact]
-    public async Task Execute_WithExistingUser_ReturnsUserTodoLists()
+    public async Task Execute_ReturnsAllCourses()
     {
         // Arrange
    
