@@ -48,8 +48,8 @@ public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
                     var price = reader.GetOrdinal("PricePerCycle");
                     var mostPopular = reader.GetOrdinal("IsMostPopular");
 
-                    var desc = "No description";
-                    subscriptions.Add(new SubscriptionData(Type: reader.GetString(name), PriceCycle: reader.GetDecimal(price), desc));
+                    var desc = "No description";//
+                    subscriptions.Add(new SubscriptionData(SubscriptionId: reader.GetGuid(id), Type: reader.GetString(name), PriceCycle: reader.GetDecimal(price), desc, IsMostPopular: reader.GetBoolean(mostPopular)));
                 }
                 return subscriptions;
             }

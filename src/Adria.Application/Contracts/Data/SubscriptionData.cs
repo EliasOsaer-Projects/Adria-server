@@ -3,7 +3,7 @@
 namespace Adria.Application.Contracts.Data;
 
 public sealed record SubscriptionData(
-    string SubscriptionId,
+    Guid SubscriptionId,
     string Type,
     decimal PriceCycle,
     string Description,
