@@ -17,7 +17,18 @@ public class User
     //TODO Still need to add Cosmetics which doesn't exist;
 
 
-    public User(string id, string name, DateTime lastPayment, decimal wallet, Subscription subscription)
+    public User(string id, string name, decimal wallet)
+    {
+        EnsureUserIdIsValid(id);
+
+        AdriaId = id;
+        Name = name;
+        PointsBalance = 0;
+        Streak = 0;
+        UserWallet = wallet;
+    }
+    
+    public User(string id, string name,DateTime lastPayment , decimal wallet, Subscription subscription)
     {
         EnsureUserIdIsValid(id);
 
@@ -29,6 +40,12 @@ public class User
         UserWallet = wallet;
 
         CurrentSubscription = new(subscription, lastPayment);
+    }
+    
+    public void addSubscription(DateTime lastPayment, Subscription subscription)
+    {
+        lastPayment = lastPayment.Date;
+        CurrentSubscription = new CustomerSubscription(subscription, lastPayment);
     }
 
     public void addPoints(int points)

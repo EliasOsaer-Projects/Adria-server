@@ -24,8 +24,7 @@ public sealed class AllSubscriptionTypesController
     {
         return subscriptionData.Select(data => new SubscriptionResponse(
               Type: data.Type,
-              PriceCycle: data.PriceCycle,
-              Description: data.Description
+              PriceCycle: data.PriceCycle
         )).ToList();
     }
 

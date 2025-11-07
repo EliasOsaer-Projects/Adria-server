@@ -26,8 +26,7 @@ public sealed class SearchSubscriptionTypeByIdController
     {
         return subscriptions.Select(data => new SubscriptionResponse(
               Type: data.Type,
-                PriceCycle: data.PriceCycle,
-                Description: data.Description
+                PriceCycle: data.PriceCycle
               )).ToList();
     }
     private SearchSubscriptionTypeByIdController() { }
