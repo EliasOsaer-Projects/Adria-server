@@ -7,6 +7,7 @@ public sealed record CourseData(
     string Name,
     string Category,
     string Description,
+    List<string> Tags,
     List<string>? LearnList,
     int Duration,
     int Level,

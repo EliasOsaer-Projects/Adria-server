@@ -52,18 +52,26 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
             var ordCourseName = reader.GetOrdinal("CourseName");
             var ordCourseDifficulty = reader.GetOrdinal("CourseDifficulty");
             var ordCourseDescription = reader.GetOrdinal("CourseDescription");
+            var ordCourseTags = reader.GetOrdinal("CourseTags");
             var ordCourseCategory = reader.GetOrdinal("CourseCategory");
             var ordPointsOnCompletion = reader.GetOrdinal("PointsOnCompletion");
             var ordEstimatedDuration = reader.GetOrdinal("EstimatedDurationInHours");
             var ordCoverImageId = reader.GetOrdinal("CoverImageID");
             var ordBannerImageId = reader.GetOrdinal("BannerImageID");
 
+            
+            List<string> tags =  reader.GetString(ordCourseTags)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries) // split by commas
+                .Select(tag => tag.Trim()) // remove extra spaces
+                .ToList();
+            
             courses.Add(new CourseData(
                 Id: reader.GetGuid(ordCourseId),
                 Name: reader.GetString(ordCourseName),
                 Level: reader.GetInt32(ordCourseDifficulty),
                 Category: reader.GetString(ordCourseCategory),
                 Description: reader.GetString(ordCourseDescription),
+                Tags: tags,
                 PointsOnCompletion: reader.GetInt32(ordPointsOnCompletion),
                 Duration: reader.GetInt32(ordEstimatedDuration),
                 LearnList: [],
