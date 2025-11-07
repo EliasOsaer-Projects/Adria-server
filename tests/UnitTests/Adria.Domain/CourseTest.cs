@@ -3,7 +3,7 @@
 
 namespace UnitTests.Adria.Domain;
 
-/*
+
 public sealed class CourseTest
 {
     
@@ -22,15 +22,17 @@ public sealed class CourseTest
         var levelInt = 1; 
         var modules = new List<CourseModule>(); 
         var points = 100;
+        var tags = new List<string>{"fun", "coding"};
 
         // Act
-        var course = new Course(id, name, category, description, learnList, duration, levelInt, modules, points);
+        var course = new Course(id, name, category, description, tags, learnList, duration, levelInt, modules, points);
 
         // Assert
         Assert.Equal(id, course.Id);
         Assert.Equal(name, course.Name);
         Assert.Equal(category, course.Category);
         Assert.Equal(description, course.Description);
+        Assert.Equal(tags, course.Tags);
         Assert.Same(learnList, course.LearnList); 
         Assert.Equal(duration, course.Duration);
         Assert.Equal((CourseLevel)levelInt, course.Level);
@@ -38,4 +40,4 @@ public sealed class CourseTest
         Assert.Equal(points, course.PointsOnCompletion);
     }
   
-}  */
+}  
