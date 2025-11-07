@@ -13,7 +13,7 @@ public sealed class SearchUserByIdTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var subscription = new SubscriptionData(new Guid("test"), "Basic", 15.99m, "test", true);
+        var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, "test", true);
         var userData = new UserData(userId, "Nathaniel", 1700, 0, DateTime.Today, 0, subscription);
         var mockQuery = new MockUserByIdQuery();
         mockQuery.AddUser(userData);
