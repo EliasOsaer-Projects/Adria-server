@@ -29,12 +29,12 @@ public sealed class SearchAllCoursesController
            filteredData = filteredData.Where(c=> c.Category == category);
        }
        
-       /*
+       
        if (!string.IsNullOrWhiteSpace(tag))
        {
            filteredData = filteredData.Where(t=> t.Tags.Contains(tag));
        }
-    */
+    
         return TypedResults.Ok(ToResponse(filteredData.ToList()));
     }
 
@@ -47,6 +47,7 @@ public sealed class SearchAllCoursesController
             level: data.Level,
             category: data.Category,
             description: data.Description,
+            tags: data.Tags,
             pointsOnCompletion: data.PointsOnCompletion,
             duration: data.Duration,
             learnList: data.LearnList,

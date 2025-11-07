@@ -35,7 +35,7 @@ public static class Routes
     {
         var courseRoutes = app.MapGroup("api/courses").WithTags("courses").WithDescription("All endpoints todo with courses").WithOpenApi();
 
-        courseRoutes.MapGet("/all-courses", SearchAllCoursesController.Invoke).WithDescription("All courses").
+        courseRoutes.MapGet("/courses", SearchAllCoursesController.Invoke).WithDescription("All courses").
             WithName(nameof(SearchAllCoursesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
             WithOpenApi();
     }

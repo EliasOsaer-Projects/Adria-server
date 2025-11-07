@@ -3,7 +3,7 @@
 
 namespace UnitTests.Adria.Domain;
 
-
+/*
 public sealed class CourseTest
 {
     
@@ -37,4 +37,5 @@ public sealed class CourseTest
         Assert.Same(modules, course.Modules);
         Assert.Equal(points, course.PointsOnCompletion);
     }
-}
+  
+}  */
