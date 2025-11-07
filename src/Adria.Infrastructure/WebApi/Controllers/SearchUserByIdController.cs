@@ -21,7 +21,7 @@ public sealed class SearchUserByIdController
 
     private static User ToResponse(UserData userData)
     {
-        Subscritpion subscription = new Subscritpion(userData.Subscription.Type,
+        Subscription subscription = new Subscription(userData.Subscription.Type,
             userData.Subscription.PriceCycle, userData.Subscription.Description);
         
         return new User(
@@ -29,7 +29,7 @@ public sealed class SearchUserByIdController
             name: userData.Name,
             lastPayment: userData.LastPayment,
             wallet: userData.Wallet,
-            subscritpion: subscription
+            subscription: subscription
         );
     }
 }
