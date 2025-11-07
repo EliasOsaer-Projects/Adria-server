@@ -4,12 +4,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Adria.Application.Subscriptions;
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
-using Adria.Application.Subscriptions;
 namespace Adria.Infrastructure;
 
-public class SearchSubscriptionTypeByIdController
+public sealed class SearchSubscriptionTypeByIdController
 {
-    public static async Task<Results<Ok<List<SubscriptionData>>, NotFound>> Invoke(
+    public static async Task<Results<Ok<List<Subscription>>, NotFound>> Invoke(
         [FromQuery] Guid subscriptionId,
         [FromServices] IUseCase<SearchSubscriptionTypeByIdInput, Task<IReadOnlyCollection<SubscriptionData>>> searchSubscriptionById
         )
@@ -23,9 +22,9 @@ public class SearchSubscriptionTypeByIdController
 
     }
 
-    private static List<SubscriptionData> ToRespone(IReadOnlyCollection<SubscriptionData> subscriptions)
+    private static List<Subscription> ToRespone(IReadOnlyCollection<SubscriptionData> subscriptions)
     {
-        return subscriptions.Select(data => new SubscriptionData(
+        return subscriptions.Select(data => new Subscription(
               Type: data.Type,
                 PriceCycle: data.PriceCycle,
                 Description: data.Description
