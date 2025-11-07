@@ -1,14 +1,15 @@
+using Adria.Infrastructure.WebApi.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using Adria.Infrastructure.WebApi;
 
 namespace Adria.Infrastructure.WebApi;
 
 public static class Routes
 {
     private readonly static string APPLICATION_JSON = "application/json";
+
     public static OpenApiInfo OpenApiInfo { get; } = new OpenApiInfo
     {
         Version = "v1",
@@ -23,8 +24,43 @@ public static class Routes
 
     public static WebApplication MapRoutes(this WebApplication app)
     {
+        MapUserRoutes(app);
         MapSubscriptionRoutes(app);
+        MapCourseRoutes(app);
+        
         return app;
+    }
+
+    private static void MapCourseRoutes(WebApplication app)
+    {
+        var courseRoutes = app.MapGroup("api/Courses").WithTags("courses").WithDescription("All endpoints todo with courses").WithOpenApi();
+
+        courseRoutes.MapGet("/all-courses", SearchAllCoursesController.Invoke).WithDescription("All courses").
+            WithName(nameof(SearchAllCoursesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
+            WithOpenApi();
+    }
+
+    private static void MapUserRoutes(WebApplication app)
+    {
+        var userRoutes = app
+            .MapGroup("/api/users")
+            .WithTags("Users")
+            .WithDescription("All endpoints related to Genesis users.")
+            .WithOpenApi();
+        
+        userRoutes
+            .MapGet("/{userId}", SearchUserByIdController.Invoke)
+            .WithDescription("Get a user by their ID.")
+            .WithName(nameof(SearchUserByIdController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        userRoutes
+            .MapGet("/leaderboard", Top10UsersController.Invoke)
+            .WithDescription("Get the top 10 users with the most points")
+            .WithName(nameof(Top10UsersController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)
