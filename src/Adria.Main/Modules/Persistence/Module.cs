@@ -55,21 +55,28 @@ public static class PersistenceModule
                 _connectionString,
                 serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
             );
-            })
-            .AddScoped<ITopUsersByPointsQuery, TopUsersByPointsQuery>(serviceProvider =>
-            {
-                return new TopUsersByPointsQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
-                    _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<TopUsersByPointsQuery>>()
+        })
+        .AddScoped<ISearchSubscriptionTypeByIdQuery, SearchSubscriptionTypeByIdQuery>(serviceProvider =>
+        {
+            return new SearchSubscriptionTypeByIdQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                _connectionString,
+                serviceProvider.GetRequiredService<ILogger<SearchSubscriptionTypeByIdQuery>>()
                 );
-            })
-            .AddScoped<IAllCoursesQuery, AllCoursesQuery>(serviceProvider =>
-            {
-                return new AllCoursesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
-                    _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<AllCoursesQuery>>()
+        });
+        .AddScoped<ITopUsersByPointsQuery, TopUsersByPointsQuery>(serviceProvider =>
+        {
+            return new TopUsersByPointsQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                _connectionString,
+                serviceProvider.GetRequiredService<ILogger<TopUsersByPointsQuery>>()
                 );
-            });
+        })
+        .AddScoped<IAllCoursesQuery, AllCoursesQuery>(serviceProvider =>
+        {
+            return new AllCoursesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                _connectionString,
+                serviceProvider.GetRequiredService<ILogger<AllCoursesQuery>>()
+            );
+        });
     }
 
     private static IServiceCollection AddAdoServices(
