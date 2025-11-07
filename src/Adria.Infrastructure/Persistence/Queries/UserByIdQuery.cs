@@ -78,6 +78,8 @@ WHERE User.AdriaID = @Id;";
             reader.GetDecimal(reader.GetOrdinal("PricePerCycle"))
         );
     }
+    
+    var courses = new List<CustomerCourseData>();
 
     _logger.LogInformation("Found user with ID {UserId}", userId);
 
@@ -88,7 +90,8 @@ WHERE User.AdriaID = @Id;";
         points,
         lastPayment,
         streak,
-        subscription
+        subscription,
+        courses
     );
 }
 }

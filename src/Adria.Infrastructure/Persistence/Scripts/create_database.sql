@@ -433,7 +433,7 @@ INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
            (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Basic culinary skills')
        );
 
---CustomerCourse
+-- CustomerCourse
 INSERT INTO `CustomerCourse` (`CustomerCourseID`, `CompletionStatus`, `ProgressPercentage`, `StartDate`, `AdriaID`, `CourseID`)
 VALUES
     (UUID(), FALSE, 20, NOW(), '8fcff41a-0342-4f57-a12f-3e771a6dcea1', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'A complete guide to cats')),

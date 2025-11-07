@@ -1,11 +1,9 @@
 ﻿using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
-using Adria.Application.Users;
-using Adria.Domain;
 using Adria.Domain.Shared.Exceptions;
 using Microsoft.Extensions.Logging;
 
-namespace Adria.Application.CustomerCourses;
+namespace Adria.Application.Users;
 
 
 public sealed record SearchCustomerCoursesByUserInput(string UserId);

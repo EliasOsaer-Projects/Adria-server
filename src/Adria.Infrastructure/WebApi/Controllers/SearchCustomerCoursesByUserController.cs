@@ -1,6 +1,6 @@
 ﻿using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
-using Adria.Application.CustomerCourses;
+using Adria.Application.Users;
 using Adria.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
