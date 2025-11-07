@@ -30,7 +30,7 @@ WHERE User.AdriaID = @Id;";
         _logger = logger;
     }
 
-    public async Task<UserData?> Fetch(Guid userId)
+    public async Task<UserData?> Fetch(string userId)
 {
     _logger.LogInformation("Starting to fetch user with ID {UserId}", userId);
 
@@ -56,7 +56,7 @@ WHERE User.AdriaID = @Id;";
         return null;
     }
 
-    var id = Guid.Parse(reader.GetString(reader.GetOrdinal("AdriaID")));
+    var id = reader.GetString(reader.GetOrdinal("AdriaID"));
     var name = reader.GetString(reader.GetOrdinal("Name"));
     var wallet = reader.GetDecimal(reader.GetOrdinal("Wallet"));
     var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));

@@ -11,7 +11,7 @@ namespace Adria.Infrastructure.WebApi.Controllers;
 public sealed class SearchUserByIdController
 {
     public static async Task<Results<Ok<User>, NotFound>> Invoke(
-        [FromRoute] Guid userId,
+        [FromRoute] string userId,
         [FromServices] IUseCase<SearchUserByIdInput, Task<UserData>> searchUserById
     )
     {

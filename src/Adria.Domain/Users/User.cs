@@ -4,7 +4,7 @@ namespace Adria.Domain;
 
 public class User
 {
-    public Guid AdriaId { get; set; }
+    public string AdriaId { get; set; }
     public string Name { get; set; }
     public int PointsBalance { get; set; }
     public DateTime LastPayment { get; set; }
@@ -17,7 +17,7 @@ public class User
     //TODO Still need to add Cosmetics which doesn't exist;
 
 
-    public User(Guid id, string name, DateTime lastPayment, decimal wallet, Subscription subscription)
+    public User(string id, string name, DateTime lastPayment, decimal wallet, Subscription subscription)
     {
         EnsureUserIdIsValid(id);
 
@@ -87,22 +87,20 @@ public class User
 
     public void AddCourse(Course course)
     {
-        EnsureUserIdIsValid(course.Id);
         _courses.Add(course);
     }
 
     public void RemoveCourse(Guid id)
     {
-        EnsureUserIdIsValid(id);
         DoesIdExist(this, id);
 
         _courses.RemoveAll(course => course.Id.Equals(id));
     }
 
     //Security
-    private static void EnsureUserIdIsValid(Guid id)
+    private static void EnsureUserIdIsValid(string id)
     {
-        if (id == Guid.Empty)
+        if (id.Length <= 0)
             throw new ArgumentException("This user id is empty");
     }
 
