@@ -51,18 +51,18 @@ public static class PersistenceModule
             })
             .AddScoped<IAllSubscriptionTypes, AllSubscriptionTypesQuery>(serviceProvider =>
             {
-            return new AllSubscriptionTypesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
-                _connectionString,
-                serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
-            );
-        })
+                return new AllSubscriptionTypesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AllSubscriptionTypesQuery>>()
+                );
+            })
         .AddScoped<ISearchSubscriptionTypeByIdQuery, SearchSubscriptionTypeByIdQuery>(serviceProvider =>
         {
             return new SearchSubscriptionTypeByIdQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
                 _connectionString,
                 serviceProvider.GetRequiredService<ILogger<SearchSubscriptionTypeByIdQuery>>()
                 );
-        });
+        })
         .AddScoped<ITopUsersByPointsQuery, TopUsersByPointsQuery>(serviceProvider =>
         {
             return new TopUsersByPointsQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
