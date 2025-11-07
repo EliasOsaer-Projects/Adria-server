@@ -23,9 +23,11 @@ public sealed class AllSubscriptionTypesController
     private static List<Subscription> ToResponse(IReadOnlyCollection<SubscriptionData> subscriptionData)
     {
         return subscriptionData.Select(data => new Subscription(
+              SubscriptionId: data.SubscriptionId,
               Type: data.Type,
               PriceCycle: data.PriceCycle,
-              Description: data.Description
+              Description: data.Description,
+              IsMostPopular: data.IsMostPopular
         )).ToList();
     }
 

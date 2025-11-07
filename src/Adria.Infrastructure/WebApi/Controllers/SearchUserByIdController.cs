@@ -21,9 +21,9 @@ public sealed class SearchUserByIdController
 
     private static User ToResponse(UserData userData)
     {
-        Subscritpion subscription = new Subscritpion(userData.Subscription.Type,
-            userData.Subscription.PriceCycle, userData.Subscription.Description);
-        
+        Subscritpion subscription = new Subscritpion(userData.Subscription.SubscriptionId, userData.Subscription.Type,
+            userData.Subscription.PriceCycle, userData.Subscription.Description, userData.Subscription.IsMostPopular);
+
         return new User(
             id: userData.Id,
             name: userData.Name,
