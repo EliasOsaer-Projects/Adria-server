@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Data.Common;
 namespace Adria.Infrastructure;
 
-public class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByIdQuery
+public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByIdQuery
 {
     private readonly string query = "select Type, PricePerCycle from Subscription where SubscriptionID = '@id'";
     private readonly ILogger _logger;
