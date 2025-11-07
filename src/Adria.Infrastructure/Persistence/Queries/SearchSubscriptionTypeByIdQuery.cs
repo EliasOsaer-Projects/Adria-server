@@ -49,6 +49,7 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
                 var mostpopular = reader.GetOrdinal("IsMostPopular");
 
                 subscriptionTypes.Add(id, new(SubscriptionId: reader.GetGuid(subId), Type: reader.GetString(type), PriceCycle: reader.GetDecimal(price), "no Description", IsMostPopular: reader.GetBoolean(mostpopular)));
+
             }
             return subscriptionTypes.Values.ToList().AsReadOnly();
         }

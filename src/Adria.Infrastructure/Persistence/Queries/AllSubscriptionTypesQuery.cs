@@ -50,6 +50,7 @@ public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
 
                     var desc = "No description";//
                     subscriptions.Add(new SubscriptionData(SubscriptionId: reader.GetGuid(id), Type: reader.GetString(name), PriceCycle: reader.GetDecimal(price), desc, IsMostPopular: reader.GetBoolean(mostPopular)));
+
                 }
                 return subscriptions;
             }

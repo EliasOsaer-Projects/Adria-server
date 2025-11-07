@@ -23,7 +23,7 @@ public class AllSubscriptionTypesTests
         var result = await usecase.Execute();
 
         Assert.NotNull(result);
-        
+
     }
 
 

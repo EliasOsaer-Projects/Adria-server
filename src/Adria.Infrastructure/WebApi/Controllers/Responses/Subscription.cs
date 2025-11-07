@@ -1,6 +1,6 @@
 ﻿namespace Adria.Infrastructure;
 
-public sealed record Subscription(
+public sealed record SubscriptionResponse(
     Guid SubscriptionId,
     string Type,
     decimal PriceCycle,

@@ -8,7 +8,7 @@ namespace Taskly.Infrastructure.Persistence.Queries;
 public sealed class UserByIdQuery : IUserByIdQuery
 {
     private static readonly string QRY = @"
-        SELECT User.AdriaID, User.Name, User.Wallet, User.PointsBalance, User.LastPayment, User.Streak, cs.CustomerSubscriptionID, cs.Status, Subscription.SubscriptionID, Subscription.Type AS SubscriptionType, Subscription.PricePerCycle, Subscription.Description
+        SELECT User.AdriaID, User.Name, User.Wallet, User.PointsBalance, User.LastPayment, User.Streak, cs.CustomerSubscriptionID, cs.Status, Subscription.SubscriptionID, Subscription.Type AS SubscriptionType, Subscription.PricePerCycle
 FROM `User`
 LEFT JOIN `CustomerSubscription` cs 
     ON User.AdriaID = cs.AdriaID AND cs.Status = 'Active'
@@ -30,7 +30,7 @@ WHERE User.AdriaID = @Id;";
         _logger = logger;
     }
 
-    public async Task<UserData?> Fetch(Guid userId)
+    public async Task<UserData?> Fetch(string userId)
     {
         _logger.LogInformation("Starting to fetch user with ID {UserId}", userId);
 
@@ -50,13 +50,13 @@ WHERE User.AdriaID = @Id;";
 
         using var reader = await command.ExecuteReaderAsync();
 
+
         if (!await reader.ReadAsync())
         {
             _logger.LogInformation("User with ID {UserId} not found", userId);
             return null;
         }
-
-        var id = Guid.Parse(reader.GetString(reader.GetOrdinal("AdriaID")));
+        var id = reader.GetString(reader.GetOrdinal("AdriaID"));
         var name = reader.GetString(reader.GetOrdinal("Name"));
         var wallet = reader.GetDecimal(reader.GetOrdinal("Wallet"));
         var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
@@ -72,13 +72,16 @@ WHERE User.AdriaID = @Id;";
         if (subscriptionId.HasValue)
         {
             subscription = new SubscriptionData(
-                reader.GetGuid(reader.GetOrdinal("SubscriptionId")),
+                reader.GetGuid(reader.GetOrdinal("SubscriptionID")),
                 reader.GetString(reader.GetOrdinal("SubscriptionType")),
                 reader.GetDecimal(reader.GetOrdinal("PricePerCycle")),
-                reader.GetString(reader.GetOrdinal("Description")),
+                "no description",
                 reader.GetBoolean(reader.GetOrdinal("IsMostPopular"))
+
             );
         }
+
+
 
         _logger.LogInformation("Found user with ID {UserId}", userId);
 

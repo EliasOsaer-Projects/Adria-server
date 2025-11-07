@@ -6,9 +6,9 @@ namespace UnitTests.Mocks;
 
 public class MockUserByIdQuery : IUserByIdQuery
 {
-    private readonly Dictionary<Guid, UserData> _users = new();
+    private readonly Dictionary<string, UserData> _users = new();
 
-    public Task<UserData?> Fetch(Guid userId)
+    public Task<UserData?> Fetch(string userId)
     {
         _users.TryGetValue(userId, out UserData? user);
         return Task.FromResult(user);
