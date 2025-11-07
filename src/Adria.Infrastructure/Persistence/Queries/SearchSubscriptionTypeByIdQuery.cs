@@ -46,7 +46,7 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
                 var type = reader.GetOrdinal("Type");
                 var price = reader.GetOrdinal("PricePerCycle");
 
-                subscriptionTypes.Add(id, new(Type: reader.GetString(type), PriceCycle: reader.GetDecimal(price), "no Description"));
+                subscriptionTypes.Add(id, new(Type: reader.GetString(type), PriceCycle: reader.GetDecimal(price)));
             }
             return subscriptionTypes.Values.ToList().AsReadOnly();
         }

@@ -107,9 +107,37 @@ CREATE TABLE `PointsPayment` (
 
 /* SEED DATA */
 
--- USER
+-- USERS
 INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES (UUID(), 'TestUser');
+    VALUES ('8fcff41a-0342-4f57-a12f-3e771a6dcea1', 'John');
+
+INSERT INTO `User` (`AdriaID`, `Name`)
+    VALUES ('c3d8b6a4-6a9a-4df0-9322-9b8c71f12a5d', 'Alice');
+
+INSERT INTO `User` (`AdriaID`, `Name`)
+    VALUES ('1e5b9f79-7e4a-4b48-9f77-932dd8fda47d', 'Bob');
+
+INSERT INTO `User` (`AdriaID`, `Name`)
+    VALUES ('e92b7b45-78a0-44a2-8d89-2b3ad3ad28e3', 'Charlie');
+
+INSERT INTO `User` (`AdriaID`, `Name`)
+    VALUES ('fa2a4b61-3c3b-44cf-b7d2-88b3e2fd1a1d', 'Diana');
+
+INSERT INTO `User` (`AdriaID`, `Name`)
+    VALUES ('6b4e02e9-46c1-45c5-8c1b-1cb4e84c0f93', 'Ethan');
+
+INSERT INTO `User` (`AdriaID`, `Name`)
+    VALUES ('b5d0ef9d-8a7c-4a6c-bc29-0f4cf60b2e60', 'Fiona');
+
+INSERT INTO `User` (`AdriaID`, `Name`)
+    VALUES ('a0b2b58e-df83-49d3-b39b-1cded5b2b1b1', 'George');
+
+INSERT INTO `User` (`AdriaID`, `Name`)
+    VALUES ('7efb3a55-4b6a-4af1-bab6-fbe6c9a52b94', 'Hannah');
+
+INSERT INTO `User` (`AdriaID`, `Name`)
+    VALUES ('2dfb674e-78f0-487b-9268-6308b2df99f2', 'Ian');
+
 
 -- SUBSCRIPTIONS
 INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)

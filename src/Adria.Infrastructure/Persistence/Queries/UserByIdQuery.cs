@@ -8,7 +8,7 @@ namespace Taskly.Infrastructure.Persistence.Queries;
 public sealed class UserByIdQuery : IUserByIdQuery
 {
     private static readonly string QRY = @"
-        SELECT User.AdriaID, User.Name, User.Wallet, User.PointsBalance, User.LastPayment, User.Streak, cs.CustomerSubscriptionID, cs.Status, Subscription.SubscriptionID, Subscription.Type AS SubscriptionType, Subscription.PricePerCycle, Subscription.Description
+        SELECT User.AdriaID, User.Name, User.Wallet, User.PointsBalance, User.LastPayment, User.Streak, cs.CustomerSubscriptionID, cs.Status, Subscription.SubscriptionID, Subscription.Type AS SubscriptionType, Subscription.PricePerCycle
 FROM `User`
 LEFT JOIN `CustomerSubscription` cs 
     ON User.AdriaID = cs.AdriaID AND cs.Status = 'Active'
@@ -30,7 +30,7 @@ WHERE User.AdriaID = @Id;";
         _logger = logger;
     }
 
-    public async Task<UserData?> Fetch(Guid userId)
+    public async Task<UserData?> Fetch(string userId)
 {
     _logger.LogInformation("Starting to fetch user with ID {UserId}", userId);
 
@@ -56,13 +56,15 @@ WHERE User.AdriaID = @Id;";
         return null;
     }
 
-    var id = Guid.Parse(reader.GetString(reader.GetOrdinal("AdriaID")));
+    var id = reader.GetString(reader.GetOrdinal("AdriaID"));
     var name = reader.GetString(reader.GetOrdinal("Name"));
     var wallet = reader.GetDecimal(reader.GetOrdinal("Wallet"));
     var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
     var streak = reader.GetInt32(reader.GetOrdinal("Streak"));
 
-    DateTime lastPayment = reader.GetDateTime(reader.GetOrdinal("LastPayment"));
+    DateTime? lastPayment = reader.IsDBNull(reader.GetOrdinal("LastPayment"))
+        ? (DateTime?)null
+        : reader.GetDateTime(reader.GetOrdinal("LastPayment"));
 
     Guid? subscriptionId = reader.IsDBNull(reader.GetOrdinal("SubscriptionID"))
         ? null
@@ -73,8 +75,7 @@ WHERE User.AdriaID = @Id;";
     {
         subscription = new SubscriptionData(
             reader.GetString(reader.GetOrdinal("SubscriptionType")),
-            reader.GetDecimal(reader.GetOrdinal("PricePerCycle")),
-            reader.GetString(reader.GetOrdinal("Description"))
+            reader.GetDecimal(reader.GetOrdinal("PricePerCycle"))
         );
     }
 

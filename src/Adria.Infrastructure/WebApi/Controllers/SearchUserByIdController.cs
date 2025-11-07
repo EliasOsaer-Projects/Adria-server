@@ -11,7 +11,7 @@ namespace Adria.Infrastructure.WebApi.Controllers;
 public sealed class SearchUserByIdController
 {
     public static async Task<Results<Ok<User>, NotFound>> Invoke(
-        [FromRoute] Guid userId,
+        [FromRoute] string userId,
         [FromServices] IUseCase<SearchUserByIdInput, Task<UserData>> searchUserById
     )
     {
@@ -21,15 +21,28 @@ public sealed class SearchUserByIdController
 
     private static User ToResponse(UserData userData)
     {
-        Subscription subscription = new Subscription(userData.Subscription.Type,
-            userData.Subscription.PriceCycle, userData.Subscription.Description);
-        
-        return new User(
-            id: userData.Id,
-            name: userData.Name,
-            lastPayment: userData.LastPayment,
-            wallet: userData.Wallet,
-            subscription: subscription
-        );
+        if (userData.LastPayment != null && userData.Subscription != null)
+        {
+            Subscription subscription = new Subscription(
+                userData.Subscription.Type,
+                userData.Subscription.PriceCycle
+            );
+
+            return new User(
+                id: userData.Id,
+                name: userData.Name,
+                lastPayment: userData.LastPayment.Value,
+                wallet: userData.Wallet,
+                subscription: subscription
+            );
+        }
+        else
+        {
+            return new User(
+                id: userData.Id,
+                name: userData.Name,
+                wallet: userData.Wallet
+            );
+        }
     }
 }

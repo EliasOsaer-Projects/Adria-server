@@ -45,8 +45,7 @@ public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
                 {
                     var name = reader.GetOrdinal("Type");
                     var price = reader.GetOrdinal("PricePerCycle");
-                    var desc = "No description";
-                    subscriptions.Add(new SubscriptionData(Type: reader.GetString(name), PriceCycle: reader.GetDecimal(price), desc));
+                    subscriptions.Add(new SubscriptionData(Type: reader.GetString(name), PriceCycle: reader.GetDecimal(price)));
                 }
                 return subscriptions;
             }

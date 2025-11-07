@@ -2,6 +2,5 @@
 
 public sealed record SubscriptionResponse(
   string Type,
-  decimal PriceCycle,
-  string Description
+  decimal PriceCycle
 );
