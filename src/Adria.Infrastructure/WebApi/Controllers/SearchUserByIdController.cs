@@ -22,7 +22,7 @@ public sealed class SearchUserByIdController
     private static User ToResponse(UserData userData)
     {
         Subscritpion subscription = new Subscritpion(userData.Subscription.SubscriptionId, userData.Subscription.Type,
-            userData.Subscription.PriceCycle, userData.Subscription.Description, userData.Subscription.IsMostPopular);
+            userData.Subscription.PriceCycle, "No description", userData.Subscription.IsMostPopular);
 
         return new User(
             id: userData.Id,
