@@ -43,7 +43,7 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
             IDictionary<Guid, SubscriptionData> subscriptionTypes = new Dictionary<Guid, SubscriptionData>();
             while (await reader.ReadAsync())
             {
-                var subId = reader.GetOrdinal("SubscriptionId");
+                var subId = reader.GetOrdinal("SubscriptionID");
                 var type = reader.GetOrdinal("Type");
                 var price = reader.GetOrdinal("PricePerCycle");
                 var mostpopular = reader.GetOrdinal("IsMostPopular");
