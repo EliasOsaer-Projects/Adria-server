@@ -10,7 +10,7 @@ namespace Adria.Infrastructure;
 
 public sealed class AllSubscriptionTypesController
 {
-    public static async Task<Results<Ok<List<Subscription>>, NotFound>> Invoke(
+    public static async Task<Results<Ok<List<SubscriptionResponse>>, NotFound>> Invoke(
         [FromServices] IUseCase<Task<IReadOnlyCollection<SubscriptionData>>> AllSubscriptionTypes
     )
     {
@@ -20,9 +20,9 @@ public sealed class AllSubscriptionTypesController
 
     }
 
-    private static List<Subscription> ToResponse(IReadOnlyCollection<SubscriptionData> subscriptionData)
+    private static List<SubscriptionResponse> ToResponse(IReadOnlyCollection<SubscriptionData> subscriptionData)
     {
-        return subscriptionData.Select(data => new Subscription(
+        return subscriptionData.Select(data => new SubscriptionResponse(
               Type: data.Type,
               PriceCycle: data.PriceCycle,
               Description: data.Description

@@ -54,14 +54,28 @@ public static class Routes
             .WithName(nameof(SearchUserByIdController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+        
+        userRoutes
+            .MapGet("/leaderboard", Top10UsersController.Invoke)
+            .WithDescription("Get the top 10 users with the most points")
+            .WithName(nameof(Top10UsersController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)
     {
+
         var subscriptionRoutes = app.MapGroup("api/subscriptions").WithTags("subscriptions").WithDescription("All endpoints todo with subscriptions").WithOpenApi();
 
         subscriptionRoutes.MapGet("/all-subscriptions", AllSubscriptionTypesController.Invoke).WithDescription("All subscriptions types").
           WithName(nameof(AllSubscriptionTypesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
           WithOpenApi();
+
+        subscriptionRoutes.MapGet("/{subscriptionId}", SearchSubscriptionTypeByIdController.Invoke)
+          .WithDescription("Get the certain subscription type")
+          .WithName(nameof(SearchSubscriptionTypeByIdController))
+          .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+          .WithOpenApi();
     }
 }
