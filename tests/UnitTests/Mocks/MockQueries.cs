@@ -72,3 +72,15 @@ public class MockTopUsersByPointsQuery : ITopUsersByPointsQuery
         return Task.FromResult<IEnumerable<LeaderBoardData>>(result);
     }
 }
+
+public class MockSearchCustomerCourseByUser : ICustomerCoursesByUserQuery
+{
+    
+    private readonly List<UserData> _users = new();
+
+    public void AddUser(UserData user) => _users.Add(user);
+    public Task<IReadOnlyCollection<UserData>> Fetch(string id)
+    {
+        return Task.FromResult<IReadOnlyCollection<UserData>>(_users.AsReadOnly());
+    }
+}
