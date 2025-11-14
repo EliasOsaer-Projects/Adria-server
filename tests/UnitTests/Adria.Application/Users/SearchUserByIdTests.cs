@@ -12,8 +12,8 @@ public sealed class SearchUserByIdTests
     public async Task Execute_WithExistingUser_ReturnsUserData()
     {
         // Arrange
+        var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, "test", true);
         var userId = "ID-0125";
-        var subscription = new SubscriptionData("Basic", 15.99m);
         var userData = new UserData(userId, "Nathaniel", 1700, 0, DateTime.Today, 0, subscription);
         var mockQuery = new MockUserByIdQuery();
         mockQuery.AddUser(userData);
@@ -33,7 +33,7 @@ public sealed class SearchUserByIdTests
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains($"Fetching user with ID: {userId}", mockLogger.LoggedMessages[0]);
     }
-    
+
     [Fact]
     public async Task Execute_WithNonExistentUser_ThrowsElementNotFoundException()
     {
@@ -48,7 +48,7 @@ public sealed class SearchUserByIdTests
         var exception = await Assert.ThrowsAsync<ElementNotFoundException>(() => useCase.Execute(input));
         Assert.Contains($"User with Id {userId} not found", exception.Message);
     }
-    
+
     [Fact]
     public async Task Execute_WithEmptyGuid_ThrowsElementNotFoundException()
     {

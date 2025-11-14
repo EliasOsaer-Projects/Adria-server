@@ -9,7 +9,7 @@ public class SearchSubscriptionTypeByIdTests
     [Fact]
     public async Task GetSubscription()
     {
-        SubscriptionData subscription = new("Base", 2);
+        //SubscriptionData subscription = new("Test","Base", 2, "base sub");
 
         //var mockquery = new Sea
         //var usecase = new SearchSubscriptionTypeById();

@@ -25,8 +25,12 @@ public sealed class SearchSubscriptionTypeByIdController
     private static List<SubscriptionResponse> ToRespone(IReadOnlyCollection<SubscriptionData> subscriptions)
     {
         return subscriptions.Select(data => new SubscriptionResponse(
+              SubscriptionId: data.SubscriptionId,
               Type: data.Type,
-                PriceCycle: data.PriceCycle
+              PriceCycle: data.PriceCycle,
+              Description: data.Description,
+              IsMostPopular: data.IsMostPopular
+
               )).ToList();
     }
     private SearchSubscriptionTypeByIdController() { }
