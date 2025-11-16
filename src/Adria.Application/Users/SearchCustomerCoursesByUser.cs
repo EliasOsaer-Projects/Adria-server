@@ -11,11 +11,11 @@ public sealed record SearchCustomerCoursesByUserInput(string UserId);
 public sealed class SearchCustomerCoursesByUser : IUseCase<SearchCustomerCoursesByUserInput, Task<IReadOnlyCollection<UserData>>>
 {
     private readonly ICustomerCoursesByUserQuery _customerCoursesByUserQuery;
-    private readonly ILogger<SearchUserById> _logger;
+    private readonly ILogger<SearchCustomerCoursesByUser> _logger;
 
     public SearchCustomerCoursesByUser(
         ICustomerCoursesByUserQuery customerCoursesByUserQuery,
-        ILogger<SearchUserById> logger
+        ILogger<SearchCustomerCoursesByUser> logger
     )
     {
         _customerCoursesByUserQuery = customerCoursesByUserQuery;
