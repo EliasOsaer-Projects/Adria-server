@@ -21,6 +21,8 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
 
     public async Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id)
     {
+        _logger.LogInformation("Fetching subscription data for id {id}", id);
+        
         using var connection = _factory.CreateConnection() ?? throw new InvalidOperationException("DBFactory provided a null connection");
 
         connection.ConnectionString = _connectionString;
@@ -49,13 +51,9 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
                 var mostpopular = reader.GetOrdinal("IsMostPopular");
 
                 subscriptionTypes.Add(id, new(SubscriptionId: reader.GetGuid(subId), Type: reader.GetString(type), PriceCycle: reader.GetDecimal(price), "no Description", IsMostPopular: reader.GetBoolean(mostpopular)));
-
+                _logger.LogInformation("Found subscription for Id: {SubscriptionId} of the type: {Type}", subscriptionId, type);
             }
             return subscriptionTypes.Values.ToList().AsReadOnly();
         }
-
-
-
-
     }
 }
