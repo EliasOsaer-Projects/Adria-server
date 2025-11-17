@@ -10,13 +10,10 @@ namespace Adria.Infrastructure.WebApi.Controllers;
 public sealed class Top10UsersController
 {
     public static async Task<Results<Ok<IEnumerable<LeaderBoardData>>, NotFound>> Invoke(
-        [FromServices] IUseCase<Top10UsersInput, Task<IEnumerable<LeaderBoardData>>> top10Users
+        [FromServices] IUseCase<Task<IEnumerable<LeaderBoardData>>> top10Users
     )
     {
-        var leaderboard = await top10Users.Execute(new Top10UsersInput());
-        if (leaderboard == null || !leaderboard.Any())
-            return TypedResults.NotFound();
-
+        var leaderboard = await top10Users.Execute();
         return TypedResults.Ok(leaderboard);
     }
 }

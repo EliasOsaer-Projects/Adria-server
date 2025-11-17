@@ -13,7 +13,6 @@ public sealed class GetTop10UsersTests
             var mockQuery = new MockTopUsersByPointsQuery();
             var mockLogger = new MockLogger<Top10Users>();
             var useCase = new Top10Users(mockQuery, mockLogger);
-            var input = new Top10UsersInput();
 
             for (int i = 1; i <= 15; i++)
             {
@@ -24,7 +23,7 @@ public sealed class GetTop10UsersTests
             }
 
             // Act
-            var result = (await useCase.Execute(input)).ToList();
+            var result = (await useCase.Execute()).ToList();
 
             // Assert
             Assert.Equal(10, result.Count);
@@ -38,7 +37,6 @@ public sealed class GetTop10UsersTests
             var mockQuery = new MockTopUsersByPointsQuery();
             var mockLogger = new MockLogger<Top10Users>();
             var useCase = new Top10Users(mockQuery, mockLogger);
-            var input = new Top10UsersInput();
 
             for (int i = 1; i <= 5; i++)
             {
@@ -48,7 +46,7 @@ public sealed class GetTop10UsersTests
                 ));
             }
 
-            var result = (await useCase.Execute(input)).ToList();
+            var result = (await useCase.Execute()).ToList();
 
             Assert.Equal(5, result.Count);
             Assert.Equal("Testuser-5", result[0].Name);
@@ -61,9 +59,8 @@ public sealed class GetTop10UsersTests
             var mockQuery = new MockTopUsersByPointsQuery();
             var mockLogger = new MockLogger<Top10Users>();
             var useCase = new Top10Users(mockQuery, mockLogger);
-            var input = new Top10UsersInput();
 
-            var result = await useCase.Execute(input);
+            var result = await useCase.Execute();
 
             Assert.Empty(result);
         }

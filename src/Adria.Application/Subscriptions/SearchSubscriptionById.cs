@@ -23,7 +23,7 @@ public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionType
         //?
         _logger.LogInformation("Retrieving subscription ...");
 
-        return await _searchSubscriptionTypeById.Fetch(subscritpion.id);
+        return await _searchSubscriptionTypeById.Fetch(subscritpion.Id);
 
     }
 }
