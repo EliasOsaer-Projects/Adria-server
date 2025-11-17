@@ -9,6 +9,7 @@ namespace Adria.Infrastructure.WebApi.Controllers;
 
 public sealed class Top10UsersController
 {
+    private Top10UsersController(){}
     public static async Task<Results<Ok<IEnumerable<LeaderBoardData>>, NotFound>> Invoke(
         [FromServices] IUseCase<Task<IEnumerable<LeaderBoardData>>> top10Users
     )
