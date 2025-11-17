@@ -13,7 +13,7 @@ public sealed class SearchCustomerCourseByUserTest
     {
         // Arrange
         var userId = "ID-0125";
-        var subscription = new SubscriptionData("Basic", 15.99m);
+        var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, "test", true);
 
 // --- Create a CourseData instance ---
         var course = new CourseData(

@@ -24,7 +24,8 @@ CREATE TABLE `User` (
 CREATE TABLE `Subscription` (
     `SubscriptionID` VARCHAR(36) PRIMARY KEY NOT NULL,
     `Type` VARCHAR(50) NOT NULL,
-    `PricePerCycle` DECIMAL(10,2) NOT NULL
+    `PricePerCycle` DECIMAL(10,2) NOT NULL,
+    `IsMostPopular` BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- CUSTOMER SUBSCRIPTIONS
@@ -140,8 +141,8 @@ INSERT INTO `User` (`AdriaID`, `Name`)
 
 
 -- SUBSCRIPTIONS
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
-    VALUES (UUID(), 'Basic', 15.99);
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`, IsMostPopular)
+    VALUES (UUID(), 'Basic', 15.99, TRUE);
 
 INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
     VALUES (UUID(), 'Standard', 22.99);
