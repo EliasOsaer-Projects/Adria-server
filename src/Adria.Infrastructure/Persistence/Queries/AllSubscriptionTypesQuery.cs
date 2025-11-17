@@ -38,23 +38,24 @@ public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
         {
             command.CommandText = query;
 
-            using (var reader = command.ExecuteReader())
+            await using var reader = await command.ExecuteReaderAsync();
+
+            var subscriptions = new List<SubscriptionData>();
+
+            while (await reader.ReadAsync())
             {
-                var subscriptions = new List<SubscriptionData>();
-                while (await reader.ReadAsync())
-                {
-                    var id = reader.GetOrdinal("SubscriptionId");
-                    var name = reader.GetOrdinal("Type");
-                    var price = reader.GetOrdinal("PricePerCycle");
-                    var mostPopular = reader.GetOrdinal("IsMostPopular");
+                var id = reader.GetOrdinal("SubscriptionId");
+                var name = reader.GetOrdinal("Type");
+                var price = reader.GetOrdinal("PricePerCycle");
+                var mostPopular = reader.GetOrdinal("IsMostPopular");
 
-                    var desc = "No description";//
-                    subscriptions.Add(new SubscriptionData(SubscriptionId: reader.GetGuid(id), Type: reader.GetString(name), PriceCycle: reader.GetDecimal(price), desc, IsMostPopular: reader.GetBoolean(mostPopular)));
-
-                }
-                return subscriptions;
+                var desc = "No description";
+                subscriptions.Add(
+                    new SubscriptionData(SubscriptionId: reader.GetGuid(id), Type: reader.GetString(name), PriceCycle: reader.GetDecimal(price), Description: desc, IsMostPopular: reader.GetBoolean(mostPopular))
+                );
             }
 
+            return subscriptions;
         }
 
     }
