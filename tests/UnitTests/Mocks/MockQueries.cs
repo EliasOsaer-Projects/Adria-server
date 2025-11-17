@@ -48,12 +48,18 @@ public class MockAllSubscriptionQuerie : IAllSubscriptionTypes
 public class MockSearchSubscriptionByIdQuery : ISearchSubscriptionTypeByIdQuery
 {
 
-    private readonly Dictionary<Guid, SubscriptionData> _user = new Dictionary<Guid, SubscriptionData>();
+    private IDictionary<Guid, SubscriptionData> _subscriptions = new Dictionary<Guid, SubscriptionData>();
+
+    public void SetSubscriptions(IDictionary<Guid, SubscriptionData> subscriptions)
+    {
+        _subscriptions = subscriptions;
+    }
+
     public Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id)
     {
         IList<SubscriptionData> data = new List<SubscriptionData>();
 
-        _user.TryGetValue(id, out SubscriptionData? user);
+        _subscriptions.TryGetValue(id, out SubscriptionData? user);
 
         data.Add(user);
         return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(data.AsReadOnly());
