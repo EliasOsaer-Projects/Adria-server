@@ -36,9 +36,8 @@ JOIN Courses c ON cc.CourseID = c.CourseID
 WHERE u.AdriaID = @userID
 ORDER BY c.CourseName;
     ";
-    
-    
-    
+
+
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
     private readonly ILogger<CustomerCoursesByUserQuery> _logger;
@@ -67,84 +66,76 @@ ORDER BY c.CourseName;
         using var command = connection.CreateCommand();
 
         command.CommandText = QRY;
-        
+
+
         var param = command.CreateParameter();
         param.ParameterName = "@userID";
         param.Value = id;
         command.Parameters.Add(param);
-   
-        
-        using var reader = await command.ExecuteReaderAsync();
 
-        var data = new List<UserData>();
+
+        using var reader = await command.ExecuteReaderAsync();
+        
+
+        var dataDict = new Dictionary<string, UserData>();
+        
 
         while (await reader.ReadAsync())
         {
-            var ordAdriaID = reader.GetOrdinal("AdriaID");
-            var ordUserName = reader.GetOrdinal("UserName");
-            var ordWallet = reader.GetOrdinal("Wallet");
-            var ordPointsBalance = reader.GetOrdinal("PointsBalance");
-            var ordLastPayment =  reader.GetOrdinal("LastPayment");
-            var ordStreak = reader.GetOrdinal("Streak");
+            var adriaID = reader.GetString(reader.GetOrdinal("AdriaID"));
+            
+            //hier wordt gecheckt of de user al bestaat omdat er anders meerdere keren dezelfde user wordt gegeven maar dan met 1 course.
+            if (!dataDict.TryGetValue(adriaID, out var userData))
+            {
+                userData = new UserData(
+                    AdriaId: adriaID,
+                    UserName: reader.GetString(reader.GetOrdinal("UserName")),
+                    Wallet: reader.GetDecimal(reader.GetOrdinal("Wallet")),
+                    PointsBalance: reader.GetInt32(reader.GetOrdinal("PointsBalance")),
+                    LastPayment: reader.IsDBNull(reader.GetOrdinal("LastPayment"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("LastPayment")),
+                    Streak: reader.GetInt32(reader.GetOrdinal("Streak")),
+                    Subscription: null,
+                    CustomerCourses: new List<CustomerCourseData>()
+                );
 
-            var ordCustomerCourseID = reader.GetOrdinal("CustomerCourseID");
-            var ordCompletionStatus = reader.GetOrdinal("CompletionStatus");
-            var ordProgressPercentage = reader.GetOrdinal("ProgressPercentage");
-            var ordCourseStartDate = reader.GetOrdinal("CourseStartDate");
-            var ordCourseCompletionDate = reader.GetOrdinal("CourseCompletionDate");
-
-            var ordCourseID = reader.GetOrdinal("CourseID");
-            var ordCourseName = reader.GetOrdinal("CourseName");
-            var ordCourseDifficulty = reader.GetOrdinal("CourseDifficulty");
-            var ordCourseDescription = reader.GetOrdinal("CourseDescription");
-            var ordCourseCategory = reader.GetOrdinal("CourseCategory");
-            var ordPointsOnCompletion = reader.GetOrdinal("PointsOnCompletion");
-            var ordEstimatedDurationInHours = reader.GetOrdinal("EstimatedDurationInHours");
-            var ordSubscriptionRequired = reader.GetOrdinal("SubscriptionRequired");
-            var ordCourseTags = reader.GetOrdinal("CourseTags");
-
-
-            List<string> tags = reader.GetString(ordCourseTags)
+                dataDict[adriaID] = userData;
+            }
+            
+            var tags = reader.GetString(reader.GetOrdinal("CourseTags"))
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(tag => tag.Trim())
                 .ToList();
 
             var courseData = new CourseData(
-                CourseId: reader.GetGuid(ordCourseID),
-                CourseName: reader.GetString(ordCourseName),
-                Category: reader.GetString(ordCourseCategory),
-                Description: reader.GetString(ordCourseDescription),
+                CourseId: reader.GetGuid(reader.GetOrdinal("CourseID")),
+                CourseName: reader.GetString(reader.GetOrdinal("CourseName")),
+                Category: reader.GetString(reader.GetOrdinal("CourseCategory")),
+                Description: reader.GetString(reader.GetOrdinal("CourseDescription")),
                 Tags: tags,
                 LearnList: [],
-                Duration: reader.GetInt32(ordEstimatedDurationInHours),
-                Level: reader.GetInt32(ordCourseDifficulty),
+                Duration: reader.GetInt32(reader.GetOrdinal("EstimatedDurationInHours")),
+                Level: reader.GetInt32(reader.GetOrdinal("CourseDifficulty")),
                 Modules: [],
-                PointsOnCompletion: reader.GetInt32(ordPointsOnCompletion)
+                PointsOnCompletion: reader.GetInt32(reader.GetOrdinal("PointsOnCompletion"))
             );
 
-            var currentData = new UserData(
-                AdriaId: reader.GetString(ordAdriaID), 
-                UserName: reader.GetString(ordUserName),
-                Wallet: reader.GetDecimal(ordWallet),
-                PointsBalance: reader.GetInt32(ordPointsBalance),
-                LastPayment: reader.IsDBNull(ordLastPayment) ? null : reader.GetDateTime(ordLastPayment),
-                Streak: reader.GetInt32(ordStreak),
-                Subscription: null, 
-                CustomerCourses: []
-            );
-                    currentData.CustomerCourses.Add(new CustomerCourseData(
-                        CustomerCourseId: reader.GetGuid(ordCustomerCourseID),
-                        Course: courseData,
-                        CompletionStatus: reader.GetBoolean(ordCompletionStatus),
-                        Progress: (decimal)reader.GetInt32(ordProgressPercentage)
-                    ));
-                    
-            data.Add(currentData);
+            userData.CustomerCourses.Add(new CustomerCourseData(
+                CustomerCourseId: reader.GetGuid(reader.GetOrdinal("CustomerCourseID")),
+                Course: courseData,
+                CompletionStatus: reader.GetBoolean(reader.GetOrdinal("CompletionStatus")),
+                Progress: (decimal)reader.GetInt32(reader.GetOrdinal("ProgressPercentage"))
+            ));
         }
-
         
-        _logger.LogInformation("Fetched {Count} Users", data.Count);
-
-        return data.AsReadOnly();
+        var data = dataDict.Values.ToList().AsReadOnly();
+        if (data != null)
+            _logger.LogInformation("Fetched user {UserId} with {Count} courses", id, data.First().CustomerCourses.Count);
+        else
+            _logger.LogWarning("No user found with ID {UserId}", id);
+        return data;
     }
 }
+
+
