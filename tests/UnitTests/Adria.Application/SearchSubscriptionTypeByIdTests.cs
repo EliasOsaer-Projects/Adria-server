@@ -30,8 +30,12 @@ public class SearchSubscriptionTypeByIdTests
         var usecase = new SearchSubscriptionTypeById(searchSubscriptionByIdQuery, mocklogger);
 
         var result = await usecase.Execute(new(_id));
+        var result2 = await usecase.Execute(new(_id2));
+        var result3 = await usecase.Execute(new(_id3));
 
         Assert.Contains(result, sub => sub.Type == "Base");
+        Assert.Contains(result2, sub => sub.SubscriptionId == _id2);
+        Assert.DoesNotContain(result3, sub => sub.SubscriptionId == _id);
     }
 
 }
