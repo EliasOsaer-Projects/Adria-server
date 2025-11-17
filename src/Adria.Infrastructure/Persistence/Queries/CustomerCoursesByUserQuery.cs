@@ -126,7 +126,6 @@ ORDER BY c.CourseName;
                 PointsOnCompletion: reader.GetInt32(ordPointsOnCompletion)
             );
 
-
             var currentData = new UserData(
                 AdriaId: reader.GetString(ordAdriaID), //dit was eerst reader.getGUID(ordAdriaID).toString maar dat was volgens mij fout.
                 UserName: reader.GetString(ordUserName),
@@ -137,20 +136,13 @@ ORDER BY c.CourseName;
                 Subscription: null, 
                 CustomerCourses: []
             );
-            
-            do
-            {
-                if (!await reader.IsDBNullAsync(ordCustomerCourseID))
-                {
                     currentData.CustomerCourses.Add(new CustomerCourseData(
                         CustomerCourseId: reader.GetGuid(ordCustomerCourseID),
                         Course: courseData,
                         CompletionStatus: reader.GetBoolean(ordCompletionStatus),
                         Progress: (decimal)reader.GetInt32(ordProgressPercentage)
                     ));
-                }
-            } while (await reader.ReadAsync());
-            
+                    
             data.Add(currentData);
         }
 
