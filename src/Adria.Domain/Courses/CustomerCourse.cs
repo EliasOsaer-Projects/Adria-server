@@ -21,7 +21,6 @@ public class CustomerCourse
     
     public CustomerCourse(Course course) :  this(Guid.NewGuid(), course)
     {
-     
     }
     
     

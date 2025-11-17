@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Adria.Application.Contracts.Data;
+﻿using Adria.Application.Contracts.Data;
 using Adria.Application.Users;
 using Adria.Domain;
 using UnitTests.Mocks;
@@ -14,8 +13,7 @@ public sealed class SearchCustomerCourseByUserTest
         // Arrange
         var userId = "ID-0125";
         var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, "test", true);
-
-// --- Create a CourseData instance ---
+        
         var course = new CourseData(
             CourseId: Guid.NewGuid(),
             CourseName: "Introduction to Programming",
@@ -25,22 +23,19 @@ public sealed class SearchCustomerCourseByUserTest
             LearnList: new List<string> { "Variables", "Loops", "Functions" },
             Duration: 120,
             Level: 1,
-            Modules: new List<CourseModule>(), // Or actual modules if you have them
+            Modules: new List<CourseModule>(),
             PointsOnCompletion: 100
         );
-
-// --- Create CustomerCourseData using the course ---
+        
         var customerCourse = new CustomerCourseData(
             CustomerCourseId: Guid.NewGuid(),
             Course: course,
             CompletionStatus: false,
             Progress: 0m
         );
-
-// --- Add to list ---
+        
         var customerCourses = new List<CustomerCourseData> { customerCourse };
-
-// --- Create the UserData object ---
+        
         var userData = new UserData(
             AdriaId: userId,
             UserName: "Nathaniel",
@@ -64,29 +59,25 @@ public sealed class SearchCustomerCourseByUserTest
 
         // Assert
         Assert.NotEmpty(result);
-        Assert.Single(result); // should return exactly one customer course entry
+        Assert.Single(result); 
 
         var courseResult = result.First();
-
-// Verify course basic info
+        
         Assert.Equal("Introduction to Programming", courseResult.CustomerCourses.First().Course.CourseName);
         Assert.Equal("Technology", courseResult.CustomerCourses.First().Course.Category);
         Assert.Equal(120, courseResult.CustomerCourses.First().Course.Duration);
         Assert.Equal(1, courseResult.CustomerCourses.First().Course.Level);
-
-// Verify course tags
+        
         Assert.Contains("Coding", courseResult.CustomerCourses.First().Course.Tags);
         Assert.Contains("Beginner", courseResult.CustomerCourses.First().Course.Tags);
-
-// Verify learn list items
+        
         Assert.Contains("Variables", courseResult.CustomerCourses.First().Course.LearnList ?? throw new InvalidOperationException());
         Assert.Contains("Functions", courseResult.CustomerCourses.First().Course.LearnList ?? throw new InvalidOperationException());
-
-// Verify progress / completion values
+        
         Assert.False(courseResult.CustomerCourses.First().CompletionStatus);
         Assert.Equal(0m, courseResult.CustomerCourses.First().Progress);
 
-// Verify points for completing
+
         Assert.Equal(100, courseResult.CustomerCourses.First().Course.PointsOnCompletion);
     }
 }
