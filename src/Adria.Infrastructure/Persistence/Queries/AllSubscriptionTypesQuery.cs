@@ -15,7 +15,7 @@ public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
     private readonly string _connectionString;
     private readonly ILogger<IAllSubscriptionTypes> _logger;
 
-    public AllSubscriptionTypesQuery(DbProviderFactory factory, string connectionString, ILogger<IAllSubscriptionTypes> logger)
+    public AllSubscriptionTypesQuery(DbProviderFactory factory, string connectionString, ILogger<AllSubscriptionTypesQuery> logger)
     {
         _factory = factory;
         _connectionString = connectionString;
