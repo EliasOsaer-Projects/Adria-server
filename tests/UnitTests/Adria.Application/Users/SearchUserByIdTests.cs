@@ -5,7 +5,7 @@ using Adria.Domain.Shared.Exceptions;
 using UnitTests.Mocks;
 
 namespace UnitTests.Adria.Application.Users;
-/*
+
 public sealed class SearchUserByIdTests
 {
     [Fact]
@@ -14,7 +14,7 @@ public sealed class SearchUserByIdTests
         // Arrange
         var userId = "ID-0125";
         var subscription = new SubscriptionData("Basic", 15.99m);
-        var userData = new UserData(userId, "Nathaniel", 1700, 0, DateTime.Today, 0, subscription);
+        var userData = new UserData(userId, "Nathaniel", 1700, 0, DateTime.Today, 0, subscription, new List<CustomerCourseData>());
         var mockQuery = new MockUserByIdQuery();
         mockQuery.AddUser(userData);
         var mockLogger = new MockLogger<SearchUserById>();
@@ -64,4 +64,3 @@ public sealed class SearchUserByIdTests
         Assert.Contains($"User with Id {userId} not found", exception.Message);
     }
 }
-*/

@@ -36,8 +36,7 @@ JOIN Courses c ON cc.CourseID = c.CourseID
 WHERE u.AdriaID = @userID
 ORDER BY c.CourseName;
     ";
-
-//hier heb ik u.LastPayment nog toegevoegd omdat ik dit was vergeten.
+    
     
     
     private readonly DbProviderFactory _factory;
@@ -68,15 +67,12 @@ ORDER BY c.CourseName;
         using var command = connection.CreateCommand();
 
         command.CommandText = QRY;
-
-        
         
         var param = command.CreateParameter();
         param.ParameterName = "@userID";
         param.Value = id;
         command.Parameters.Add(param);
-        //deze blok heb ik ook toegevoegd omdat chatgpt zei dat dit moest.
-        
+   
         
         using var reader = await command.ExecuteReaderAsync();
 
@@ -127,7 +123,7 @@ ORDER BY c.CourseName;
             );
 
             var currentData = new UserData(
-                AdriaId: reader.GetString(ordAdriaID), //dit was eerst reader.getGUID(ordAdriaID).toString maar dat was volgens mij fout.
+                AdriaId: reader.GetString(ordAdriaID), 
                 UserName: reader.GetString(ordUserName),
                 Wallet: reader.GetDecimal(ordWallet),
                 PointsBalance: reader.GetInt32(ordPointsBalance),
