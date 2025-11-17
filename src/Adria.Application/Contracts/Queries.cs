@@ -4,7 +4,7 @@ namespace Adria.Application.Contracts;
 
 public interface IUserByIdQuery
 {
-    Task<UserData> Fetch(string userId);
+    Task<UserData?> Fetch(string userId);
 }
 
 public interface IAllSubscriptionTypes
