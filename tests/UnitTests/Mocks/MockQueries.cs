@@ -25,7 +25,7 @@ public class MockUserByIdQuery : IUserByIdQuery
     }
 }
 
-public class MockAllSubscriptionQuerie : IAllSubscriptionTypes
+public class MockAllSubscriptionQuery : IAllSubscriptionTypes
 {
     private IList<SubscriptionData> subscriptions = new List<SubscriptionData>();
 
