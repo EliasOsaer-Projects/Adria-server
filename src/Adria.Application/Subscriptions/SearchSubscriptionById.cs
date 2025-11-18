@@ -5,12 +5,12 @@ using Adria.Application.Contracts.Data;
 namespace Adria.Application.Subscriptions;
 
 public sealed record SearchSubscriptionTypeByIdInput(
-    Guid id
+    Guid Id
     );
 public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionTypeByIdInput, Task<IReadOnlyCollection<SubscriptionData>>>
 {
-    private ILogger<SearchSubscriptionTypeById> _logger;
-    private ISearchSubscriptionTypeByIdQuery _searchSubscriptionTypeById;
+    private readonly ILogger<SearchSubscriptionTypeById> _logger;
+    private readonly ISearchSubscriptionTypeByIdQuery _searchSubscriptionTypeById;
 
     public SearchSubscriptionTypeById(ISearchSubscriptionTypeByIdQuery searchSubscriptionTypeById, ILogger<SearchSubscriptionTypeById> logger)
     {
@@ -23,7 +23,7 @@ public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionType
         //?
         _logger.LogInformation("Retrieving subscription ...");
 
-        return await _searchSubscriptionTypeById.Fetch(subscritpion.id);
+        return await _searchSubscriptionTypeById.Fetch(subscritpion.Id);
 
     }
 }

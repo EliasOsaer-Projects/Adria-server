@@ -8,9 +8,9 @@ public sealed record CourseData(
     string Category,
     string Description,
     List<string> Tags,
-    List<string>? LearnList,
+    List<string> LearnList,
     int Duration,
     int Level,
-    List<CourseModule>? Modules,
+    List<CourseModule> Modules,
     int PointsOnCompletion
 );

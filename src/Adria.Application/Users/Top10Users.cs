@@ -4,9 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Adria.Application.Users;
 
-public sealed record Top10UsersInput();
-
-public class Top10Users : IUseCase<Top10UsersInput, Task<IEnumerable<LeaderBoardData>>>
+public class Top10Users : IUseCase<Task<IEnumerable<LeaderBoardData>>>
 {
     private readonly ITopUsersByPointsQuery _query;
     private readonly ILogger<Top10Users> _logger;
@@ -17,7 +15,7 @@ public class Top10Users : IUseCase<Top10UsersInput, Task<IEnumerable<LeaderBoard
         _logger = logger;
     }
 
-    public async Task<IEnumerable<LeaderBoardData>> Execute(Top10UsersInput input)
+    public async Task<IEnumerable<LeaderBoardData>> Execute()
     {
         _logger.LogInformation("Finding Top 10 users");
         return await _query.Fetch();

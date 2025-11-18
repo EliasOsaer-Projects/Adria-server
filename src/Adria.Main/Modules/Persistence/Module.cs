@@ -14,7 +14,7 @@ public static class PersistenceModule
         IConfiguration configuration
     )
     {
-        _connectionString = configuration["Persistence:ConnectionString"];
+        _connectionString = configuration["Persistence:ConnectionString"]!;
         return services
             .AddAdoServices(configuration)
             .AddRepositories()
