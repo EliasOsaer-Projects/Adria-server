@@ -15,7 +15,7 @@ public class AllSubscriptionTypesTests
 
         IList<SubscriptionData> subscriptions = new List<SubscriptionData> { subscription, subscription2 };
 
-        var mockquery = new MockAllSubscriptionQuery();
+        var mockquery = new MockAllSubscriptionQuerie();
         mockquery.SetSubscriptions(subscriptions);
         var mocklogger = new MockLogger<AllSubscriptionTypes>();
         var usecase = new AllSubscriptionTypes(mockquery, mocklogger);
@@ -32,7 +32,7 @@ public class AllSubscriptionTypesTests
     {
         IList<SubscriptionData> subscriptions = new List<SubscriptionData>();
 
-        var mockquery = new MockAllSubscriptionQuery();
+        var mockquery = new MockAllSubscriptionQuerie();
         mockquery.SetSubscriptions(subscriptions);
         var mocklogger = new MockLogger<AllSubscriptionTypes>();
         var usecase = new AllSubscriptionTypes(mockquery, mocklogger);
