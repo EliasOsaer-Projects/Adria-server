@@ -9,7 +9,7 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
 {
     private static readonly string QRY = @"
         SELECT *
-        From Courses
+        From Course
     ";
 
 

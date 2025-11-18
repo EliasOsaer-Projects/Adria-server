@@ -14,7 +14,6 @@ public sealed class CustomerCoursesByUserQuery : ICustomerCoursesByUserQuery
     u.Name AS UserName,
     u.Wallet,
     u.PointsBalance,
-    u.LastPayment,
     u.Streak,
     cc.CustomerCourseID,
     cc.CompletionStatus,
