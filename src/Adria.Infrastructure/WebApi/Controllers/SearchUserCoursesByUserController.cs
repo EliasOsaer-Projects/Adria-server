@@ -14,7 +14,7 @@ public sealed class SearchUserCoursesByUserController
     public static async Task<Results<Ok<IReadOnlyCollection<UserCourseData>>, NotFound>> Invoke(
         [FromServices]
         IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>> searchCustomerCoursesByUser,
-        [FromRoute] string userId
+        [FromRoute] Guid userId
     )
     {
         IReadOnlyCollection<UserCourseData> userCourseData =

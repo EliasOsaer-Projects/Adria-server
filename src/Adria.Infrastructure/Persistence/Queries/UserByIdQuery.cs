@@ -8,13 +8,22 @@ namespace Taskly.Infrastructure.Persistence.Queries;
 public sealed class UserByIdQuery : IUserByIdQuery
 {
     private static readonly string QRY = @"
-        SELECT User.AdriaID, User.Name, User.Wallet, User.PointsBalance, User.LastPayment, User.Streak, cs.CustomerSubscriptionID, cs.Status, Subscription.SubscriptionID, Subscription.Type AS SubscriptionType, Subscription.PricePerCycle
-FROM `User`
-LEFT JOIN `CustomerSubscription` cs 
-    ON User.AdriaID = cs.AdriaID AND cs.Status = 'Active'
-LEFT JOIN `Subscription` 
-    ON cs.SubscriptionID = Subscription.SubscriptionID
-WHERE User.AdriaID = @Id;";
+        SELECT 
+            User.AdriaID, 
+            User.Name, 
+            User.Wallet, 
+            User.PointsBalance, 
+            User.Streak, 
+            cs.UserSubscriptionID, 
+            cs.Status, 
+            Subscription.SubscriptionID, 
+            Subscription.Type AS SubscriptionType, 
+            Subscription.Price
+        FROM `User`
+        LEFT JOIN `CustomerSubscription` cs ON User.AdriaID = cs.AdriaID AND cs.Status = 'Active'
+        LEFT JOIN `Subscription` ON cs.SubscriptionID = Subscription.SubscriptionID
+        WHERE User.AdriaID = @Id;
+";
     
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
@@ -56,15 +65,12 @@ WHERE User.AdriaID = @Id;";
             _logger.LogInformation("User with ID {UserId} not found", userId);
             return null;
         }
+        
         var id = reader.GetString(reader.GetOrdinal("AdriaID"));
         var name = reader.GetString(reader.GetOrdinal("Name"));
         var wallet = reader.GetDecimal(reader.GetOrdinal("Wallet"));
         var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
         var streak = reader.GetInt32(reader.GetOrdinal("Streak"));
-
-        DateTime? lastPayment = reader.IsDBNull(reader.GetOrdinal("LastPayment"))
-            ? null
-            : reader.GetDateTime(reader.GetOrdinal("LastPayment"));
 
         Guid? subscriptionId = await reader.IsDBNullAsync(reader.GetOrdinal("SubscriptionID"))
             ? null
@@ -76,7 +82,7 @@ WHERE User.AdriaID = @Id;";
             subscription = new SubscriptionData(
                 reader.GetGuid(reader.GetOrdinal("SubscriptionID")),
                 reader.GetString(reader.GetOrdinal("SubscriptionType")),
-                reader.GetDecimal(reader.GetOrdinal("PricePerCycle")),
+                reader.GetDecimal(reader.GetOrdinal("Price")),
                 "no description",
                 reader.GetBoolean(reader.GetOrdinal("IsMostPopular"))
 
@@ -92,10 +98,8 @@ WHERE User.AdriaID = @Id;";
         name,
         wallet,
         points,
-        lastPayment,
         streak,
-        subscription,
-        courses
+        subscription
     );
 }
 }

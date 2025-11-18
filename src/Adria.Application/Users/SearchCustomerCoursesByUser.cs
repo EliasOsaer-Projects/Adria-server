@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Adria.Application.Users;
 
 
-public sealed record SearchUserCoursesByUserInput(string UserId);
+public sealed record SearchUserCoursesByUserInput(Guid UserId);
 
 public sealed class SearchCustomerCoursesByUser 
     : IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>

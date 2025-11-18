@@ -37,7 +37,7 @@ public sealed class SearchUserCoursesByUserQuery : IUserCoursesByUserQuery
         _logger = logger;
     }
 
-    public async Task<IReadOnlyCollection<UserData>> Fetch(string id)
+    public async Task<IReadOnlyCollection<UserCourseData>> Fetch(Guid id)
     {
         _logger.LogInformation("Starting to fetch all customer courses");
 

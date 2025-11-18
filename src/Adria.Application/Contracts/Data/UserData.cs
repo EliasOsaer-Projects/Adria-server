@@ -8,5 +8,6 @@ public sealed record UserData
     string UserName,
     decimal Wallet,
     int PointsBalance,
-    int Streak
+    int Streak,
+    SubscriptionData? Subscription
 );
