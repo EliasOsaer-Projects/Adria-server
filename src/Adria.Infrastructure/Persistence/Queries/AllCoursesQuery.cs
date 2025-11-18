@@ -69,7 +69,7 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
             courses.Add(new CourseData(
                 Id: reader.GetGuid(ordCourseId),
                 Name: reader.GetString(ordCourseName),
-                Level: (CourseLevel)reader.GetInt16(ordCourseDifficulty),
+                Level: reader.GetInt16(ordCourseDifficulty),
                 Description: reader.GetString(ordCourseDescription),
                 Category: reader.GetString(ordCourseCategory),
                 Tags: tags,

@@ -13,7 +13,7 @@ public sealed class SearchUserByIdController
     private SearchUserByIdController(){}
     
     public static async Task<Results<Ok<UserData>, NotFound>> Invoke(
-        [FromRoute] string userId,
+        [FromRoute] Guid userId,
         [FromServices] IUseCase<SearchUserByIdInput, Task<UserData>> searchUserById
     )
     {

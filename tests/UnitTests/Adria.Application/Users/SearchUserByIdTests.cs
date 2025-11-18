@@ -13,8 +13,8 @@ public sealed class SearchUserByIdTests
     {
         // Arrange
         var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, "test", true);
-        var userId = "ID-0125";
-        var userData = new UserData(userId, "Nathaniel", 1700, 0, DateTime.Today, 0, subscription, new List<CustomerCourseData>());
+        var userId = Guid.NewGuid();
+        var userData = new UserData(userId, "Nathaniel", 1700, 0,0,subscription);
         var mockQuery = new MockUserByIdQuery();
         mockQuery.AddUser(userData);
         var mockLogger = new MockLogger<SearchUserById>();
@@ -38,7 +38,7 @@ public sealed class SearchUserByIdTests
     public async Task Execute_WithNonExistentUser_ThrowsElementNotFoundException()
     {
         // Arrange
-        var userId = "ID-0125";
+        var userId = Guid.NewGuid();
         var mockQuery = new MockUserByIdQuery();
         var mockLogger = new MockLogger<SearchUserById>();
         var useCase = new SearchUserById(mockQuery, mockLogger);
@@ -53,7 +53,7 @@ public sealed class SearchUserByIdTests
     public async Task Execute_WithEmptyGuid_ThrowsElementNotFoundException()
     {
         // Arrange
-        var userId = "";
+        var userId = new Guid();
         var mockQuery = new MockUserByIdQuery();
         var mockLogger = new MockLogger<SearchUserById>();
         var useCase = new SearchUserById(mockQuery, mockLogger);

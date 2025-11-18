@@ -5,7 +5,7 @@ namespace Adria.Application.Contracts.Data;
 public sealed record CourseData(
     Guid Id,
     string Name,
-    CourseLevel Level,
+    int Level,
     string Description,
     string Category ,
     IList<string> Tags,

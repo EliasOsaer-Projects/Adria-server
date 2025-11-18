@@ -8,15 +8,15 @@ namespace Adria.Application.Users;
 
 public sealed record SearchUserCoursesByUserInput(Guid UserId);
 
-public sealed class SearchCustomerCoursesByUser 
+public sealed class SearchUserCoursesByUser 
     : IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>
 {
     private readonly IUserCoursesByUserQuery _userCoursesByUserQuery;
-    private readonly ILogger<SearchCustomerCoursesByUser> _logger;
+    private readonly ILogger<SearchUserCoursesByUser> _logger;
 
-    public SearchCustomerCoursesByUser(
+    public SearchUserCoursesByUser(
         IUserCoursesByUserQuery userCoursesByUserQuery,
-        ILogger<SearchCustomerCoursesByUser> logger
+        ILogger<SearchUserCoursesByUser> logger
     )
     {
         _userCoursesByUserQuery = userCoursesByUserQuery;

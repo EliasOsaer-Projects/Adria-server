@@ -39,7 +39,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
         _logger = logger;
     }
 
-    public async Task<UserData?> Fetch(string userId)
+    public async Task<UserData?> Fetch(Guid userId)
     {
         _logger.LogInformation("Starting to fetch user with ID {UserId}", userId);
 
@@ -54,7 +54,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
 
         var parameter = command.CreateParameter();
         parameter.ParameterName = "@Id";
-        parameter.Value = userId.ToString();
+        parameter.Value = userId;
         command.Parameters.Add(parameter);
 
         using var reader = await command.ExecuteReaderAsync();
@@ -66,7 +66,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
             return null;
         }
         
-        var id = reader.GetString(reader.GetOrdinal("AdriaID"));
+        var id = reader.GetGuid(reader.GetOrdinal("AdriaID"));
         var name = reader.GetString(reader.GetOrdinal("Name"));
         var wallet = reader.GetDecimal(reader.GetOrdinal("Wallet"));
         var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
@@ -88,8 +88,6 @@ public sealed class UserByIdQuery : IUserByIdQuery
 
             );
         }
-    
-    var courses = new List<CustomerCourseData>();
 
         _logger.LogInformation("Found user with ID {UserId}", userId);
 

@@ -20,6 +20,7 @@ public sealed class AllSubscriptionTypesController
 
     }
 
+    //todo: remove mapper, change PriceCycle to Price
     private static List<SubscriptionResponse> ToResponse(IReadOnlyCollection<SubscriptionData> subscriptionData)
     {
         return subscriptionData.Select(data => new SubscriptionResponse(

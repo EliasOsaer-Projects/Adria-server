@@ -18,6 +18,6 @@ public static class UseCases
             .AddScoped<IUseCase<Task<IEnumerable<LeaderBoardData>>>, Top10Users>()
             .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
             .AddScoped<IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>,
-                SearchCustomerCoursesByUser>();
+                SearchUserCoursesByUser>();
     }
 }
