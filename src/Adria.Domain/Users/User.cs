@@ -10,7 +10,7 @@ public class User
     public DateTime LastPayment { get; set; }
     public int Streak { get; set; }
     public decimal UserWallet { get; set; }
-    public CustomerSubscription CurrentSubscription { get; set; }
+    public CustomerSubscription? CurrentSubscription { get; set; }
     public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
     private readonly List<Course> _courses = [];
 

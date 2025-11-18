@@ -64,7 +64,7 @@ WHERE User.AdriaID = @Id;";
 
         DateTime lastPayment = reader.GetDateTime(reader.GetOrdinal("LastPayment"));
 
-        Guid? subscriptionId = reader.IsDBNull(reader.GetOrdinal("SubscriptionID"))
+        Guid? subscriptionId = await reader.IsDBNullAsync(reader.GetOrdinal("SubscriptionID"))
             ? null
             : Guid.Parse(reader.GetString(reader.GetOrdinal("SubscriptionID")));
 
