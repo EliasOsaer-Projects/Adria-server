@@ -31,8 +31,8 @@ public sealed class SearchUserByIdController
             );
 
             return new User(
-                id: userData.Id,
-                name: userData.Name,
+                id: userData.AdriaId,
+                name: userData.UserName,
                 lastPayment: userData.LastPayment.Value,
                 wallet: userData.Wallet,
                 subscription: subscription
@@ -41,8 +41,8 @@ public sealed class SearchUserByIdController
         else
         {
             return new User(
-                id: userData.Id,
-                name: userData.Name,
+                id: userData.AdriaId,
+                name: userData.UserName,
                 wallet: userData.Wallet
             );
         }

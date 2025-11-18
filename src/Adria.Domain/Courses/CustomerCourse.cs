@@ -21,6 +21,14 @@ public class CustomerCourse
     
     public CustomerCourse(Course course) :  this(Guid.NewGuid(), course)
     {
-     
+    }
+    
+    
+    public CustomerCourse(Guid id, Course course, Decimal progress, Boolean completionStatus)
+    {
+        Id = id;
+        Course = course;
+        Progress = progress;
+        CompletionStatus = completionStatus;
     }
 }

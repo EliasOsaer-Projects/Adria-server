@@ -26,3 +26,8 @@ public interface IAllCoursesQuery
 {
     Task<IReadOnlyCollection<CourseData>> Fetch();
 }
+
+public interface ICustomerCoursesByUserQuery
+{
+    Task<IReadOnlyCollection<UserData>> Fetch(string id);
+}

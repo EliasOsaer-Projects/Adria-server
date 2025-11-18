@@ -66,8 +66,8 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
                 .ToList();
             
             courses.Add(new CourseData(
-                Id: reader.GetGuid(ordCourseId),
-                Name: reader.GetString(ordCourseName),
+                CourseId: reader.GetGuid(ordCourseId),
+                CourseName: reader.GetString(ordCourseName),
                 Level: reader.GetInt32(ordCourseDifficulty),
                 Category: reader.GetString(ordCourseCategory),
                 Description: reader.GetString(ordCourseDescription),

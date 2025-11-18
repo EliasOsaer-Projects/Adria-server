@@ -61,6 +61,13 @@ public static class Routes
             .WithName(nameof(Top10UsersController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+        
+        userRoutes
+            .MapGet("/{userId}/CustomerCourses", SearchCustomerCoursesByUserController.Invoke)
+            .WithDescription("Get all CustomerCourses and their corresponding course by user.")
+            .WithName(nameof(SearchCustomerCoursesByUserController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)

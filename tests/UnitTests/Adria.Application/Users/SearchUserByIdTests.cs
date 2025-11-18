@@ -14,7 +14,7 @@ public sealed class SearchUserByIdTests
         // Arrange
         var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, "test", true);
         var userId = "ID-0125";
-        var userData = new UserData(userId, "Nathaniel", 1700, 0, DateTime.Today, 0, subscription);
+        var userData = new UserData(userId, "Nathaniel", 1700, 0, DateTime.Today, 0, subscription, new List<CustomerCourseData>());
         var mockQuery = new MockUserByIdQuery();
         mockQuery.AddUser(userData);
         var mockLogger = new MockLogger<SearchUserById>();
@@ -26,14 +26,14 @@ public sealed class SearchUserByIdTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(userId, result.Id);
-        Assert.Equal("Nathaniel", result.Name);
+        Assert.Equal(userId, result.AdriaId);
+        Assert.Equal("Nathaniel", result.UserName);
         Assert.Equal(0, result.PointsBalance);
         Assert.Equal(0, result.Streak);
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains($"Fetching user with ID: {userId}", mockLogger.LoggedMessages[0]);
     }
-
+    
     [Fact]
     public async Task Execute_WithNonExistentUser_ThrowsElementNotFoundException()
     {
@@ -48,7 +48,7 @@ public sealed class SearchUserByIdTests
         var exception = await Assert.ThrowsAsync<ElementNotFoundException>(() => useCase.Execute(input));
         Assert.Contains($"User with Id {userId} not found", exception.Message);
     }
-
+    
     [Fact]
     public async Task Execute_WithEmptyGuid_ThrowsElementNotFoundException()
     {

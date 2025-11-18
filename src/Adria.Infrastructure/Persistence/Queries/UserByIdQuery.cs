@@ -15,7 +15,7 @@ LEFT JOIN `CustomerSubscription` cs
 LEFT JOIN `Subscription` 
     ON cs.SubscriptionID = Subscription.SubscriptionID
 WHERE User.AdriaID = @Id;";
-
+    
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
     private readonly ILogger<UserByIdQuery> _logger;
@@ -62,7 +62,9 @@ WHERE User.AdriaID = @Id;";
         var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
         var streak = reader.GetInt32(reader.GetOrdinal("Streak"));
 
-        DateTime lastPayment = reader.GetDateTime(reader.GetOrdinal("LastPayment"));
+        DateTime? lastPayment = reader.IsDBNull(reader.GetOrdinal("LastPayment"))
+            ? null
+            : reader.GetDateTime(reader.GetOrdinal("LastPayment"));
 
         Guid? subscriptionId = await reader.IsDBNullAsync(reader.GetOrdinal("SubscriptionID"))
             ? null
@@ -80,19 +82,20 @@ WHERE User.AdriaID = @Id;";
 
             );
         }
-
-
+    
+    var courses = new List<CustomerCourseData>();
 
         _logger.LogInformation("Found user with ID {UserId}", userId);
 
-        return new UserData(
-            id,
-            name,
-            wallet,
-            points,
-            lastPayment,
-            streak,
-            subscription
-        );
-    }
+    return new UserData(
+        id,
+        name,
+        wallet,
+        points,
+        lastPayment,
+        streak,
+        subscription,
+        courses
+    );
+}
 }

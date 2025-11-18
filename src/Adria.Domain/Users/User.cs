@@ -11,8 +11,8 @@ public class User
     public int Streak { get; set; }
     public decimal UserWallet { get; set; }
     public CustomerSubscription? CurrentSubscription { get; set; }
-    public IReadOnlyCollection<Course> Courses => _courses.AsReadOnly();
-    private readonly List<Course> _courses = [];
+    public IReadOnlyCollection<CustomerCourse> Courses => _courses.AsReadOnly();
+    private readonly List<CustomerCourse> _courses = [];
 
     //TODO Still need to add Cosmetics which doesn't exist;
 
@@ -27,6 +27,19 @@ public class User
         Streak = 0;
         UserWallet = wallet;
     }
+    
+    public User(string id, string name, decimal wallet, List<CustomerCourse> courses)
+    {
+        EnsureUserIdIsValid(id);
+
+        AdriaId = id;
+        Name = name;
+        PointsBalance = 0;
+        Streak = 0;
+        UserWallet = wallet;
+        _courses = courses;
+    }
+    
     
     public User(string id, string name,DateTime lastPayment , decimal wallet, Subscription subscription)
     {
@@ -102,7 +115,7 @@ public class User
         Streak = 0;
     }
 
-    public void AddCourse(Course course)
+    public void AddCourse(CustomerCourse course)
     {
         _courses.Add(course);
     }

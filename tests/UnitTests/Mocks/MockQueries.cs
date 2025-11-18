@@ -16,7 +16,7 @@ public class MockUserByIdQuery : IUserByIdQuery
 
     public void AddUser(UserData user)
     {
-        _users[user.Id] = user;
+        _users[user.AdriaId] = user;
     }
 
     public void clear()
@@ -25,7 +25,7 @@ public class MockUserByIdQuery : IUserByIdQuery
     }
 }
 
-public class MockAllSubscriptionQuerie : IAllSubscriptionTypes
+public class MockAllSubscriptionQuery : IAllSubscriptionTypes
 {
     private IList<SubscriptionData> subscriptions = new List<SubscriptionData>();
 
@@ -57,7 +57,7 @@ public class MockSearchSubscriptionByIdQuery : ISearchSubscriptionTypeByIdQuery
 
     public Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id)
     {
-        if (_user.TryGetValue(id, out var user))
+        if (_subscriptions.TryGetValue(id, out var user))
         {
             return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(
                 new List<SubscriptionData> { user }.AsReadOnly()
@@ -95,4 +95,16 @@ public class MockAllCoursesQuery : IAllCoursesQuery
     public void AddCourse(CourseData course) => _courses.Add(course);
 
     public void Clear() => _courses.Clear();
+}
+
+public class MockSearchCustomerCourseByUser : ICustomerCoursesByUserQuery
+{
+    
+    private readonly List<UserData> _users = new();
+
+    public void AddUser(UserData user) => _users.Add(user);
+    public Task<IReadOnlyCollection<UserData>> Fetch(string id)
+    {
+        return Task.FromResult<IReadOnlyCollection<UserData>>(_users.AsReadOnly());
+    }
 }
