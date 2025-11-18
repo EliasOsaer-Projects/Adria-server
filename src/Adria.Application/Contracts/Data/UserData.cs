@@ -8,8 +8,5 @@ public sealed record UserData
     string UserName,
     decimal Wallet,
     int PointsBalance,
-    DateTime? LastPayment,
-    int Streak,
-    SubscriptionData? Subscription,
-    List<CustomerCourseData>? CustomerCourses
+    int Streak
 );

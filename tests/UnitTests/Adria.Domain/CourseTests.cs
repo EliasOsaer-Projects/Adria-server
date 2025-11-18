@@ -17,7 +17,7 @@ public sealed class CourseTests
         var learnList = new List<string> { "variables", "loops", "classes" };
         var duration = 8;
         var levelInt = 1; 
-        var modules = new List<CourseModule>(); 
+        var modules = new List<Module>(); 
         var points = 100;
         var tags = new List<string>{"fun", "coding"};
 
@@ -47,7 +47,7 @@ public sealed class CourseTests
         var learnList = new List<string> { "query syntax", "method syntax" };
         var duration = 6;
         var levelInt = 2;
-        var modules = new List<CourseModule>();
+        var modules = new List<Module>();
         var points = 50;
         var tags = new List<string>{"fun", "coding"};
 
@@ -71,7 +71,7 @@ public sealed class CourseTests
         var learnList = new List<string>();
         var duration = 1;
         var levelInt = 2; 
-        var modules = new List<CourseModule>();
+        var modules = new List<Module>();
         var points = 0;
         var tags = new List<string>{"fun", "coding"};
 

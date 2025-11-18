@@ -97,7 +97,7 @@ public class MockAllCoursesQuery : IAllCoursesQuery
     public void Clear() => _courses.Clear();
 }
 
-public class MockSearchCustomerCourseByUser : ICustomerCoursesByUserQuery
+public class MockSearchUserCourseByUser : IUserCoursesByUserQuery
 {
     
     private readonly List<UserData> _users = new();

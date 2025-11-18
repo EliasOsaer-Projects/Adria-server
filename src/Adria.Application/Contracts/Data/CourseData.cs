@@ -3,14 +3,16 @@
 namespace Adria.Application.Contracts.Data;
 
 public sealed record CourseData(
-    Guid CourseId,
-    string CourseName,
-    string Category,
+    Guid Id,
+    string Name,
+    CourseLevel Level,
     string Description,
-    List<string> Tags,
-    List<string> LearnList,
+    string Category ,
+    IList<string> Tags,
+    int PointsOnCompletion,
+    IList<string> LearnList,
     int Duration,
-    int Level,
-    List<CourseModule> Modules,
-    int PointsOnCompletion
+    // Guid CoverImageId,
+    // Guid BannerImageId,
+    Boolean SubscriptionRequired
 );

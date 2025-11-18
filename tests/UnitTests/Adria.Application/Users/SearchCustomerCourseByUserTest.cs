@@ -23,7 +23,7 @@ public sealed class SearchCustomerCourseByUserTest
             LearnList: new List<string> { "Variables", "Loops", "Functions" },
             Duration: 120,
             Level: 1,
-            Modules: new List<CourseModule>(),
+            Modules: new List<Module>(),
             PointsOnCompletion: 100
         );
         
@@ -46,10 +46,10 @@ public sealed class SearchCustomerCourseByUserTest
             Subscription: subscription,
             CustomerCourses: customerCourses
         );
-        var mockQuery = new MockSearchCustomerCourseByUser();
+        var mockQuery = new MockSearchUserCourseByUser();
         var mockLogger = new MockLogger<SearchCustomerCoursesByUser>();
         var useCase = new SearchCustomerCoursesByUser(mockQuery, mockLogger);
-        var input = new SearchCustomerCoursesByUserInput(userId);
+        var input = new SearchUserCoursesByUserInput(userId);
 
         mockQuery.AddUser(userData);
 

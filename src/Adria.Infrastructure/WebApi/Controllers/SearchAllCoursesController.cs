@@ -9,7 +9,7 @@ namespace Adria.Infrastructure.WebApi.Controllers;
 
 public sealed class SearchAllCoursesController
 {
-    public static async Task<Results<Ok<List<Course>>, NotFound>> Invoke(
+    public static async Task<Results<Ok<List<CourseData>>, NotFound>> Invoke(
         [FromServices] IUseCase<Task<IReadOnlyCollection<CourseData>>> searchAllCourses,
         [FromQuery] string? category = null,
         [FromQuery] string? tag = null
@@ -35,28 +35,6 @@ public sealed class SearchAllCoursesController
            filteredData = filteredData.Where(t=> t.Tags.Contains(tag));
        }
     
-        return TypedResults.Ok(ToResponse(filteredData.ToList()));
-    }
-
-
-    private static List<Course> ToResponse(IReadOnlyCollection<CourseData> CourseData)
-    {
-        return CourseData.Select(data => new Course(
-            id: data.CourseId,
-            name: data.CourseName,
-            level: data.Level,
-            category: data.Category,
-            description: data.Description,
-            tags: data.Tags,
-            pointsOnCompletion: data.PointsOnCompletion,
-            duration: data.Duration,
-            learnList: data.LearnList,
-            modules: data.Modules
-        )).ToList();
-    }
-    
-    
-    private SearchAllCoursesController()
-    {
+        return TypedResults.Ok(filteredData.ToList());
     }
 }

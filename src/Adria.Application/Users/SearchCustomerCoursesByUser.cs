@@ -6,30 +6,31 @@ using Microsoft.Extensions.Logging;
 namespace Adria.Application.Users;
 
 
-public sealed record SearchCustomerCoursesByUserInput(string UserId);
+public sealed record SearchUserCoursesByUserInput(string UserId);
 
-public sealed class SearchCustomerCoursesByUser : IUseCase<SearchCustomerCoursesByUserInput, Task<IReadOnlyCollection<UserData>>>
+public sealed class SearchCustomerCoursesByUser 
+    : IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>
 {
-    private readonly ICustomerCoursesByUserQuery _customerCoursesByUserQuery;
+    private readonly IUserCoursesByUserQuery _userCoursesByUserQuery;
     private readonly ILogger<SearchCustomerCoursesByUser> _logger;
 
     public SearchCustomerCoursesByUser(
-        ICustomerCoursesByUserQuery customerCoursesByUserQuery,
+        IUserCoursesByUserQuery userCoursesByUserQuery,
         ILogger<SearchCustomerCoursesByUser> logger
     )
     {
-        _customerCoursesByUserQuery = customerCoursesByUserQuery;
+        _userCoursesByUserQuery = userCoursesByUserQuery;
         _logger = logger;
     }
     
-    public async Task<IReadOnlyCollection<UserData>> Execute(SearchCustomerCoursesByUserInput input)
+    public async Task<IReadOnlyCollection<UserCourseData>> Execute(SearchUserCoursesByUserInput input)
     {
         _logger.LogInformation(
             "Fetching CustomerCourses with UserID: {Id}",
             input.UserId
         );
 
-        return (await _customerCoursesByUserQuery.Fetch(input.UserId))
+        return (await _userCoursesByUserQuery.Fetch(input.UserId))
                ?? throw new ElementNotFoundException(
                    $"User with Id {input.UserId} not found."
                );
