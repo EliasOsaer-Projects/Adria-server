@@ -73,6 +73,20 @@ public class MockTopUsersByPointsQuery : ITopUsersByPointsQuery
     }
 }
 
+public class MockAllCoursesQuery : IAllCoursesQuery
+{
+    private readonly IList<CourseData> _courses = new List<CourseData>();
+
+    public Task<IReadOnlyCollection<CourseData>> Fetch()
+    {
+        return Task.FromResult<IReadOnlyCollection<CourseData>>(_courses.AsReadOnly());
+    }
+    
+    public void AddCourse(CourseData course) => _courses.Add(course);
+
+    public void Clear() => _courses.Clear();
+}
+
 public class MockSearchCustomerCourseByUser : ICustomerCoursesByUserQuery
 {
     
