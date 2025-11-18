@@ -48,7 +48,13 @@ public class MockAllSubscriptionQuerie : IAllSubscriptionTypes
 public class MockSearchSubscriptionByIdQuery : ISearchSubscriptionTypeByIdQuery
 {
 
-    private readonly Dictionary<Guid, SubscriptionData> _user = new Dictionary<Guid, SubscriptionData>();
+    private IDictionary<Guid, SubscriptionData> _subscriptions = new Dictionary<Guid, SubscriptionData>();
+
+    public void SetSubscriptions(IDictionary<Guid, SubscriptionData> subscriptions)
+    {
+        _subscriptions = subscriptions;
+    }
+
     public Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id)
     {
         if (_user.TryGetValue(id, out var user))
@@ -75,4 +81,18 @@ public class MockTopUsersByPointsQuery : ITopUsersByPointsQuery
         var result = _users.OrderByDescending(u => u.PointsBalance).Take(10);
         return Task.FromResult<IEnumerable<LeaderBoardData>>(result);
     }
+}
+
+public class MockAllCoursesQuery : IAllCoursesQuery
+{
+    private readonly IList<CourseData> _courses = new List<CourseData>();
+
+    public Task<IReadOnlyCollection<CourseData>> Fetch()
+    {
+        return Task.FromResult<IReadOnlyCollection<CourseData>>(_courses.AsReadOnly());
+    }
+
+    public void AddCourse(CourseData course) => _courses.Add(course);
+
+    public void Clear() => _courses.Clear();
 }
