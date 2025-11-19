@@ -10,7 +10,7 @@ public sealed class SearchCustomerCourseByUserTest
     [Fact]
     public async Task Execute_ReturnsCustomerCourses()
     {
-        var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, "test", true);
+        var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, ["test"], true);
         
         var course = new CourseData(
             Id: Guid.NewGuid(),

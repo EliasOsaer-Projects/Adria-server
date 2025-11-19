@@ -55,17 +55,23 @@ public class MockSearchSubscriptionByIdQuery : ISearchSubscriptionTypeByIdQuery
         _subscriptions = subscriptions;
     }
 
-    public Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id)
+    public Task<SubscriptionData> Fetch(Guid id)
     {
         if (_subscriptions.TryGetValue(id, out var user))
         {
-            return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(
-                new List<SubscriptionData> { user }.AsReadOnly()
+            return Task.FromResult(
+                new SubscriptionData(
+                    SubscriptionId: user.SubscriptionId,
+                    Name: user.Name,
+                    Price: user.Price,
+                    Description: user.Description,
+                    IsMostPopular: user.IsMostPopular
+                )
             );
         }
 
-        return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(
-            Array.Empty<SubscriptionData>()
+        return Task.FromResult(
+            new SubscriptionData(Guid.Empty, string.Empty, 0, new List<string>(), false)
         );
     }
 }

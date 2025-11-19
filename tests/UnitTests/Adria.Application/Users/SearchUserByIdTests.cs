@@ -12,7 +12,7 @@ public sealed class SearchUserByIdTests
     public async Task Execute_WithExistingUser_ReturnsUserData()
     {
         // Arrange
-        var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, "test", true);
+        var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, ["test"], true);
         var userId = Guid.NewGuid();
         var userData = new UserData(userId, "Nathaniel", 1700, 0,0,subscription);
         var mockQuery = new MockUserByIdQuery();

@@ -14,7 +14,7 @@ public interface IAllSubscriptionTypes
 
 public interface ISearchSubscriptionTypeByIdQuery
 {
-    Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id);
+    Task<SubscriptionData> Fetch(Guid id);
 }
 
 public interface ITopUsersByPointsQuery

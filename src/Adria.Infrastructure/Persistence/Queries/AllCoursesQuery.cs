@@ -62,7 +62,7 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
 
             
             List<string> tags =  reader.GetString(ordCourseTags)
-                .Split(',', StringSplitOptions.RemoveEmptyEntries) // split by commas
+                .Split(',', StringSplitOptions.TrimEntries) // split by commas
                 .Select(tag => tag.Trim()) // remove extra spaces
                 .ToList();
             

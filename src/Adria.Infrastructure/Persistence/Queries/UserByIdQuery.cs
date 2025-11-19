@@ -18,9 +18,11 @@ public sealed class UserByIdQuery : IUserByIdQuery
             cs.Status, 
             Subscription.SubscriptionID, 
             Subscription.Type AS SubscriptionType, 
-            Subscription.Price
+            Subscription.Price, 
+            Subscription.Description, 
+            Subscription.IsMostPopular
         FROM `User`
-        LEFT JOIN `CustomerSubscription` cs ON User.AdriaID = cs.AdriaID AND cs.Status = 'Active'
+        LEFT JOIN `UserSubscription` cs ON User.AdriaID = cs.AdriaID AND cs.Status = 'Active'
         LEFT JOIN `Subscription` ON cs.SubscriptionID = Subscription.SubscriptionID
         WHERE User.AdriaID = @Id;
 ";
@@ -83,7 +85,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
                 reader.GetGuid(reader.GetOrdinal("SubscriptionID")),
                 reader.GetString(reader.GetOrdinal("SubscriptionType")),
                 reader.GetDecimal(reader.GetOrdinal("Price")),
-                "no description",
+                reader.GetString(reader.GetOrdinal("Description")).Split(',', StringSplitOptions.TrimEntries).ToList(),
                 reader.GetBoolean(reader.GetOrdinal("IsMostPopular"))
 
             );
