@@ -7,7 +7,7 @@ namespace Adria.Application.Subscriptions;
 public sealed record SearchSubscriptionTypeByIdInput(
     Guid Id
     );
-public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionTypeByIdInput, Task<IReadOnlyCollection<SubscriptionData>>>
+public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionTypeByIdInput, Task<SubscriptionData>>
 {
     private readonly ILogger<SearchSubscriptionTypeById> _logger;
     private readonly ISearchSubscriptionTypeByIdQuery _searchSubscriptionTypeById;
@@ -18,7 +18,7 @@ public sealed class SearchSubscriptionTypeById : IUseCase<SearchSubscriptionType
         _logger = logger;
     }
 
-    public async Task<IReadOnlyCollection<SubscriptionData>> Execute(SearchSubscriptionTypeByIdInput subscritpion)
+    public async Task<SubscriptionData> Execute(SearchSubscriptionTypeByIdInput subscritpion)
     {
         //?
         _logger.LogInformation("Retrieving subscription ...");

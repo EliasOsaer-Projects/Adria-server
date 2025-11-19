@@ -1,8 +1,7 @@
 ﻿using System.Data.Common;
-using Adria.Application;
-using Microsoft.Extensions.Logging;
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
+using Microsoft.Extensions.Logging;
 
 
 namespace Adria.Infrastructure;
@@ -40,22 +39,30 @@ public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
 
             await using var reader = await command.ExecuteReaderAsync();
 
-            var subscriptions = new List<SubscriptionData>();
+            IList<SubscriptionData> subscriptions = new List<SubscriptionData>();
 
             while (await reader.ReadAsync())
             {
                 var id = reader.GetOrdinal("SubscriptionId");
                 var name = reader.GetOrdinal("Type");
-                var price = reader.GetOrdinal("PricePerCycle");
+                var price = reader.GetOrdinal("Price");
                 var mostPopular = reader.GetOrdinal("IsMostPopular");
+                var description = reader.GetString(reader.GetOrdinal("Description"));
 
-                var desc = "No description";
+                List<string> descriptionList = description.Split(',', StringSplitOptions.TrimEntries).ToList();
+                
                 subscriptions.Add(
-                    new SubscriptionData(SubscriptionId: reader.GetGuid(id), Type: reader.GetString(name), PriceCycle: reader.GetDecimal(price), Description: desc, IsMostPopular: reader.GetBoolean(mostPopular))
+                    new SubscriptionData(
+                        SubscriptionId: reader.GetGuid(id),
+                        Name: reader.GetString(name),
+                        Price: reader.GetDecimal(price),
+                        Description: descriptionList,
+                        IsMostPopular: reader.GetBoolean(mostPopular)
+                    )
                 );
             }
 
-            return subscriptions;
+            return subscriptions.AsReadOnly();
         }
 
     }

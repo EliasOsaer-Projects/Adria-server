@@ -8,31 +8,18 @@ namespace Adria.Infrastructure;
 
 public sealed class SearchSubscriptionTypeByIdController
 {
-    public static async Task<Results<Ok<List<SubscriptionResponse>>, NotFound>> Invoke(
+    public static async Task<Results<Ok<List<SubscriptionData>>, NotFound>> Invoke(
         [FromQuery] Guid subscriptionId,
         [FromServices] IUseCase<SearchSubscriptionTypeByIdInput, Task<IReadOnlyCollection<SubscriptionData>>> searchSubscriptionById
         )
     {
         if (subscriptionId == Guid.Empty)
-            throw new ArgumentException("Your id is empty");
+            return TypedResults.NotFound();
+        
         SearchSubscriptionTypeByIdInput input = new SearchSubscriptionTypeByIdInput(subscriptionId);
         IReadOnlyCollection<SubscriptionData> subscriptionData = await searchSubscriptionById.Execute(input);
 
-        return TypedResults.Ok(ToRespone(subscriptionData));
+        return TypedResults.Ok(subscriptionData.ToList());
 
     }
-
-    private static List<SubscriptionResponse> ToRespone(IReadOnlyCollection<SubscriptionData> subscriptions)
-    {
-        return subscriptions.Select(data => new SubscriptionResponse(
-              SubscriptionId: data.SubscriptionId,
-              Type: data.Type,
-              PriceCycle: data.PriceCycle,
-              Description: data.Description,
-              IsMostPopular: data.IsMostPopular
-
-              )).ToList();
-    }
-    private SearchSubscriptionTypeByIdController() { }
-
 }

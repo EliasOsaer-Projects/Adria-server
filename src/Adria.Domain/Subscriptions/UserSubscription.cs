@@ -1,14 +1,14 @@
 ﻿namespace Adria.Domain;
 
 //This is a value object for User.
-public class CustomerSubscription
+public class UserSubscription
 {
     public Subscription CurrentSubscription { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public bool Status { get; set; }
 
-    public CustomerSubscription(Subscription currentSubscription, DateTime date)
+    public UserSubscription(Subscription currentSubscription, DateTime date)
     {
         EnsureValidDate(this, date);
         CurrentSubscription = currentSubscription;
@@ -55,7 +55,7 @@ public class CustomerSubscription
     }
 
     //Security
-    private static void EnsureValidDate(CustomerSubscription subscription, DateTime date)
+    private static void EnsureValidDate(UserSubscription subscription, DateTime date)
     {
         if (date > subscription.EndDate)
             throw new ArgumentException("new Date is younger than End date");

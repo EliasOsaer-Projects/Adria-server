@@ -13,9 +13,9 @@ public class SearchSubscriptionTypeByIdTests
         Guid _id = Guid.NewGuid();
         Guid _id2 = Guid.NewGuid();
         Guid _id3 = Guid.NewGuid();
-        SubscriptionData subscription = new(_id, "Base", 2, "base sub", false);
-        SubscriptionData subscription2 = new(_id2, "Premium", 10, "premium sub", true);
-        SubscriptionData subscription3 = new(_id3, "Super", 9001, "SUPER! sub!", false);
+        SubscriptionData subscription = new(_id, "Base", 2, ["base sub"], false);
+        SubscriptionData subscription2 = new(_id2, "Premium", 10, ["premium sub"], true);
+        SubscriptionData subscription3 = new(_id3, "Super", 9001, ["SUPER! sub!"], false);
 
         IDictionary<Guid, SubscriptionData> subscriptions = new Dictionary<Guid, SubscriptionData>();
 
@@ -33,9 +33,9 @@ public class SearchSubscriptionTypeByIdTests
         var result2 = await usecase.Execute(new(_id2));
         var result3 = await usecase.Execute(new(_id3));
 
-        Assert.Contains(result, sub => sub.Type == "Base");
-        Assert.Contains(result2, sub => sub.SubscriptionId == _id2);
-        Assert.DoesNotContain(result3, sub => sub.SubscriptionId == _id);
+        Assert.Equal("Base", result.Name);
+        Assert.Equal(_id2, result2.SubscriptionId);
+        Assert.NotEqual(_id, result3.SubscriptionId);
     }
 
 }
