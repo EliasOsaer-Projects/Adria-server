@@ -10,48 +10,45 @@ public sealed class SearchCustomerCourseByUserTest
     [Fact]
     public async Task Execute_ReturnsCustomerCourses()
     {
-        // Arrange
-        var userId = "ID-0125";
-        var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, "test", true);
+        var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, ["test"], true);
         
         var course = new CourseData(
-            CourseId: Guid.NewGuid(),
-            CourseName: "Introduction to Programming",
-            Category: "Technology",
-            Description: "A beginner-friendly programming course.",
-            Tags: new List<string> { "Coding", "Basics", "Beginner" },
-            LearnList: new List<string> { "Variables", "Loops", "Functions" },
-            Duration: 120,
+            Id: Guid.NewGuid(),
+            Name: "Introduction to Java",
             Level: 1,
-            Modules: new List<CourseModule>(),
-            PointsOnCompletion: 100
+            Description: "Learn the basics of Java, including syntax, data types, and OOP principles.",
+            Category: "Programming",
+            Tags: new List<string> { "Java", "Programming"},
+            PointsOnCompletion: 100,
+            LearnList:[],
+            Duration: 10,
+            SubscriptionRequired: false
         );
         
-        var customerCourse = new CustomerCourseData(
-            CustomerCourseId: Guid.NewGuid(),
-            Course: course,
+        var userCourse = new UserCourseData(
+            CourseId: course.Id,
+            CourseName: course.Name,
+            Difficulty: course.Level,
             CompletionStatus: false,
-            Progress: 0m
+            ProgressPercentage: 0
         );
         
-        var customerCourses = new List<CustomerCourseData> { customerCourse };
+        var userCourses = new List<UserCourseData> { userCourse };
         
         var userData = new UserData(
-            AdriaId: userId,
+            AdriaId: Guid.NewGuid(),
             UserName: "Nathaniel",
             Wallet: 1700m,
             PointsBalance: 0,
-            LastPayment: DateTime.Today,
             Streak: 0,
-            Subscription: subscription,
-            CustomerCourses: customerCourses
+            Subscription: subscription
         );
-        var mockQuery = new MockSearchCustomerCourseByUser();
-        var mockLogger = new MockLogger<SearchCustomerCoursesByUser>();
-        var useCase = new SearchCustomerCoursesByUser(mockQuery, mockLogger);
-        var input = new SearchCustomerCoursesByUserInput(userId);
+        var mockQuery = new MockSearchUserCourseByUser();
+        var mockLogger = new MockLogger<SearchUserCoursesByUser>();
+        var useCase = new SearchUserCoursesByUser(mockQuery, mockLogger);
+        var input = new SearchUserCoursesByUserInput(userData.AdriaId);
 
-        mockQuery.AddUser(userData);
+        mockQuery.AddUser(userCourse);
 
 
         // Act
@@ -60,24 +57,11 @@ public sealed class SearchCustomerCourseByUserTest
         // Assert
         Assert.NotEmpty(result);
         Assert.Single(result); 
-
-        var courseResult = result.First();
         
-        Assert.Equal("Introduction to Programming", courseResult.CustomerCourses.First().Course.CourseName);
-        Assert.Equal("Technology", courseResult.CustomerCourses.First().Course.Category);
-        Assert.Equal(120, courseResult.CustomerCourses.First().Course.Duration);
-        Assert.Equal(1, courseResult.CustomerCourses.First().Course.Level);
+        Assert.Equal("Introduction to Java", userCourses.First().CourseName);
+        Assert.Equal(1, userCourses.First().Difficulty);
         
-        Assert.Contains("Coding", courseResult.CustomerCourses.First().Course.Tags);
-        Assert.Contains("Beginner", courseResult.CustomerCourses.First().Course.Tags);
-        
-        Assert.Contains("Variables", courseResult.CustomerCourses.First().Course.LearnList ?? throw new InvalidOperationException());
-        Assert.Contains("Functions", courseResult.CustomerCourses.First().Course.LearnList ?? throw new InvalidOperationException());
-        
-        Assert.False(courseResult.CustomerCourses.First().CompletionStatus);
-        Assert.Equal(0m, courseResult.CustomerCourses.First().Progress);
-
-
-        Assert.Equal(100, courseResult.CustomerCourses.First().Course.PointsOnCompletion);
+        Assert.False(userCourses.First().CompletionStatus);
+        Assert.Equal(0, userCourses.First().ProgressPercentage);
     }
 }

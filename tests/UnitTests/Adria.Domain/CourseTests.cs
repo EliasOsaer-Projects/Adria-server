@@ -17,12 +17,11 @@ public sealed class CourseTests
         var learnList = new List<string> { "variables", "loops", "classes" };
         var duration = 8;
         var levelInt = 1; 
-        var modules = new List<CourseModule>(); 
         var points = 100;
         var tags = new List<string>{"fun", "coding"};
 
         // Act
-        var course = new Course(id, name, category, description, tags, learnList, duration, levelInt, modules, points);
+        var course = new Course(id, name, levelInt, description, category, tags, points, learnList, duration, new Guid(), new Guid(), false);
 
         // Assert
         Assert.Equal(id, course.Id);
@@ -32,8 +31,7 @@ public sealed class CourseTests
         Assert.Equal(tags, course.Tags);
         Assert.Same(learnList, course.LearnList); 
         Assert.Equal(duration, course.Duration);
-        Assert.Equal((CourseLevel)levelInt, course.Level);
-        Assert.Same(modules, course.Modules);
+        Assert.Equal(1, course.Level);
         Assert.Equal(points, course.PointsOnCompletion);
     }
   
@@ -47,17 +45,16 @@ public sealed class CourseTests
         var learnList = new List<string> { "query syntax", "method syntax" };
         var duration = 6;
         var levelInt = 2;
-        var modules = new List<CourseModule>();
         var points = 50;
         var tags = new List<string>{"fun", "coding"};
 
         // Act
-        var course = new Course(name, category, description, tags, learnList, duration, levelInt, modules, points);
+        var course = new Course(name, levelInt, description, category, tags, points, learnList, duration, new Guid(), new Guid(), false);
 
         // Assert
         Assert.NotEqual(Guid.Empty, course.Id);
         Assert.Equal(name, course.Name);
-        Assert.Equal((CourseLevel)levelInt, course.Level);
+        Assert.Equal(2, course.Level);
     }
     
 
@@ -71,15 +68,15 @@ public sealed class CourseTests
         var learnList = new List<string>();
         var duration = 1;
         var levelInt = 2; 
-        var modules = new List<CourseModule>();
+        var modules = new List<Module>();
         var points = 0;
         var tags = new List<string>{"fun", "coding"};
 
         // Act
-        var course = new Course(name, category, description,tags, learnList, duration, levelInt, modules, points);
+        var course = new Course(name, levelInt, description, category, tags, points, learnList, duration, new Guid(), new Guid(), false);
 
         // Assert
-        Assert.IsType<CourseLevel>(course.Level);
-        Assert.Equal((CourseLevel)levelInt, course.Level);
+        Assert.IsType<int>(course.Level);
+        Assert.Equal(2, course.Level);
     }
 }  

@@ -77,11 +77,11 @@ public static class PersistenceModule
                 serviceProvider.GetRequiredService<ILogger<AllCoursesQuery>>()
             );
         })
-        .AddScoped<ICustomerCoursesByUserQuery, CustomerCoursesByUserQuery>(serviceProvider =>
+        .AddScoped<IUserCoursesByUserQuery, SearchUserCoursesByUserQuery>(serviceProvider =>
         {
-            return new CustomerCoursesByUserQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+            return new SearchUserCoursesByUserQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
                 _connectionString,
-                serviceProvider.GetRequiredService<ILogger<CustomerCoursesByUserQuery>>()
+                serviceProvider.GetRequiredService<ILogger<SearchUserCoursesByUserQuery>>()
             );
         });
     }

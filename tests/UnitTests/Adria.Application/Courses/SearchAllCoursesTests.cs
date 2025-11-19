@@ -12,29 +12,29 @@ public sealed class SearchAllCoursesTests
         // Arrange
    
         var courseData =   new CourseData(
-            CourseId: Guid.NewGuid(),
-            CourseName: "Introduction to C#",
-            Category: "Programming",
+            Id: Guid.NewGuid(),
+            Name: "Introduction to C#",
+            Level: 2,
             Description: "Learn the basics of C#, including syntax, data types, and OOP principles.",
+            Category: "Programming",
             Tags: new List<string> { "C#", "Programming", ".NET", "Beginner" },
+            PointsOnCompletion: 100,
             LearnList:[],
             Duration: 10,
-            Level: 1,
-            Modules: [],
-            PointsOnCompletion: 100
+            SubscriptionRequired: false
         );
         
         var courseData2 =   new CourseData(
-            CourseId: Guid.NewGuid(),
-            CourseName: "Introduction to Java",
-            Category: "Programming",
+            Id: Guid.NewGuid(),
+            Name: "Introduction to Java",
+            Level: 1,
             Description: "Learn the basics of Java, including syntax, data types, and OOP principles.",
-            Tags: new List<string> { "Java", "Programming", ".NET", "Beginner" },
+            Category: "Programming",
+            Tags: new List<string> { "Java", "Programming"},
+            PointsOnCompletion: 100,
             LearnList:[],
             Duration: 10,
-            Level: 1,
-            Modules: [],
-            PointsOnCompletion: 100
+            SubscriptionRequired: false
         );
         
         var mockQuery = new MockAllCoursesQuery();
@@ -51,8 +51,8 @@ public sealed class SearchAllCoursesTests
         // Assert
         Assert.NotNull(result);
         Assert.NotEmpty(result);
-        Assert.Contains(result, tl => tl.CourseName == "Introduction to C#");
-        Assert.Contains(result, tl => tl.CourseName == "Introduction to Java");
+        Assert.Contains(result, tl => tl.Name == "Introduction to C#");
+        Assert.Contains(result, tl => tl.Name == "Introduction to Java");
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains($"Fetching all courses", mockLogger.LoggedMessages[0]);
     }

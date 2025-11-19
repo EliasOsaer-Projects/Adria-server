@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Adria.Application.Users;
 
-public sealed record SearchUserByIdInput(string Id);
+public sealed record SearchUserByIdInput(Guid Id);
 
 public class SearchUserById : IUseCase<SearchUserByIdInput, Task<UserData>>
 {

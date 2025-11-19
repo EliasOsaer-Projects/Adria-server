@@ -6,9 +6,9 @@ namespace UnitTests.Mocks;
 
 public class MockUserByIdQuery : IUserByIdQuery
 {
-    private readonly Dictionary<string, UserData> _users = new();
+    private readonly Dictionary<Guid, UserData> _users = new();
 
-    public Task<UserData?> Fetch(string userId)
+    public Task<UserData?> Fetch(Guid userId)
     {
         _users.TryGetValue(userId, out UserData? user);
         return Task.FromResult(user);
@@ -27,21 +27,21 @@ public class MockUserByIdQuery : IUserByIdQuery
 
 public class MockAllSubscriptionQuery : IAllSubscriptionTypes
 {
-    private IList<SubscriptionData> subscriptions = new List<SubscriptionData>();
+    private IList<SubscriptionData> _subscriptions = new List<SubscriptionData>();
 
     public Task<IReadOnlyCollection<SubscriptionData>> Fetch()
     {
-        return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(subscriptions.AsReadOnly());
+        return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(_subscriptions.AsReadOnly());
     }
 
     public void SetSubscriptions(IList<SubscriptionData> subscriptions)
     {
-        this.subscriptions = subscriptions;
+        this._subscriptions = subscriptions;
     }
 
     public void Clear()
     {
-        subscriptions.Clear();
+        _subscriptions.Clear();
     }
 }
 
@@ -55,17 +55,23 @@ public class MockSearchSubscriptionByIdQuery : ISearchSubscriptionTypeByIdQuery
         _subscriptions = subscriptions;
     }
 
-    public Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id)
+    public Task<SubscriptionData> Fetch(Guid id)
     {
         if (_subscriptions.TryGetValue(id, out var user))
         {
-            return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(
-                new List<SubscriptionData> { user }.AsReadOnly()
+            return Task.FromResult(
+                new SubscriptionData(
+                    SubscriptionId: user.SubscriptionId,
+                    Name: user.Name,
+                    Price: user.Price,
+                    Description: user.Description,
+                    IsMostPopular: user.IsMostPopular
+                )
             );
         }
 
-        return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(
-            Array.Empty<SubscriptionData>()
+        return Task.FromResult(
+            new SubscriptionData(Guid.Empty, string.Empty, 0, new List<string>(), false)
         );
     }
 }
@@ -97,14 +103,14 @@ public class MockAllCoursesQuery : IAllCoursesQuery
     public void Clear() => _courses.Clear();
 }
 
-public class MockSearchCustomerCourseByUser : ICustomerCoursesByUserQuery
+public class MockSearchUserCourseByUser : IUserCoursesByUserQuery
 {
     
-    private readonly List<UserData> _users = new();
+    private readonly List<UserCourseData> _users = new();
 
-    public void AddUser(UserData user) => _users.Add(user);
-    public Task<IReadOnlyCollection<UserData>> Fetch(string id)
+    public void AddUser(UserCourseData user) => _users.Add(user);
+    public Task<IReadOnlyCollection<UserCourseData>> Fetch(Guid id)
     {
-        return Task.FromResult<IReadOnlyCollection<UserData>>(_users.AsReadOnly());
+        return Task.FromResult<IReadOnlyCollection<UserCourseData>>(_users.AsReadOnly());
     }
 }

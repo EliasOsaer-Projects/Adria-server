@@ -4,8 +4,8 @@ namespace Adria.Application.Contracts.Data;
 
 public sealed record SubscriptionData(
     Guid SubscriptionId,
-    string Type,
-    decimal PriceCycle,
-    string Description,
+    string Name,
+    decimal Price,
+    IList<string> Description,
     bool IsMostPopular
 );

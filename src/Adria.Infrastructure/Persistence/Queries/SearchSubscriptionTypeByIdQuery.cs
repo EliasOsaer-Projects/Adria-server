@@ -1,6 +1,5 @@
 ﻿using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
-using Adria.Application.Subscriptions;
 using Microsoft.Extensions.Logging;
 using System.Data.Common;
 namespace Adria.Infrastructure;
@@ -19,7 +18,7 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
         _logger = logger;
     }
 
-    public async Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id)
+    public async Task<SubscriptionData> Fetch(Guid id)
     {
         _logger.LogInformation("Fetching subscription data for id {id}", id);
         
@@ -42,18 +41,21 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
 
         using (var reader = await command.ExecuteReaderAsync())
         {
-            IDictionary<Guid, SubscriptionData> subscriptionTypes = new Dictionary<Guid, SubscriptionData>();
-            while (await reader.ReadAsync())
-            {
-                var subId = reader.GetOrdinal("SubscriptionID");
-                var type = reader.GetOrdinal("Type");
-                var price = reader.GetOrdinal("PricePerCycle");
-                var mostpopular = reader.GetOrdinal("IsMostPopular");
-
-                subscriptionTypes.Add(id, new(SubscriptionId: reader.GetGuid(subId), Type: reader.GetString(type), PriceCycle: reader.GetDecimal(price), "no Description", IsMostPopular: reader.GetBoolean(mostpopular)));
-                _logger.LogInformation("Found subscription for Id: {SubscriptionId} of the type: {Type}", subscriptionId, type);
-            }
-            return subscriptionTypes.Values.ToList().AsReadOnly();
+            var subId = reader.GetOrdinal("SubscriptionID");
+            var type = reader.GetOrdinal("Type");
+            var price = reader.GetOrdinal("Price");
+            var mostpopular = reader.GetOrdinal("IsMostPopular");
+            var description = reader.GetString(reader.GetOrdinal("Description"));
+            
+            SubscriptionData subscription = new (
+                SubscriptionId: reader.GetGuid(subId),
+                Name: reader.GetString(type),
+                Price: reader.GetDecimal(price),
+                Description: description.Split(',', StringSplitOptions.TrimEntries).ToList(),
+                IsMostPopular: reader.GetBoolean(mostpopular)
+            );
+            _logger.LogInformation("Found subscription for Id: {SubscriptionId} of the type: {Type}", subscriptionId, type);
+            return subscription;
         }
     }
 }

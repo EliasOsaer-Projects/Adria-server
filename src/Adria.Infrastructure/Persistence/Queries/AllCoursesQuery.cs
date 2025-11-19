@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
+using Adria.Domain;
 using Microsoft.Extensions.Logging;
 
 namespace Adria.Infrastructure.Persistence.Queries;
@@ -9,7 +10,7 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
 {
     private static readonly string QRY = @"
         SELECT *
-        From Courses
+        From Course
     ";
 
 
@@ -61,21 +62,21 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
 
             
             List<string> tags =  reader.GetString(ordCourseTags)
-                .Split(',', StringSplitOptions.RemoveEmptyEntries) // split by commas
+                .Split(',', StringSplitOptions.TrimEntries) // split by commas
                 .Select(tag => tag.Trim()) // remove extra spaces
                 .ToList();
             
             courses.Add(new CourseData(
-                CourseId: reader.GetGuid(ordCourseId),
-                CourseName: reader.GetString(ordCourseName),
-                Level: reader.GetInt32(ordCourseDifficulty),
-                Category: reader.GetString(ordCourseCategory),
+                Id: reader.GetGuid(ordCourseId),
+                Name: reader.GetString(ordCourseName),
+                Level: reader.GetInt16(ordCourseDifficulty),
                 Description: reader.GetString(ordCourseDescription),
+                Category: reader.GetString(ordCourseCategory),
                 Tags: tags,
                 PointsOnCompletion: reader.GetInt32(ordPointsOnCompletion),
                 Duration: reader.GetInt32(ordEstimatedDuration),
-                LearnList: [],
-                Modules: []
+                LearnList: null,
+                SubscriptionRequired: false
             ));
         }
         

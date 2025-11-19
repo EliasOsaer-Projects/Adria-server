@@ -17,7 +17,7 @@ public sealed class AllSubscriptionTypes : IUseCase<Task<IReadOnlyCollection<Sub
 
     public async Task<IReadOnlyCollection<SubscriptionData>> Execute()
     {
-        _logger.LogInformation("Fetching all Subscription types ...");
+        _logger.LogInformation("Fetching all Subscription types");
 
         return await _subscriptionTypes.Fetch();
 

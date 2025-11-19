@@ -4,7 +4,7 @@ namespace Adria.Application.Contracts;
 
 public interface IUserByIdQuery
 {
-    Task<UserData?> Fetch(string userId);
+    Task<UserData?> Fetch(Guid userId);
 }
 
 public interface IAllSubscriptionTypes
@@ -14,7 +14,7 @@ public interface IAllSubscriptionTypes
 
 public interface ISearchSubscriptionTypeByIdQuery
 {
-    Task<IReadOnlyCollection<SubscriptionData>> Fetch(Guid id);
+    Task<SubscriptionData> Fetch(Guid id);
 }
 
 public interface ITopUsersByPointsQuery
@@ -27,7 +27,7 @@ public interface IAllCoursesQuery
     Task<IReadOnlyCollection<CourseData>> Fetch();
 }
 
-public interface ICustomerCoursesByUserQuery
+public interface IUserCoursesByUserQuery
 {
-    Task<IReadOnlyCollection<UserData>> Fetch(string id);
+    Task<IReadOnlyCollection<UserCourseData>> Fetch(Guid id);
 }

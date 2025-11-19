@@ -8,13 +8,24 @@ namespace Taskly.Infrastructure.Persistence.Queries;
 public sealed class UserByIdQuery : IUserByIdQuery
 {
     private static readonly string QRY = @"
-        SELECT User.AdriaID, User.Name, User.Wallet, User.PointsBalance, User.LastPayment, User.Streak, cs.CustomerSubscriptionID, cs.Status, Subscription.SubscriptionID, Subscription.Type AS SubscriptionType, Subscription.PricePerCycle
-FROM `User`
-LEFT JOIN `CustomerSubscription` cs 
-    ON User.AdriaID = cs.AdriaID AND cs.Status = 'Active'
-LEFT JOIN `Subscription` 
-    ON cs.SubscriptionID = Subscription.SubscriptionID
-WHERE User.AdriaID = @Id;";
+        SELECT 
+            User.AdriaID, 
+            User.Name, 
+            User.Wallet, 
+            User.PointsBalance, 
+            User.Streak, 
+            cs.UserSubscriptionID, 
+            cs.Status, 
+            Subscription.SubscriptionID, 
+            Subscription.Type AS SubscriptionType, 
+            Subscription.Price, 
+            Subscription.Description, 
+            Subscription.IsMostPopular
+        FROM `User`
+        LEFT JOIN `UserSubscription` cs ON User.AdriaID = cs.AdriaID AND cs.Status = 'Active'
+        LEFT JOIN `Subscription` ON cs.SubscriptionID = Subscription.SubscriptionID
+        WHERE User.AdriaID = @Id;
+";
     
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
@@ -30,7 +41,7 @@ WHERE User.AdriaID = @Id;";
         _logger = logger;
     }
 
-    public async Task<UserData?> Fetch(string userId)
+    public async Task<UserData?> Fetch(Guid userId)
     {
         _logger.LogInformation("Starting to fetch user with ID {UserId}", userId);
 
@@ -45,7 +56,7 @@ WHERE User.AdriaID = @Id;";
 
         var parameter = command.CreateParameter();
         parameter.ParameterName = "@Id";
-        parameter.Value = userId.ToString();
+        parameter.Value = userId;
         command.Parameters.Add(parameter);
 
         using var reader = await command.ExecuteReaderAsync();
@@ -56,15 +67,12 @@ WHERE User.AdriaID = @Id;";
             _logger.LogInformation("User with ID {UserId} not found", userId);
             return null;
         }
-        var id = reader.GetString(reader.GetOrdinal("AdriaID"));
+        
+        var id = reader.GetGuid(reader.GetOrdinal("AdriaID"));
         var name = reader.GetString(reader.GetOrdinal("Name"));
         var wallet = reader.GetDecimal(reader.GetOrdinal("Wallet"));
         var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
         var streak = reader.GetInt32(reader.GetOrdinal("Streak"));
-
-        DateTime? lastPayment = reader.IsDBNull(reader.GetOrdinal("LastPayment"))
-            ? null
-            : reader.GetDateTime(reader.GetOrdinal("LastPayment"));
 
         Guid? subscriptionId = await reader.IsDBNullAsync(reader.GetOrdinal("SubscriptionID"))
             ? null
@@ -76,14 +84,12 @@ WHERE User.AdriaID = @Id;";
             subscription = new SubscriptionData(
                 reader.GetGuid(reader.GetOrdinal("SubscriptionID")),
                 reader.GetString(reader.GetOrdinal("SubscriptionType")),
-                reader.GetDecimal(reader.GetOrdinal("PricePerCycle")),
-                "no description",
+                reader.GetDecimal(reader.GetOrdinal("Price")),
+                reader.GetString(reader.GetOrdinal("Description")).Split(',', StringSplitOptions.TrimEntries).ToList(),
                 reader.GetBoolean(reader.GetOrdinal("IsMostPopular"))
 
             );
         }
-    
-    var courses = new List<CustomerCourseData>();
 
         _logger.LogInformation("Found user with ID {UserId}", userId);
 
@@ -92,10 +98,8 @@ WHERE User.AdriaID = @Id;";
         name,
         wallet,
         points,
-        lastPayment,
         streak,
-        subscription,
-        courses
+        subscription
     );
 }
 }

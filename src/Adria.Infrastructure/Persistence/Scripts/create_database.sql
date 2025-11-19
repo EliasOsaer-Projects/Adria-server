@@ -1,10 +1,17 @@
 DROP TABLE IF EXISTS `PointsPayment`;
-DROP TABLE IF EXISTS `CosmeticItem`;
-DROP TABLE IF EXISTS `CustomerCourse`;
-DROP TABLE IF EXISTS `CourseModule`;
-DROP TABLE IF EXISTS `Courses`;
+DROP TABLE IF EXISTS `UserQuestionAnswer`;
+DROP TABLE IF EXISTS `QuestionAnswer`;
+DROP TABLE IF EXISTS `Answer`;
+DROP TABLE IF EXISTS `Question`;
+DROP TABLE IF EXISTS `Module`;
+DROP TABLE IF EXISTS `UserCourse`;
+DROP TABLE IF EXISTS `UserSubscription`;
 DROP TABLE IF EXISTS `Payment`;
-DROP TABLE IF EXISTS `CustomerSubscription`;
+DROP TABLE IF EXISTS `CosmeticItem`;
+
+DROP TABLE IF EXISTS `Course`;
+DROP TABLE IF EXISTS `CoverImage`;
+DROP TABLE IF EXISTS `BannerImage`;
 DROP TABLE IF EXISTS `Subscription`;
 DROP TABLE IF EXISTS `User`;
 
@@ -12,442 +19,3139 @@ DROP TABLE IF EXISTS `User`;
 
 -- USERS
 CREATE TABLE `User` (
-    `AdriaID` VARCHAR(36) PRIMARY KEY NOT NULL,
-    `Name` VARCHAR(100) NOT NULL,
-    `Wallet` DECIMAL(10,2) NOT NULL DEFAULT 0,
-    `PointsBalance` INT DEFAULT 0,
-    `LastPayment` DATE,
-    `Streak` INT DEFAULT 0
+                        `AdriaID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                        `Name` VARCHAR(100) NOT NULL,
+                        `Wallet` DECIMAL(10,2) NOT NULL DEFAULT 0,
+                        `PointsBalance` INT DEFAULT 0,
+                        `Streak` INT DEFAULT 0,
+                        `ProfilePicture` LONGBLOB
 );
 
 -- SUBSCRIPTIONS
 CREATE TABLE `Subscription` (
-    `SubscriptionID` VARCHAR(36) PRIMARY KEY NOT NULL,
-    `Type` VARCHAR(50) NOT NULL,
-    `PricePerCycle` DECIMAL(10,2) NOT NULL,
-    `IsMostPopular` BOOLEAN NOT NULL DEFAULT FALSE
+                                `SubscriptionID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                                `Type` VARCHAR(50) NOT NULL,
+                                `Price` DECIMAL(10,2) NOT NULL,
+                                `IsMostPopular` BOOLEAN NOT NULL DEFAULT FALSE,
+                                `Description` VARCHAR(1024)
 );
 
 -- CUSTOMER SUBSCRIPTIONS
-CREATE TABLE `CustomerSubscription` (
-    `CustomerSubscriptionID` VARCHAR(36) PRIMARY KEY NOT NULL,
-    `StartDate` DATETIME NOT NULL,
-    `EndDate` DATETIME NOT NULL,
-    `Status` VARCHAR(50) NOT NULL,
-    `AdriaID` VARCHAR(36) NOT NULL,
-    `SubscriptionID` VARCHAR(36) NOT NULL,
-    
-    FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`),
-    FOREIGN KEY (`SubscriptionID`) REFERENCES `Subscription`(`SubscriptionID`)
+CREATE TABLE `UserSubscription` (
+                                    `UserSubscriptionID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                                    `StartDate` DATETIME NOT NULL,
+                                    `EndDate` DATETIME NOT NULL,
+                                    `Status` VARCHAR(50) NOT NULL,
+                                    `AdriaID` VARCHAR(36) NOT NULL,
+                                    `SubscriptionID` VARCHAR(36) NOT NULL,
+
+                                    FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE,
+                                    FOREIGN KEY (`SubscriptionID`) REFERENCES `Subscription`(`SubscriptionID`) ON DELETE CASCADE
 );
 
 -- PAYMENTS
 CREATE TABLE `Payment` (
-   `TransactionID` VARCHAR(36) PRIMARY KEY NOT NULL,
-   `AdriaCoinAmount` DECIMAL(10,2) NOT NULL,
-   `TransactionDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   `AdriaID` VARCHAR(36) NOT NULL,
-    
-   FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`)
+                           `TransactionID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                           `AdriaCoinAmount` DECIMAL(10,2) NOT NULL,
+                           `TransactionDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                           `AdriaID` VARCHAR(36) NOT NULL,
+
+                           FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE
+);
+
+CREATE TABLE `BannerImage` (
+                               `BannerImageID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                               `BannerImage` LONGBLOB
+);
+
+CREATE TABLE `CoverImage` (
+                              `CoverImageID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                              `CoverImage` LONGBLOB
 );
 
 -- COURSES
-CREATE TABLE `Courses` (
-  `CourseID` VARCHAR(36) PRIMARY KEY NOT NULL,
-  `CourseName` VARCHAR(255) NOT NULL,
-  `CourseDifficulty`INT NOT NULL,
-  `CourseDescription` TEXT,
-  `CourseCategory` VARCHAR(255) NOT NULL,
-  `PointsOnCompletion` INT NOT NULL,
-  `EstimatedDurationInHours` INT,
-  `CoverImageID` VARCHAR(255),
-  `BannerImageID` VARCHAR(255),
-  `SubscriptionRequired` INT NOT NULL,
-  `CourseTags` VARCHAR(255) NOT NULL
-);
+CREATE TABLE `Course` (
+                          `CourseID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                          `CourseName` VARCHAR(255) NOT NULL,
+                          `CourseDifficulty`INT NOT NULL,
+                          `CourseDescription` VARCHAR(4096),
+                          `CourseCategory` VARCHAR(255) NOT NULL,
+                          `CourseTags` VARCHAR(255) NOT NULL,
+                          `PointsOnCompletion` INT NOT NULL,
+                          `EstimatedDurationInHours` INT,
+                          `CoverImageID` VARCHAR(36),
+                          `BannerImageID` VARCHAR(36),
+                          `LearnList` VARCHAR(1024),
+                          `SubscriptionRequired` BOOLEAN NOT NULL,
 
--- COURSE MODULES
-CREATE TABLE `CourseModule` (
-    `CourseModuleID` VARCHAR(36) PRIMARY KEY NOT NULL,
-    `ModuleName` VARCHAR(255) NOT NULL,
-    `CourseID` VARCHAR(36) NOT NULL,
-    FOREIGN KEY (`CourseID`) REFERENCES `Courses`(`CourseID`)
+                          FOREIGN KEY (`CoverImageID`) REFERENCES `CoverImage`(`CoverImageID`) ON DELETE CASCADE,
+                          FOREIGN KEY (`BannerImageID`) REFERENCES `BannerImage`(`BannerImageID`) ON DELETE CASCADE
 );
 
 -- CUSTOMER COURSES
-CREATE TABLE `CustomerCourse` (
-  `CustomerCourseID` VARCHAR(36) PRIMARY KEY NOT NULL,
-  `CompletionStatus` BOOLEAN NOT NULL,
-  `ProgressPercentage` INT NOT NULL DEFAULT 0,
-  `StartDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `CompletionDate` DATETIME,
-  `AdriaID` VARCHAR(36) NOT NULL,
-  `CourseID` VARCHAR(36) NOT NULL,
-  FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`),
-  FOREIGN KEY (`CourseID`) REFERENCES `Courses`(`CourseID`)
+CREATE TABLE `UserCourse` (
+                              `CompletionStatus` BOOLEAN NOT NULL DEFAULT 0,
+                              `ProgressPercentage` INT NOT NULL DEFAULT 0,
+                              `StartDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                              `EndDate` DATETIME,
+                              `AdriaID` VARCHAR(36) NOT NULL,
+                              `CourseID` VARCHAR(36) NOT NULL,
+                              FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE,
+                              FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE
+);
+
+-- COURSE MODULES
+
+CREATE TABLE `Module` (
+                          `ModuleID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                          `CourseID` VARCHAR(36) NOT NULL,
+                          `Position` INT NOT NULL,
+                          `Content` TEXT NOT NULL,
+
+                          FOREIGN KEY (`CourseID`) REFERENCES `Course`(`CourseID`) ON DELETE CASCADE
+);
+
+-- QUESTIONS AND ANSWERS
+
+CREATE TABLE `Question` (
+                            `QuestionID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                            `Question` VARCHAR(1024) NOT NULL
+);
+
+CREATE TABLE `Answer` (
+                          `AnswerID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                          `Answer` VARCHAR(1024) NOT NULL,
+                          `IsCorrect` BOOLEAN NOT NULL
+);
+
+CREATE TABLE `QuestionAnswer` (
+                                  `QAID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                                  `ModuleID` VARCHAR(36) NOT NULL,
+                                  `QuestionID` VARCHAR(36) NOT NULL,
+                                  `AnswerID` VARCHAR(36),
+
+                                  FOREIGN KEY (`ModuleID`) REFERENCES `Module`(`ModuleID`) ON DELETE CASCADE,
+                                  FOREIGN KEY (`QuestionID`) REFERENCES `Question`(`QuestionID`) ON DELETE CASCADE,
+                                  FOREIGN KEY (`AnswerID`) REFERENCES `Answer`(`AnswerID`) ON DELETE CASCADE
+);
+
+CREATE TABLE `UserQuestionAnswer` (
+                                      `QAID` VARCHAR(36) NOT NULL,
+                                      `AdriaID` VARCHAR(36) NOT NULL,
+                                      `IsCorrectlyAnswered` BOOLEAN NOT NULL,
+
+                                      FOREIGN KEY (`QAID`) REFERENCES `QuestionAnswer`(`QAID`) ON DELETE CASCADE,
+                                      FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE
 );
 
 -- COSMETICS
 CREATE TABLE `CosmeticItem` (
-    `CosmeticItemID` VARCHAR(36) PRIMARY KEY NOT NULL,
-    `ItemName` VARCHAR(100) NOT NULL,
-    `ItemType` VARCHAR(50) NOT NULL,
-    `PointsCost` INT NOT NULL
+                                `CosmeticItemID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                                `ItemName` VARCHAR(100) NOT NULL,
+                                `ItemType` VARCHAR(50) NOT NULL,
+                                `PointsCost` INT NOT NULL
 );
 
 -- POINT PAYMENTS
 CREATE TABLE `PointsPayment` (
-    `PointsTransactionID` VARCHAR(36) PRIMARY KEY NOT NULL,
-    `PointsAmount` INT NOT NULL,
-    `TransactionDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `AdriaID` VARCHAR(36) NOT NULL,
-    `CosmeticItemID` VARCHAR(36) NOT NULL,
-    FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`),
-    FOREIGN KEY (`CosmeticItemID`) REFERENCES `CosmeticItem`(`CosmeticItemID`)
+                                 `PointsTransactionID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                                 `PointsAmount` INT NOT NULL,
+                                 `TransactionDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                 `AdriaID` VARCHAR(36) NOT NULL,
+                                 `CosmeticItemID` VARCHAR(36) NOT NULL,
+                                 FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE,
+                                 FOREIGN KEY (`CosmeticItemID`) REFERENCES `CosmeticItem`(`CosmeticItemID`) ON DELETE CASCADE
 );
 
-/* SEED DATA */
 
--- USERS
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('8fcff41a-0342-4f57-a12f-3e771a6dcea1', 'John');
+-- SEED DATA
+-- =====================================================
+-- GENESIS LEARNING PLATFORM - DATABASE INSERT STATEMENTS
+-- Generated for post-apocalypse Earth repopulation
+-- Context: Mars colonists return in 2084 to rebuild
+-- =====================================================
 
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('c3d8b6a4-6a9a-4df0-9322-9b8c71f12a5d', 'Alice');
+-- ===== USERS =====
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`) VALUES ('389bc6fb-080e-4450-ac9a-2ff10868b0d6', 'Sarah Chen', 125.5, 350, 7, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`) VALUES ('48a0cbe3-b26f-40bb-8386-89099378f2a0', 'Marcus Thompson', 89.75, 520, 14, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`) VALUES ('34dd7192-9e23-4d16-bd3f-4223b301febc', 'Elena Rodriguez', 200.0, 180, 3, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`) VALUES ('db5b29f6-7078-48cf-94e8-f491096482be', 'Kai Anderson', 45.25, 95, 1, NULL);
 
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('1e5b9f79-7e4a-4b48-9f77-932dd8fda47d', 'Bob');
+-- ===== SUBSCRIPTIONS =====
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('e9024415-00e5-401c-84c3-5d4b2489b975', 'Free', 0.0, 0, 'Basic access to limited courses and features');
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('26d25a2b-970c-4428-b224-438d5b1584a5', 'Basic', 9.99, 0, 'Access to most courses with standard features');
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('eebfa304-3e1f-4a75-9d0d-d147b78c735f', 'Premium', 19.99, 1, 'Full access to all courses, priority support, and bonus content');
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('5e04b02d-eac7-42c0-b877-9ecbc695cec2', 'Ultimate', 29.99, 0, 'Everything in Premium plus exclusive masterclasses and personal learning assistant');
 
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('e92b7b45-78a0-44a2-8d89-2b3ad3ad28e3', 'Charlie');
+-- ===== USER SUBSCRIPTIONS =====
+INSERT INTO `UserSubscription` (`UserSubscriptionID`, `StartDate`, `EndDate`, `Status`, `AdriaID`, `SubscriptionID`) VALUES ('7c3c7712-cfb8-4e29-9386-f61ff2c53b0e', '2084-01-15 10:00:00', '2085-01-15 10:00:00', 'Active', '389bc6fb-080e-4450-ac9a-2ff10868b0d6', 'eebfa304-3e1f-4a75-9d0d-d147b78c735f');
+INSERT INTO `UserSubscription` (`UserSubscriptionID`, `StartDate`, `EndDate`, `Status`, `AdriaID`, `SubscriptionID`) VALUES ('fd98424c-2caa-40ab-a11e-ba99aa87769c', '2084-02-01 14:30:00', '2085-02-01 14:30:00', 'Active', '48a0cbe3-b26f-40bb-8386-89099378f2a0', '5e04b02d-eac7-42c0-b877-9ecbc695cec2');
+INSERT INTO `UserSubscription` (`UserSubscriptionID`, `StartDate`, `EndDate`, `Status`, `AdriaID`, `SubscriptionID`) VALUES ('13300376-1277-4629-9de0-a2f6ec5251f7', '2084-03-10 09:15:00', '2085-03-10 09:15:00', 'Active', '34dd7192-9e23-4d16-bd3f-4223b301febc', '26d25a2b-970c-4428-b224-438d5b1584a5');
 
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('fa2a4b61-3c3b-44cf-b7d2-88b3e2fd1a1d', 'Diana');
+-- ===== PAYMENTS =====
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('9d80fdb9-eae1-45c8-a748-c86218d21b04', 50.0, '2084-01-15 10:05:00', '389bc6fb-080e-4450-ac9a-2ff10868b0d6');
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('dd6049ea-3e30-4d25-82f6-d78d5a00616a', 25.5, '2084-03-20 15:30:00', '389bc6fb-080e-4450-ac9a-2ff10868b0d6');
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('7050d070-934f-4741-a15d-ba54b9946f02', 50.0, '2084-06-12 11:20:00', '389bc6fb-080e-4450-ac9a-2ff10868b0d6');
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('e696b7ba-28d9-4d3a-80f1-7af1ff0ad5c8', 29.99, '2084-02-01 14:35:00', '48a0cbe3-b26f-40bb-8386-89099378f2a0');
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('8571b7ca-896e-4a99-9b78-62a6fe9927cd', 30.0, '2084-04-10 09:45:00', '48a0cbe3-b26f-40bb-8386-89099378f2a0');
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('e4c1cf2f-f6f9-4ec9-bea7-da96c7633420', 29.76, '2084-07-05 16:10:00', '48a0cbe3-b26f-40bb-8386-89099378f2a0');
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('8a6d5b53-dcbf-4f19-b1d0-5b4f88660d07', 100.0, '2084-03-10 09:20:00', '34dd7192-9e23-4d16-bd3f-4223b301febc');
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('c2f2c039-f5e6-4ecc-8578-3e22a180e9ae', 100.0, '2084-08-15 13:00:00', '34dd7192-9e23-4d16-bd3f-4223b301febc');
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('22330134-7716-4039-8010-a70e8297c270', 20.0, '2084-05-05 10:30:00', 'db5b29f6-7078-48cf-94e8-f491096482be');
+INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('35c18dfd-cf4f-448e-9a87-d4f4796e0ad3', 25.25, '2084-09-01 14:15:00', 'db5b29f6-7078-48cf-94e8-f491096482be');
 
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('6b4e02e9-46c1-45c5-8c1b-1cb4e84c0f93', 'Ethan');
+-- ===== COSMETIC ITEMS =====
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('9d2ef6f2-88c6-4cc3-a268-e94a208b5616', 'Pioneer Badge', 'Badge', 100);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('578cb38c-418e-4460-91ed-bc034c0deb99', 'Scholar Badge', 'Badge', 250);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('ff1c72ac-8781-4d63-b404-6763d1e20d79', 'Master Badge', 'Badge', 500);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('b95f5e95-c46b-4b95-b671-cfe23b3930fc', 'Golden Frame', 'Frame', 150);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('051d3efe-97b8-40f6-955c-a3388a39146a', 'Mars Colony Frame', 'Frame', 300);
 
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('b5d0ef9d-8a7c-4a6c-bc29-0f4cf60b2e60', 'Fiona');
+-- ===== COURSES =====
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('5fe6e3d1-0a74-4759-9bad-a5f0e48a9340', 'Baking bread for the modern household', 1, 'Learn the fundamentals of bread making from scratch, essential for self-sufficient living in the new Earth.', 'Culinary Arts', 'baking, bread, cooking, food preparation, kitchen skills', 50, 4, NULL, NULL, 'Basic dough preparation, Kneading techniques, Yeast activation, Baking temperatures, Bread storage methods', 0);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('9d649dc9-a233-4274-904c-3f75936ae86e', 'Surgery for dummies', 3, 'Basic surgical techniques and emergency medical procedures for survival situations.', 'Medical Science', 'surgery, medical, healthcare, emergency, first aid', 150, 20, NULL, NULL, 'Sterilization procedures, Basic suturing, Wound care, Emergency protocols, Surgical tools usage', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('db0387d9-3594-417e-838b-424a0006b452', 'Carpenter''s guide', 2, 'Master woodworking and construction skills to build and repair structures.', 'Construction', 'carpentry, woodworking, construction, building, tools', 75, 12, NULL, NULL, 'Tool identification, Wood selection, Joinery techniques, Structural basics, Safety protocols', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('97185e87-68f7-4668-97ce-6d3ed941d54f', 'Intro to bricklaying', 2, 'Essential masonry skills for building durable structures in the repopulated Earth.', 'Construction', 'bricklaying, masonry, construction, building, foundations', 70, 10, NULL, NULL, 'Mortar mixing, Brick patterns, Level checking, Foundation work, Wall construction', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('62bc5d6d-2102-4884-af09-e601cc8b79db', 'Primates and pizza', 1, 'An anthropological study of human evolution and cultural food traditions.', 'History', 'anthropology, evolution, culture, food history, primates', 45, 6, NULL, NULL, 'Human evolution timeline, Primate behavior, Cultural food origins, Pizza history, Dietary anthropology', 0);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('b0842838-1709-4c80-b231-632db7f46b05', 'World history', 2, 'Comprehensive overview of human civilization from ancient times to the pre-apocalypse era.', 'History', 'history, civilization, culture, society, world events', 100, 15, NULL, NULL, 'Ancient civilizations, Major world events, Cultural movements, Technological advancement, Pre-apocalypse society', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('69f96e21-2551-46e0-929b-89f7f8e7c98a', 'Basic culinary skills', 1, 'Foundation cooking techniques and food safety for everyday meal preparation.', 'Culinary Arts', 'cooking, food, kitchen, recipes, meal preparation', 40, 5, NULL, NULL, 'Knife skills, Cooking methods, Food safety, Recipe reading, Kitchen organization', 0);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('70f8cbb3-886c-4563-adea-ffee0152e373', 'Wilderness basics', 2, 'Essential survival skills for navigating and thriving in natural environments.', 'Survival Skills', 'survival, wilderness, outdoors, nature, camping', 80, 8, NULL, NULL, 'Shelter building, Water purification, Fire starting, Navigation, Foraging basics', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('c2c0891f-d14e-4926-8e55-864063956862', 'Programming fundamentals', 2, 'Introduction to coding and computer science principles for rebuilding technology.', 'Technology', 'programming, coding, computers, software, technology', 90, 14, NULL, NULL, 'Programming logic, Variables and data types, Control structures, Functions, Debugging basics', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('80fdbf18-d6e2-4b6a-a42a-071b460b15bd', 'King Von-ism: a history', 1, 'Cultural study of influential pre-apocalypse musical movements and their societal impact.', 'History', 'culture, music, history, society, art', 35, 4, NULL, NULL, 'Musical movements, Cultural impact, Historical context, Artistic expression, Social influence', 0);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('0819e979-a9ba-42b6-a55f-cbe08427b821', 'Psych 101', 2, 'Introduction to human psychology and mental health awareness.', 'Science', 'psychology, mental health, behavior, mind, science', 85, 12, NULL, NULL, 'Basic psychology concepts, Human behavior, Mental health basics, Cognitive processes, Emotional intelligence', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('571d18ff-220f-4eca-abe9-eea6d8b2bc2a', 'Bird blindness: a deepdive', 3, 'Advanced ornithological study on avian vision limitations and adaptation.', 'Science', 'birds, biology, ornithology, vision, animals', 120, 10, NULL, NULL, 'Avian anatomy, Vision mechanisms, Adaptation strategies, Research methods, Ecological impact', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('fe14820b-a8a0-4a90-917e-a02710bc51b3', 'Salsa and cha-cha', 1, 'Learn traditional dance forms to reconnect with human cultural expression.', 'Arts', 'dance, music, culture, movement, performance', 30, 6, NULL, NULL, 'Basic steps, Rhythm understanding, Partner coordination, Cultural context, Performance techniques', 0);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('5609397a-9a25-4ef4-bc03-cc32c8b3da7c', 'How to train your dragon', 1, 'Mythology and storytelling traditions from ancient human cultures.', 'Arts', 'mythology, storytelling, culture, fantasy, literature', 25, 3, NULL, NULL, 'Mythological creatures, Storytelling techniques, Cultural narratives, Literary analysis, Creative imagination', 0);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('3adfb50b-91c2-4b12-a316-cd377d5f1668', 'How to raise children', 2, 'Essential parenting skills and child development knowledge for repopulating Earth.', 'Life Skills', 'parenting, children, family, development, childcare', 95, 16, NULL, NULL, 'Child development stages, Nutrition basics, Educational approaches, Safety measures, Emotional support', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('cab91c44-56af-4823-8578-3979adfcf680', 'Outback basics', 2, 'Survival techniques specific to harsh, arid environments.', 'Survival Skills', 'survival, desert, outdoors, wilderness, harsh environments', 75, 9, NULL, NULL, 'Desert survival, Water conservation, Heat management, Navigation in arid lands, Resource finding', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('9ac0620e-1e07-4cd9-a588-56e3aaee4abb', 'Fishing 101', 1, 'Basic fishing techniques for sustainable food sourcing.', 'Survival Skills', 'fishing, food, survival, outdoors, water', 40, 5, NULL, NULL, 'Fishing equipment, Bait selection, Casting techniques, Fish identification, Sustainable practices', 0);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('70d62244-fe2c-4acb-8943-40eb26e042cc', 'How to mine', 3, 'Resource extraction and mining techniques for rebuilding civilization.', 'Technology', 'mining, resources, extraction, industry, technology', 130, 18, NULL, NULL, 'Mining safety, Tool usage, Resource identification, Extraction methods, Environmental considerations', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('308934f3-03ea-46f4-97df-b6cbbbf52cc3', 'Cleaning 101', 1, 'Hygiene and sanitation practices for healthy living environments.', 'Life Skills', 'cleaning, hygiene, sanitation, health, household', 20, 2, NULL, NULL, 'Cleaning products, Sanitization methods, Organization systems, Waste management, Maintenance routines', 0);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('1dd22626-44a8-4866-8aa7-c442bb82e274', 'How to hunt', 3, 'Ethical hunting practices and techniques for sustainable food procurement.', 'Survival Skills', 'hunting, survival, food, wildlife, outdoors', 110, 14, NULL, NULL, 'Hunting ethics, Weapon safety, Tracking skills, Game preparation, Conservation principles', 1);
+INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('2b96c4e9-d4fa-40fb-9934-66a2b059c8a8', 'A complete guide to cats', 1, 'Understanding and caring for feline companions in human society.', 'Life Skills', 'cats, pets, animals, care, domestic', 30, 4, NULL, NULL, 'Cat behavior, Feeding requirements, Health care, Training basics, Human-cat bonding', 0);
 
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('a0b2b58e-df83-49d3-b39b-1cded5b2b1b1', 'George');
+-- ===== USER COURSE ENROLLMENTS =====
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (1, 100, '2084-02-01 09:00:00', '2084-02-15 16:30:00', '389bc6fb-080e-4450-ac9a-2ff10868b0d6', '5fe6e3d1-0a74-4759-9bad-a5f0e48a9340');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 75, '2084-03-01 10:00:00', NULL, '389bc6fb-080e-4450-ac9a-2ff10868b0d6', '69f96e21-2551-46e0-929b-89f7f8e7c98a');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 45, '2084-04-10 11:00:00', NULL, '389bc6fb-080e-4450-ac9a-2ff10868b0d6', '3adfb50b-91c2-4b12-a316-cd377d5f1668');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (1, 100, '2084-01-20 14:00:00', '2084-01-28 10:00:00', '389bc6fb-080e-4450-ac9a-2ff10868b0d6', '2b96c4e9-d4fa-40fb-9934-66a2b059c8a8');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 30, '2084-05-01 15:00:00', NULL, '389bc6fb-080e-4450-ac9a-2ff10868b0d6', 'fe14820b-a8a0-4a90-917e-a02710bc51b3');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 60, '2084-02-15 08:30:00', NULL, '48a0cbe3-b26f-40bb-8386-89099378f2a0', 'c2c0891f-d14e-4926-8e55-864063956862');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (1, 100, '2084-03-01 09:00:00', '2084-04-20 17:00:00', '48a0cbe3-b26f-40bb-8386-89099378f2a0', '70d62244-fe2c-4acb-8943-40eb26e042cc');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 85, '2084-04-25 10:00:00', NULL, '48a0cbe3-b26f-40bb-8386-89099378f2a0', 'b0842838-1709-4c80-b231-632db7f46b05');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 40, '2084-06-01 11:30:00', NULL, '48a0cbe3-b26f-40bb-8386-89099378f2a0', '0819e979-a9ba-42b6-a55f-cbe08427b821');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 25, '2084-03-20 09:00:00', NULL, '34dd7192-9e23-4d16-bd3f-4223b301febc', '9d649dc9-a233-4274-904c-3f75936ae86e');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (1, 100, '2084-04-01 08:00:00', '2084-05-10 16:00:00', '34dd7192-9e23-4d16-bd3f-4223b301febc', 'db0387d9-3594-417e-838b-424a0006b452');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 70, '2084-05-15 09:30:00', NULL, '34dd7192-9e23-4d16-bd3f-4223b301febc', '97185e87-68f7-4668-97ce-6d3ed941d54f');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 55, '2084-06-01 10:00:00', NULL, '34dd7192-9e23-4d16-bd3f-4223b301febc', '70f8cbb3-886c-4563-adea-ffee0152e373');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 90, '2084-07-01 08:30:00', NULL, '34dd7192-9e23-4d16-bd3f-4223b301febc', '1dd22626-44a8-4866-8aa7-c442bb82e274');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 15, '2084-08-01 14:00:00', NULL, '34dd7192-9e23-4d16-bd3f-4223b301febc', '571d18ff-220f-4eca-abe9-eea6d8b2bc2a');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (1, 100, '2084-05-10 10:00:00', '2084-05-12 15:00:00', 'db5b29f6-7078-48cf-94e8-f491096482be', '308934f3-03ea-46f4-97df-b6cbbbf52cc3');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 50, '2084-06-01 09:00:00', NULL, 'db5b29f6-7078-48cf-94e8-f491096482be', '9ac0620e-1e07-4cd9-a588-56e3aaee4abb');
+INSERT INTO `UserCourse` (`CompletionStatus`, `ProgressPercentage`, `StartDate`, `EndDate`, `AdriaID`, `CourseID`) VALUES (0, 20, '2084-08-15 11:00:00', NULL, 'db5b29f6-7078-48cf-94e8-f491096482be', '5609397a-9a25-4ef4-bc03-cc32c8b3da7c');
 
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('7efb3a55-4b6a-4af1-bab6-fbe6c9a52b94', 'Hannah');
+-- ===== MODULES (3 per course) =====
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('f0ba7fa5-4e99-454c-8703-e0731d3307ef', '5fe6e3d1-0a74-4759-9bad-a5f0e48a9340', 1, '<h2>Welcome to Bread Making</h2><p>In this module, you will learn the fundamental concepts of bread making. We will explore the history of bread, the basic ingredients, and the science behind fermentation. Understanding these basics will set you up for success in creating delicious homemade bread.</p><h3>Key Topics</h3><p>History of breadmaking, ingredient selection, and the role of yeast in fermentation.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('e06b0192-74d4-4f10-9f89-f8a51625939c', '5fe6e3d1-0a74-4759-9bad-a5f0e48a9340', 2, '<h2>Working with Dough</h2><p>This module covers the essential techniques for kneading dough and developing gluten structure. You will practice different kneading methods and learn how to recognize when your dough is ready for proofing.</p><h3>Practical Skills</h3><p>Hand kneading techniques, windowpane test, and proper dough consistency.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('2bcfb9de-3849-4b53-b8ef-b08368101a9e', '5fe6e3d1-0a74-4759-9bad-a5f0e48a9340', 3, '<h2>From Oven to Table</h2><p>Learn the final steps of bread making including shaping, scoring, and baking. We will discuss oven temperatures, steam creation, and how to achieve the perfect crust. Storage techniques will ensure your bread stays fresh.</p><h3>Final Touches</h3><p>Proper baking techniques, crust development, and bread storage methods.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('e8e5a1c9-53b9-4aec-8828-1bed37b156ef', '9d649dc9-a233-4274-904c-3f75936ae86e', 1, '<h2>Foundation of Surgical Practice</h2><p>This critical module introduces you to the principles of medical safety and sterilization. Learn about contamination prevention, proper instrument handling, and creating a sterile field. These practices are essential for any medical procedure.</p><h3>Safety First</h3><p>Sterilization protocols, personal protective equipment, and contamination prevention.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('6a22eb13-7058-4db8-99e4-08e6c1a088d5', '9d649dc9-a233-4274-904c-3f75936ae86e', 2, '<h2>Essential Procedures</h2><p>Develop hands-on skills with basic surgical techniques including incision, suturing, and wound closure. This module provides step-by-step guidance on performing fundamental surgical procedures safely and effectively.</p><h3>Core Skills</h3><p>Incision techniques, suturing patterns, and tissue handling.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('21dc89af-fd56-4aee-a2ec-6abb2c31f273', '9d649dc9-a233-4274-904c-3f75936ae86e', 3, '<h2>Crisis Management</h2><p>Learn to respond to medical emergencies with confidence. This module covers triage, emergency surgical interventions, and life-saving procedures when resources are limited.</p><h3>Critical Situations</h3><p>Triage protocols, emergency surgery, and improvised medical solutions.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('295fd5e3-801f-4648-8c99-381470be7c41', 'db0387d9-3594-417e-838b-424a0006b452', 1, '<h2>The Carpenter''s Toolkit</h2><p>Familiarize yourself with essential carpentry tools and wood materials. Learn proper tool maintenance, safety procedures, and how to select the right wood for your projects.</p><h3>Getting Started</h3><p>Tool identification, maintenance practices, and wood species characteristics.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('7ddcf202-240f-424f-9f20-87a28f641822', 'db0387d9-3594-417e-838b-424a0006b452', 2, '<h2>Building Strong Connections</h2><p>Master various joinery techniques that form the backbone of carpentry. From simple butt joints to complex dovetails, you will learn to create strong, lasting connections.</p><h3>Connection Methods</h3><p>Joint types, assembly techniques, and structural integrity.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('409b0df9-e78e-4c74-8925-e84a0143056c', 'db0387d9-3594-417e-838b-424a0006b452', 3, '<h2>From Blueprint to Reality</h2><p>Transform your ideas into finished projects. This module teaches project planning, measurement, and the step-by-step process of completing carpentry projects.</p><h3>Project Management</h3><p>Reading plans, accurate measurement, and quality control.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('a9b323b2-2b75-4f5c-8706-860dc090094b', '97185e87-68f7-4668-97ce-6d3ed941d54f', 1, '<h2>Building from the Ground Up</h2><p>Understand the fundamentals of masonry including foundation preparation, brick types, and mortar mixing. This module establishes the groundwork for successful bricklaying.</p><h3>Foundation Knowledge</h3><p>Foundation types, brick selection, and mortar composition.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('f4172077-ed6c-4924-a83a-e4eae0dc3662', '97185e87-68f7-4668-97ce-6d3ed941d54f', 2, '<h2>Laying the Course</h2><p>Learn proper bricklaying techniques including leveling, plumb checking, and creating various bond patterns. Practice ensures precision and structural soundness.</p><h3>Technical Skills</h3><p>Brick patterns, leveling methods, and mortar application.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('10201cac-3b52-4952-9cfd-83fe24d904e4', '97185e87-68f7-4668-97ce-6d3ed941d54f', 3, '<h2>Building Vertical Structures</h2><p>Apply your skills to construct complete walls. This module covers corner building, opening creation, and finishing techniques for professional results.</p><h3>Advanced Construction</h3><p>Corner techniques, opening frames, and surface finishing.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '62bc5d6d-2102-4884-af09-e601cc8b79db', 1, '<h2>Our Primate Heritage</h2><p>Explore the fascinating journey of human evolution from early primates to modern humans. Understand our place in the primate family tree and the biological traits we share.</p><h3>Evolutionary Journey</h3><p>Primate characteristics, evolutionary timeline, and human uniqueness.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('10df1c29-7332-46a0-aad1-b433f2897ed6', '62bc5d6d-2102-4884-af09-e601cc8b79db', 2, '<h2>From Foraging to Farming</h2><p>Discover how human food practices evolved alongside our species. Learn about the agricultural revolution and the development of complex cuisines.</p><h3>Food Evolution</h3><p>Hunter-gatherer societies, agricultural development, and culinary traditions.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('9362efd1-5b4f-46f9-a895-0458df0770e2', '62bc5d6d-2102-4884-af09-e601cc8b79db', 3, '<h2>The Story of Pizza</h2><p>Dive into the history and cultural significance of pizza. From ancient flatbreads to modern variations, pizza represents human creativity and cultural exchange.</p><h3>Pizza History</h3><p>Pizza origins, cultural adaptations, and global popularity.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('d98bf8ea-309f-43c4-8854-10af781209b1', 'b0842838-1709-4c80-b231-632db7f46b05', 1, '<h2>The Dawn of Civilization</h2><p>Study the great ancient civilizations that laid the foundation for human society. From Mesopotamia to Rome, explore their contributions and legacies.</p><h3>Ancient Worlds</h3><p>Early civilizations, technological innovations, and cultural achievements.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('b344a63c-bf29-479b-a8e9-00a4965216ed', 'b0842838-1709-4c80-b231-632db7f46b05', 2, '<h2>Transformation of Society</h2><p>Follow the evolution of human society through the medieval period, Renaissance, and into the modern age. Understand the forces that shaped our world.</p><h3>Ages of Change</h3><p>Medieval life, Renaissance innovation, and industrial revolution.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('0ad14129-208b-49a4-84e5-112acdf64188', 'b0842838-1709-4c80-b231-632db7f46b05', 3, '<h2>The Modern World</h2><p>Examine recent history leading up to the pre-apocalypse era. Study technological advancement, global conflicts, and societal transformations.</p><h3>Recent Times</h3><p>20th century events, technological revolution, and global society.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '69f96e21-2551-46e0-929b-89f7f8e7c98a', 1, '<h2>Your Culinary Foundation</h2><p>Begin your culinary journey with essential kitchen knowledge. Learn about kitchen organization, food safety principles, and basic cooking terminology that every cook should know.</p><h3>Essential Basics</h3><p>Kitchen setup, hygiene practices, and culinary terminology.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('8cb181ee-3743-4522-84e4-85942a7e8cba', '69f96e21-2551-46e0-929b-89f7f8e7c98a', 2, '<h2>Mastering Heat and Flavor</h2><p>Explore fundamental cooking methods including sautéing, roasting, boiling, and steaming. Understand how different techniques affect food texture and flavor.</p><h3>Method Mastery</h3><p>Heat control, cooking methods, and flavor development.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('d1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '69f96e21-2551-46e0-929b-89f7f8e7c98a', 3, '<h2>From Recipe to Plate</h2><p>Put your skills into practice by learning to follow recipes, adjust seasonings, and present dishes attractively. Build confidence in your cooking abilities.</p><h3>Practical Application</h3><p>Recipe interpretation, taste adjustment, and food presentation.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('5db92043-3c35-450d-a127-79c317e13709', '70f8cbb3-886c-4563-adea-ffee0152e373', 1, '<h2>Your First Priority</h2><p>Learn to assess your environment and construct appropriate shelter. Understanding protection from elements is crucial for wilderness survival.</p><h3>Shelter Skills</h3><p>Shelter types, location selection, and construction techniques.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('6ac32b42-6015-47f1-a920-c20b5aac583c', '70f8cbb3-886c-4563-adea-ffee0152e373', 2, '<h2>Essential Resources</h2><p>Master the skills of finding and purifying water, and starting fires in various conditions. These are life-sustaining abilities in the wilderness.</p><h3>Critical Needs</h3><p>Water sourcing, purification methods, and fire starting techniques.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '70f8cbb3-886c-4563-adea-ffee0152e373', 3, '<h2>Finding Your Way</h2><p>Develop orientation skills and learn basic foraging for wild edibles. Navigate confidently and supplement your food supply safely.</p><h3>Wilderness Knowledge</h3><p>Navigation methods, plant identification, and foraging safety.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('07fa3356-a6ba-406b-ad89-851762b48896', 'c2c0891f-d14e-4926-8e55-864063956862', 1, '<h2>The Logic of Code</h2><p>Discover the foundational concepts of programming including algorithms, data structures, and computational thinking. No prior experience needed.</p><h3>Core Concepts</h3><p>Programming logic, problem solving, and algorithmic thinking.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('7177c953-484a-4c03-84ce-985b56c359f6', 'c2c0891f-d14e-4926-8e55-864063956862', 2, '<h2>Making Decisions in Code</h2><p>Learn about variables, data types, and control structures like loops and conditionals. These building blocks power all programs.</p><h3>Building Blocks</h3><p>Data types, conditional statements, and iteration.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('bb2f8660-1199-4d93-99c4-d39e0ce41171', 'c2c0891f-d14e-4926-8e55-864063956862', 3, '<h2>Writing Clean Code</h2><p>Master the art of creating reusable functions and debugging your code. Learn best practices for writing maintainable programs.</p><h3>Code Quality</h3><p>Function creation, debugging techniques, and code organization.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', '80fdbf18-d6e2-4b6a-a42a-071b460b15bd', 1, '<h2>Musical Movements</h2><p>Explore the rich tapestry of musical culture that existed before the apocalypse. Understand the role of music in society and personal expression.</p><h3>Cultural Context</h3><p>Music genres, cultural movements, and social impact.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('fec638d5-5b35-4ba0-a460-79825cdb4390', '80fdbf18-d6e2-4b6a-a42a-071b460b15bd', 2, '<h2>The Voice of a Generation</h2><p>Examine how artists used music to express identity, tell stories, and influence society. Learn about the power of artistic expression.</p><h3>Expression Forms</h3><p>Lyrical content, storytelling methods, and cultural influence.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('2a0dbeb3-49be-4b7c-b846-43b21168248c', '80fdbf18-d6e2-4b6a-a42a-071b460b15bd', 3, '<h2>Remembering the Past</h2><p>Understand the importance of preserving cultural heritage. Learn how music and art connect us to our history.</p><h3>Cultural Memory</h3><p>Heritage preservation, historical significance, and cultural continuity.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('65be735b-0836-42e7-9c7c-4c82c7000c87', '0819e979-a9ba-42b6-a55f-cbe08427b821', 1, '<h2>Understanding the Mind</h2><p>Begin your journey into psychology with an overview of the field. Learn about major psychological theories and research methods.</p><h3>Psychological Foundations</h3><p>Psychology branches, research methods, and theoretical frameworks.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('4ab08401-43f2-4276-ab7f-3e029b2b53a1', '0819e979-a9ba-42b6-a55f-cbe08427b821', 2, '<h2>How We Think and Act</h2><p>Explore cognitive processes and behavioral patterns. Understand how humans learn, remember, and make decisions.</p><h3>Mind and Behavior</h3><p>Cognitive functions, learning theories, and behavioral principles.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', '0819e979-a9ba-42b6-a55f-cbe08427b821', 3, '<h2>Psychological Wellness</h2><p>Learn about mental health, emotional regulation, and psychological well-being. Develop awareness of common mental health challenges.</p><h3>Mental Wellness</h3><p>Mental health basics, coping strategies, and emotional intelligence.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('4ff93b31-93f8-4bd8-a763-cb092700e456', '571d18ff-220f-4eca-abe9-eea6d8b2bc2a', 1, '<h2>How Birds See</h2><p>Delve into the complex visual systems of birds. Understand the anatomy and physiology that enables avian vision.</p><h3>Visual Anatomy</h3><p>Eye structure, visual capabilities, and sensory processing.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('67eabe11-d1fe-4f09-a37c-29b242254d1b', '571d18ff-220f-4eca-abe9-eea6d8b2bc2a', 2, '<h2>Seeing Differently</h2><p>Explore the specific vision limitations in various bird species and the remarkable adaptations they have evolved.</p><h3>Adaptive Strategies</h3><p>Vision constraints, evolutionary adaptations, and behavioral compensation.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('5bdbec64-9f89-4b7c-acbc-aed904c95e68', '571d18ff-220f-4eca-abe9-eea6d8b2bc2a', 3, '<h2>Studying Avian Biology</h2><p>Learn about research methodologies in ornithology and the conservation implications of understanding bird vision.</p><h3>Scientific Approach</h3><p>Research techniques, data collection, and conservation applications.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('35cd1186-9217-4480-886b-c8c603490339', 'fe14820b-a8a0-4a90-917e-a02710bc51b3', 1, '<h2>Rhythm and Movement</h2><p>Learn the basic steps and rhythms of salsa and cha-cha dancing. Develop timing, coordination, and musical awareness.</p><h3>Basic Skills</h3><p>Step patterns, rhythm counting, and body movement.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('ab7663d9-7a2c-48f2-a7ac-199dd4665088', 'fe14820b-a8a0-4a90-917e-a02710bc51b3', 2, '<h2>Dancing Together</h2><p>Master the art of partner dancing. Learn lead and follow techniques, connection, and communication through movement.</p><h3>Partnership Skills</h3><p>Lead and follow, connection techniques, and partner communication.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('d2555415-da8d-47ec-8957-5ed330d2b5a8', 'fe14820b-a8a0-4a90-917e-a02710bc51b3', 3, '<h2>Dance with Confidence</h2><p>Develop your performance skills and personal dance style. Learn to express yourself through dance and understand cultural context.</p><h3>Expressive Dance</h3><p>Performance techniques, styling, and cultural appreciation.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('c4030b88-afde-4808-91d1-dd096de904ee', '5609397a-9a25-4ef4-bc03-cc32c8b3da7c', 1, '<h2>Tales of Dragons</h2><p>Explore dragon mythology across cultures. Understand the role of mythical creatures in human storytelling traditions.</p><h3>Mythical Narratives</h3><p>Dragon lore, cultural variations, and symbolic meanings.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '5609397a-9a25-4ef4-bc03-cc32c8b3da7c', 2, '<h2>Building Fantasy Worlds</h2><p>Learn techniques for creative world-building and character development. Understand the elements that make compelling fantasy stories.</p><h3>Creative Writing</h3><p>World building, character creation, and narrative structure.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('6573376b-050f-41e2-ba55-cf298abd09d7', '5609397a-9a25-4ef4-bc03-cc32c8b3da7c', 3, '<h2>Myths in Society</h2><p>Examine how myths and legends reflect cultural values and human psychology. Understand their importance in human culture.</p><h3>Cultural Analysis</h3><p>Symbolic interpretation, cultural reflection, and psychological meaning.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('525d7e27-330d-498e-b151-5cc97785dc6f', '3adfb50b-91c2-4b12-a316-cd377d5f1668', 1, '<h2>Growing and Learning</h2><p>Understand the stages of child development from infancy through adolescence. Learn about physical, cognitive, and emotional milestones.</p><h3>Development Stages</h3><p>Age milestones, growth patterns, and developmental needs.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '3adfb50b-91c2-4b12-a316-cd377d5f1668', 2, '<h2>Nurturing Children</h2><p>Explore various parenting styles and techniques. Learn about discipline, communication, and creating a supportive environment.</p><h3>Parenting Methods</h3><p>Discipline strategies, communication skills, and positive reinforcement.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('1a104b87-de81-4743-880b-c5ae3508f22b', '3adfb50b-91c2-4b12-a316-cd377d5f1668', 3, '<h2>Keeping Children Safe</h2><p>Learn essential health care, nutrition, and safety practices for children. Understand common health concerns and prevention.</p><h3>Child Welfare</h3><p>Nutrition basics, safety measures, and health monitoring.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('584b3003-be51-47a8-ae4b-a1bd000bc4d8', 'cab91c44-56af-4823-8578-3979adfcf680', 1, '<h2>Harsh Environment Challenges</h2><p>Understand the unique challenges of desert survival. Learn about heat management, water conservation, and environmental hazards.</p><h3>Desert Conditions</h3><p>Climate challenges, environmental hazards, and survival priorities.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'cab91c44-56af-4823-8578-3979adfcf680', 2, '<h2>Water and Food Sources</h2><p>Master techniques for locating water and food in arid environments. Learn to recognize signs of resources in seemingly barren landscapes.</p><h3>Resource Location</h3><p>Water indicators, edible plants, and resource conservation.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', 'cab91c44-56af-4823-8578-3979adfcf680', 3, '<h2>Moving Through the Outback</h2><p>Learn navigation techniques specific to desert environments. Understand when to travel, how to conserve energy, and route planning.</p><h3>Desert Travel</h3><p>Navigation methods, travel timing, and energy conservation.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '9ac0620e-1e07-4cd9-a588-56e3aaee4abb', 1, '<h2>Rods, Reels, and More</h2><p>Familiarize yourself with essential fishing equipment. Learn about different types of gear and their appropriate uses.</p><h3>Equipment Knowledge</h3><p>Rod and reel types, line selection, and hook varieties.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('029885d8-eb71-47fa-89f0-508b94a6695e', '9ac0620e-1e07-4cd9-a588-56e3aaee4abb', 2, '<h2>Casting and Catching</h2><p>Develop practical fishing skills including casting, bait presentation, and fish handling. Practice makes perfect in fishing.</p><h3>Practical Skills</h3><p>Casting methods, bait techniques, and fish handling.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('38bbb269-74d7-4401-a343-cde7e8da8987', '9ac0620e-1e07-4cd9-a588-56e3aaee4abb', 3, '<h2>Sustainable Fishing</h2><p>Learn to identify common fish species and practice sustainable fishing. Understand catch-and-release and conservation principles.</p><h3>Responsible Fishing</h3><p>Species identification, sustainability practices, and conservation ethics.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('9db74db4-6b04-45f7-a187-3a941c75a015', '70d62244-fe2c-4acb-8943-40eb26e042cc', 1, '<h2>Safety First Underground</h2><p>Understand critical safety protocols for mining operations. Learn about protective equipment, hazard recognition, and emergency procedures.</p><h3>Safety Essentials</h3><p>Safety equipment, hazard identification, and emergency response.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', '70d62244-fe2c-4acb-8943-40eb26e042cc', 2, '<h2>Finding Valuable Materials</h2><p>Learn to identify valuable minerals and ores. Understand geological indicators and surveying techniques.</p><h3>Resource Detection</h3><p>Mineral identification, geological signs, and surveying methods.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('fa41f596-cec8-44aa-b720-d0cb73ec35f4', '70d62244-fe2c-4acb-8943-40eb26e042cc', 3, '<h2>Mining Methods</h2><p>Master various extraction methods from surface mining to underground operations. Learn efficient and safe resource extraction.</p><h3>Mining Operations</h3><p>Extraction methods, tool usage, and operational efficiency.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('97e9a608-cfa0-470c-94b3-136c372bb5d2', '308934f3-03ea-46f4-97df-b6cbbbf52cc3', 1, '<h2>Clean Living Basics</h2><p>Learn fundamental cleaning principles and product knowledge. Understand the importance of maintaining a clean environment for health.</p><h3>Basic Principles</h3><p>Cleaning products, surface types, and hygiene importance.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('435185fd-a819-4769-92f7-39e59157ec93', '308934f3-03ea-46f4-97df-b6cbbbf52cc3', 2, '<h2>Systematic Cleaning</h2><p>Develop efficient cleaning routines for different spaces. Learn specific techniques for kitchens, bathrooms, and living areas.</p><h3>Targeted Cleaning</h3><p>Room-specific methods, efficiency techniques, and thorough cleaning.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('5824dacd-6128-44fe-a506-7355ee10bad5', '308934f3-03ea-46f4-97df-b6cbbbf52cc3', 3, '<h2>Keeping It Clean</h2><p>Master organization systems and maintenance schedules. Learn to prevent messes and maintain cleanliness long-term.</p><h3>Ongoing Care</h3><p>Organization systems, maintenance schedules, and prevention strategies.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('6c807594-9333-43aa-a44f-48ef1f0fecea', '1dd22626-44a8-4866-8aa7-c442bb82e274', 1, '<h2>Responsible Hunting</h2><p>Understand the ethical foundations of hunting and conservation principles. Learn about sustainable practices and wildlife management.</p><h3>Ethical Framework</h3><p>Hunting ethics, conservation principles, and legal requirements.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('7ff943ec-8d33-453d-bd11-461df5d581b3', '1dd22626-44a8-4866-8aa7-c442bb82e274', 2, '<h2>Tracking and Stalking</h2><p>Develop essential hunting skills including tracking, stalking, and weapon proficiency. Learn to read animal signs and behavior.</p><h3>Field Skills</h3><p>Tracking techniques, stalking methods, and weapon safety.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('38fcf542-83e8-4251-9078-bbb536d0b050', '1dd22626-44a8-4866-8aa7-c442bb82e274', 3, '<h2>Field to Table</h2><p>Learn proper field dressing, meat processing, and preservation. Understand how to utilize game animals efficiently and safely.</p><h3>Processing Skills</h3><p>Field dressing, meat preparation, and preservation methods.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('e29a8da1-0e88-4ded-ad49-4beeceae9c3a', '2b96c4e9-d4fa-40fb-9934-66a2b059c8a8', 1, '<h2>The Feline Mind</h2><p>Learn to understand cat behavior, body language, and communication. Discover what your cat is trying to tell you.</p><h3>Cat Psychology</h3><p>Behavior patterns, body language, and communication signals.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('ab63c159-ea30-4c60-b040-ca7bb929343c', '2b96c4e9-d4fa-40fb-9934-66a2b059c8a8', 2, '<h2>Daily Cat Care</h2><p>Master the basics of cat care including feeding, grooming, and health monitoring. Learn to keep your cat happy and healthy.</p><h3>Care Routines</h3><p>Feeding schedules, grooming techniques, and health indicators.</p>');
+INSERT INTO `Module` (`ModuleID`, `CourseID`, `Position`, `Content`) VALUES ('a8b8abef-668e-42ba-b687-526d3ba77399', '2b96c4e9-d4fa-40fb-9934-66a2b059c8a8', 3, '<h2>A Happy Cat</h2><p>Learn positive training techniques and environmental enrichment strategies. Understand how to create a stimulating life for your cat.</p><h3>Cat Enrichment</h3><p>Training methods, play activities, and environmental enrichment.</p>');
 
-INSERT INTO `User` (`AdriaID`, `Name`)
-    VALUES ('2dfb674e-78f0-487b-9268-6308b2df99f2', 'Ian');
+-- ===== QUESTIONS =====
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('7694bc79-d3ae-44dc-9b83-b633428b8afa', 'What is the primary function of yeast in bread making?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2a104584-24ca-4acc-9b72-9448721e4215', 'What temperature range is ideal for activating yeast?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e11d1bad-0ee1-4c8b-a3ae-ed2dbb648ad0', 'What does the windowpane test check for in bread dough?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1d5844a6-51d0-4fda-a492-86a21f089ad3', 'How long should bread typically cool before slicing?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3dde5971-6878-4696-9a35-1cc03db5e64a', 'What is the main protein in wheat flour that forms gluten?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('fb163bf0-1f50-4e6f-b1cc-3f79e44ff81b', 'What is the primary function of yeast in bread making?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3648442a-272f-44b9-9fdd-83b09faf14b2', 'What temperature range is ideal for activating yeast?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9f7206c7-fe53-4329-9171-462b2b5a206d', 'What does the windowpane test check for in bread dough?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('aab51b9f-c074-44b6-b3bc-fe395423cb1d', 'How long should bread typically cool before slicing?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('7fb79b77-3fe2-4140-a09f-d5dbfb48d102', 'What is the main protein in wheat flour that forms gluten?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('f620a249-953f-4a67-945b-744a6bbd40b1', 'What is the primary function of yeast in bread making?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d6148094-d81b-46a3-8b4c-e7a9081d9c15', 'What temperature range is ideal for activating yeast?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2093bfaa-2df5-4f07-9d8a-01823239b769', 'What does the windowpane test check for in bread dough?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5860a442-4388-45f8-bb25-83861db22f3e', 'How long should bread typically cool before slicing?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8fd584b9-321a-499b-857a-34532e9ff6fe', 'What is the main protein in wheat flour that forms gluten?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1ecb810e-c20a-4e97-ae02-4e3af206a47d', 'What is the first step in creating a sterile field?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a7369940-9769-4bda-875f-1f1e98f61855', 'Which suture pattern is strongest for wound closure?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5afdc0d9-652e-44d5-a61d-455071cef451', 'What is the primary purpose of surgical drapes?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('fb88cb27-44f2-494a-88fe-023e6b971f65', 'How long should instruments be autoclaved at 250°F?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('de172038-2b45-436a-b483-ac6916e5cdf9', 'What is the recommended angle for making a surgical incision?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('dfba90d0-a149-403b-821c-e26ef60c9ad0', 'What is the first step in creating a sterile field?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('7b387aba-1b9e-466b-a476-60eb4a50656c', 'Which suture pattern is strongest for wound closure?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4ccad532-13ba-43de-a3f0-d003a3ab3c88', 'What is the primary purpose of surgical drapes?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d0e0328b-71e4-40f1-be63-73064e3f2e79', 'How long should instruments be autoclaved at 250°F?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5c141acb-c7a1-47f1-b630-eca2d6adad95', 'What is the recommended angle for making a surgical incision?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4a4c003f-7346-4b6e-baed-9d4d5c782e25', 'What is the first step in creating a sterile field?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4e2705db-6751-446f-aa49-45a58d7574f3', 'Which suture pattern is strongest for wound closure?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('6d300b7d-f6b9-4f72-a5bb-e6bdb0934eb7', 'What is the primary purpose of surgical drapes?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('65be3d9a-86a9-4cfe-a5d7-7a6cb7e6c290', 'How long should instruments be autoclaved at 250°F?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c972729e-66b9-4c8f-8a26-0a0679592cae', 'What is the recommended angle for making a surgical incision?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('72416a51-d591-425a-8983-9bf68067da45', 'What is the purpose of a try square in carpentry?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('287a1949-307b-410b-81d9-1f92fb546484', 'Which wood joint is strongest for corner connections?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('bb6ad342-6225-4ec9-8977-2bebc7fd2fba', 'What grit sandpaper is best for final finishing?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('ef65d4a8-c099-4e1f-b019-1a42379f788c', 'Which saw is best for cutting curves?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('97676ef0-1927-4a83-8c24-755fad346fa1', 'What is the primary purpose of wood stain?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5fec48b9-ffaf-483b-bc48-9ed0281149b2', 'What is the purpose of a try square in carpentry?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c36d83e8-846a-43cb-a3e6-0ab24da288da', 'Which wood joint is strongest for corner connections?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5945f7d2-d3fc-4d1b-97ec-39aea649e3ee', 'What grit sandpaper is best for final finishing?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8fb38ba9-ef69-4081-9484-c16f4e4414d7', 'Which saw is best for cutting curves?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3dbf9a22-f8a1-4e12-97d8-eb9902c51e4a', 'What is the primary purpose of wood stain?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9902d2c4-eae2-463d-b976-4c40f95180c2', 'What is the purpose of a try square in carpentry?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('212580a6-2561-4a36-8384-a5193b6c9c08', 'Which wood joint is strongest for corner connections?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('64142513-4869-4e4f-911a-a31427fd02d9', 'What grit sandpaper is best for final finishing?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('44be5384-beb6-4c39-9a84-8a331658e582', 'Which saw is best for cutting curves?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d86729e2-d5d5-40a6-be39-02ace4e884bf', 'What is the primary purpose of wood stain?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('07b1976c-5152-4a6e-8406-c34761a66e0c', 'What is the ideal mortar consistency?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d5f847bc-2682-442c-9f2a-0b940bb1b0d3', 'How thick should mortar joints typically be?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('64f78915-971d-4308-a345-bae057dc5247', 'What does running bond pattern mean?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8ec202e0-d61a-4a6f-bb66-3bb21caeeaf6', 'What tool is used to check vertical alignment?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('705ca62a-507c-4e87-a909-c28834080661', 'How long should mortar cure before applying load?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('80131e7f-8e4c-48bf-a643-60ec24c4732e', 'What is the ideal mortar consistency?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a140b566-6d74-42db-930c-6b9ac423675a', 'How thick should mortar joints typically be?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('fc5f0de1-e730-4e61-84f4-91e96e9c31cd', 'What does running bond pattern mean?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b4e588b0-9f78-47f4-b57a-4242f71fccb5', 'What tool is used to check vertical alignment?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('612a8842-4c83-4ac8-a636-60905b6d7f6d', 'How long should mortar cure before applying load?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e65573ef-b0ce-45c9-bc13-f6522a87f5be', 'What is the ideal mortar consistency?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0ca66077-15e4-484a-9896-a246ba922d55', 'How thick should mortar joints typically be?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d05f39e0-abff-4412-9253-c01879816033', 'What does running bond pattern mean?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('da6466b3-874e-4464-8b18-7d795f3e1939', 'What tool is used to check vertical alignment?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2c4f8586-aacc-433a-b768-0f3bdb6280a1', 'How long should mortar cure before applying load?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('eeec3c09-7bcb-46dd-9aa1-673899d5ebc9', 'What order do humans belong to?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('6f8bc199-a6c8-4c44-b77c-b42920d37d92', 'Approximately when did Homo sapiens emerge?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('86c70eef-6177-4e2a-84e8-bc85738d3cc3', 'What is bipedalism?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('bb27e469-9c49-4cc1-8001-a84cec272771', 'Which is closest human relative?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('19350caf-db14-476e-8159-3315778577f7', 'What development enabled human cultural evolution?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a832fdb3-d0cc-4b53-8027-99f1d46f0fcd', 'What order do humans belong to?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('01eb54af-ef7f-4869-830b-918f991c94b9', 'Approximately when did Homo sapiens emerge?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c96de900-42b7-4e0c-b9ca-49290f76267e', 'What is bipedalism?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('6294ecad-032e-4821-9761-c566b1601a3f', 'Which is closest human relative?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('cb4bdd43-6a12-4863-9d01-524a7885b00f', 'What development enabled human cultural evolution?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('52ed554b-7f9f-4f96-9c83-e6b5ae9758c4', 'What order do humans belong to?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0418ec47-a4ab-4b29-a7ae-ee976c598528', 'Approximately when did Homo sapiens emerge?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('681388f6-fd77-4320-b276-8b180c51ff98', 'What is bipedalism?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c20baa6c-eac9-4d37-b1d2-82ed34b3e5e0', 'Which is closest human relative?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('becb8dbf-568a-4bcd-96d9-bc7a0b88d3c7', 'What development enabled human cultural evolution?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('eb428a5b-af81-4f0d-b4b5-e5c4f4b8c25b', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0012859e-d972-4b6c-9ab8-352fc517b6d7', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('69063cee-fc6c-4fbc-acc6-e91f6ee699dc', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9922553b-9b2a-4bf4-8fd5-d876a15931f6', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('24e73961-f6af-4318-9077-c00cc4c15db1', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0bd4b4b6-ab23-478d-be68-31dd4409e625', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('53abbbba-e036-464f-bf4c-e396f7fa7c70', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('f6dbefec-1bcc-4414-8d48-7057c7b8e2a0', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2f4ef9e3-6170-4ff5-bd39-3513af70d81a', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8318bc9c-893d-4aef-95ce-8cc51c5608cc', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('027dde8a-4207-4845-857f-8dda9519d239', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('f5168000-3c75-4b14-8252-b688e2520fb8', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('87cbac4e-52bf-46c6-a8fd-ad4bdee8bb69', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('850182ae-fb28-4c72-8506-b4d8dcefb40f', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5b339646-08d7-4108-904e-b4f11aec48cd', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0c59a2cd-2fe2-4978-9975-ba228e6c9b4c', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0421db9d-8582-44c5-8d50-bdab22855cf8', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2aa5a5c4-4e03-46ba-bb06-22d07aa38491', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('308c1adc-fad5-4550-b7d7-a34d0f36923d', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('13a35beb-b608-483a-9973-0e63fd7f3bf0', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('ad92b372-cf8e-4353-ad9f-821027d71381', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('ebd6bb91-3157-41c0-a0b3-005c184f85d0', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5d8ad174-121e-4ad4-a87c-91f2248102ef', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('035e4407-bba8-4e0c-9456-2cfedba3bc09', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('6691c413-110e-42f3-bbd4-94ab4f8f1f20', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('694a83c6-d00c-44af-9e4c-308b7bbe9d43', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('82044708-a55c-420d-b798-15eb8565d83d', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8d822084-55df-4bd7-a3c4-2764ca1c9339', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('24f579d3-7f9f-4891-9cb3-ab005aca7f88', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('95bd1358-4702-4443-a75e-39f3d90b4237', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('79cf6165-0ed1-4e64-bbb3-e9823504c3b9', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('ae0b8613-1d0e-4898-b40e-c57ac086efb0', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c03c5f28-2963-4d01-9451-67d6fc14a854', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('119dad8e-acbf-4926-8982-78c359d68201', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('501b795e-e205-4eb9-afea-9d0d1f66d395', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('aa903322-a7b5-424c-bc89-6b17ba53f260', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('885fc623-9cf3-406f-aa46-0b2fec7bb021', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0093b3ac-9742-4ac0-bc30-2bc27f55b599', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('30a73384-6213-4b86-9fe6-fffa6c40af74', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('fbca9852-ad68-4b08-bbe2-c185ab1cbc9c', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c17ccc4a-1886-4e27-bd4d-545028bf8d20', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('49127095-7b2e-46d3-a5e0-c8d0d6a20466', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('516d3fea-fac3-461d-b65c-0094030b35ec', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('61eee443-bbd1-4566-ab42-9b034180bb17', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('7e2e7791-fcb0-4605-9a7d-51c118d1730b', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3a18e30a-3612-494d-aa70-5cbed675da7c', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('86ac4ac4-22de-4e70-ac44-27c3e69b5803', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c783a112-a280-48ae-8ef9-66a3cef6637e', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b32506af-256b-4325-8a1b-a412ae9a8c92', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('47424693-0e60-454b-8e57-c39677d4ddb0', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0db54b58-fe0b-4d52-9a5c-c1ea63420739', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a2cd31fa-47e1-4758-9d03-a1024c16d4d9', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('679ee1dc-8fab-44f5-a790-f7d433940d32', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('666e3dfe-60cc-423a-90e5-55d20cc5527e', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c02787a2-2692-4c1a-8a3e-d3c11e0806c1', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('64b9fb4b-b391-4466-91e6-d5acafe8f9a7', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('92f11aee-ea5e-4c87-a2fd-880a6055894d', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('02dbd0c8-d628-47d6-93f3-4d5e58dad0ed', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c44db85d-e94b-41b3-a636-8c700210efc9', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('6108b976-cf76-4c97-af51-227cc5152072', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('6ed0be33-119b-43ac-a0e2-86468354faf8', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('87f63748-d413-45c1-b407-d5eef9a40517', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b9a947c2-6c0f-4175-8d94-6d54ab6129c2', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('ae90f9f6-7c27-4b45-b487-2efa003bfbfc', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b8a2609a-6484-402a-a1ca-87ae22d20fcb', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d7f5ae8c-9216-4170-8be8-64b82ebaae1d', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('02d7b563-33f8-4ece-85f4-ab9b5ec21a68', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('23695e67-c707-41ba-b965-be3945950a2f', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('ffaa19c1-b3fe-4683-b897-8417c0a46dd0', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3d5b3a43-de2d-4119-8154-f0fc57de5df9', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('cb062645-eb7c-41de-809b-d507d2b7e561', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('959b8a1f-3a6c-4177-a186-dc3eca9f676d', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('26643992-bc81-4436-bbd1-489d27b78bd4', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('f9d4159f-806f-44be-b703-86c5644dd162', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9ba46192-65d0-40eb-8a8e-815a56cbbac7', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('6d67c297-c3f2-4ef0-b3c6-fa952f329e40', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e6ec0e92-024a-4643-b14b-034f7d9bcb4b', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8dea3b4c-5315-4a0b-a68e-6b17a31eb572', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1854596a-b0ab-4506-90f7-6cb31d23e163', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('eeb67cd7-92f6-4589-9b2c-c584c71d76d3', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e091fcd4-b22c-49b0-b065-c19d71148c07', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a7fe2383-4686-4dda-9774-cc90451bccfa', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('659a6770-c836-448c-a840-973854bb15b5', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a59989fd-7e34-4330-a7b4-938d9d5bf5ff', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('77a61a0c-5229-4af5-961f-a7354953aba4', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('fd52448a-7ec1-4a67-ae44-11a20284008c', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e495902c-f009-473a-be68-8be784895935', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a6d6ac64-6898-4f2e-8dba-a024321274fe', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2b50a6dd-4d96-4d85-a447-aac86f669c81', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9906522c-6bc9-4370-9534-68c10cc50858', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b1ec16a7-2792-497a-bbfb-6a59b0cb4b99', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('f4467bdb-2cb9-4a27-905f-093bc748200c', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b49222ec-cc96-4076-8fe4-b7edc4042857', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('40c4da66-1107-49e9-8c52-1abc4d81cfdc', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('daf09629-d2a6-4417-a67e-884a10c453eb', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a3f359d2-43dc-48e5-95bc-4605cf804ed1', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('22ba80ee-9df4-4a69-9f0a-d675c18f366c', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0c5e3bf7-030d-4477-ba44-2c2b087ce99a', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e9c42e79-d130-47be-813e-abaa371fffd1', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2b4e6275-1154-4a7d-ae0a-49468fa4e7ad', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('125700cf-9de5-43a4-8b65-1e93745b50f5', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4b57aeb3-f1d7-489e-b95b-f66b3625336d', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('022c981f-e186-42b1-9825-4c6796855b50', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1a520983-099f-4e03-b836-157acae35497', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2f03f836-7d04-438d-b5d9-d54169d98e3a', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('ce8aa915-07eb-4f6f-99aa-f3437636e6ac', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('f9dfe0d2-49fd-4eb1-8b7a-b397bf41fdbe', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1f448db3-145d-420e-afb5-174add0faebf', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9dbda7dc-0c28-4601-ad52-4cf3ec7d62bf', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('90e3d98a-04f1-4f72-be59-3a45aabbb482', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2a7fc5ea-0d4c-4c2c-b868-81840c3ef36f', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('f6965b6f-c9c4-4e80-9b4a-17dbab560d38', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0fa19e50-8129-4899-870b-5d39963bfb63', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('03d1aac6-1b80-423d-a962-973f0a8938ac', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3100c5cd-0a62-4ad7-ba10-b6b5c9e28175', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1e689502-6917-4ef2-b7e7-4cbd5946d06c', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1f93696f-c745-4e16-94ba-85383b0b6f0d', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('6a7891af-91c7-4cf2-aabb-4a780a5f2c8a', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2bd0fd73-e6b4-4bef-997a-6ffb12f667d1', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c6b6abb5-eeae-4128-bdd9-f76f2c1be437', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8d6f4c00-1c80-40f8-835b-df51ca8d1f27', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('31aa400e-5d31-4049-b378-fee40109864e', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('696e4305-5ba7-4856-9c9f-376a83e41172', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('48c1ce2a-f457-452a-9d1e-7b068235a259', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('7e467fcf-64d2-43a7-aa44-db000a424c63', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3782bb17-ad9b-4ce2-b3d4-e575d01c31a0', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5cce90fd-26c0-40ff-8b70-15b0760d70a1', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('82c802dc-1630-4568-84da-2ae5101a6734', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9d36e22a-5b5a-4599-83b6-fa8685423471', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('23bf4f12-a8a9-4762-98e7-babbf4d67c04', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4f201f55-43c9-47d6-bcb6-58548c200669', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('17c83789-b24e-41e1-923d-1ef3bfb12acb', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('13373e03-d18c-49bf-9c6c-b048fa769eb4', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a273b937-d0d6-4be3-bb02-660c2e2a9ada', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9afd444a-11e3-4f75-9196-9fd66e3dee51', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9515fe60-8a46-4171-834d-0948497aedb0', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9b1be0db-76f4-4c47-a815-810ea27839c3', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('7452fccd-3d01-4d7a-9551-db04e18066bd', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('af6f8196-79d2-4573-a8b1-2d5dff2df228', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4c6a6d54-2051-4e3c-8b96-01d612e25c24', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5ad3b60b-bcf9-4782-b83f-7c2d24afd5fb', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3e6c03fd-2ec5-4d05-8b74-a87e591e5362', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2bcda11d-189b-49e0-b9b1-3d5268d78a41', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b62e6e60-062f-4135-92ac-327899388945', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('91ae5ad2-3883-4844-b54b-401a62a1e166', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0a8e9eb9-0247-48f6-aed2-d668d5576b11', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('96a8028b-785a-4b2d-a2d7-bf1e27b3931d', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('860f5a5d-06ae-4548-bac4-d54ba544e1d2', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1e10cc79-c79a-483f-a2d4-b2f5f93e21f1', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5522acea-3ce2-48b2-83a4-9139188fdc2d', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('aa48bd46-ea23-4e74-b192-d9b8219b7cf8', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4eafab0e-d1f2-4c49-b2c2-60abf8caae3e', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4383ea6a-aa35-4566-9ea1-89955999d718', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3b972970-7309-45f5-b620-37b6f6f802a2', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e4e99200-dcd9-475e-acc9-cc5eb75fdd72', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('cca05aa9-b601-449c-8e32-923d667b21fb', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4038fdf2-ba50-44c1-b729-adba05ed6b78', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0cf44012-d8ba-4d22-97b7-db668facff24', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d152399f-ea5a-4284-815e-3fcf9f4fa8e2', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b3df936b-6096-4134-ac10-8ccb43c4c126', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('24df8278-25b8-4a57-b101-e9ecd092065e', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('ec50d760-2883-440d-92d4-90b500768c59', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('16d13bd0-5b95-4777-acbb-989cff370c98', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8c6d41cb-afd7-4108-a001-1490b81930c9', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e2aa2f0e-17ea-4586-acc2-7c229c6cea69', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('cbb8cebf-c42c-47f1-95c1-4c8d79c898d4', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('344550e8-3220-4259-8156-7ad7defc66e8', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3d55503a-05b7-4b48-a56f-db0d48eff161', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('bd8e106b-f776-4d39-a2cb-646550721fa2', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('2798ac4a-7683-4970-8ea4-a62f4caf7a87', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('09d3b427-c956-4fad-a51e-b042e3e25217', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('87787278-f33b-4bc6-8717-7665808969ec', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('25cb72e6-dc2b-4448-8b97-ad8509758aa6', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d8292778-1d05-484c-afb5-a372b3d13401', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e64dc87f-43d6-48dc-899d-a203a294d10c', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('5c64e6e2-5dbe-4baf-8db2-f83ce260235b', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('cf110e0a-966b-49b9-885b-41af369e93e4', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8e29226c-254f-4fa9-afb1-eeff50532d73', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('100cbd61-36da-439c-af9e-ffc99ed61339', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('601e41ca-4dde-415d-b9d4-7a077c452cfd', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a282d1e8-f420-4ab9-bb1e-b7f1d1be7902', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1eb0b99f-5bf4-4a49-b688-63dad1556772', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('1d840fff-c961-4694-894d-ee6f16ed4ca3', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('adc33152-5659-4d57-b10c-8b78e2e441a1', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('7f5dbee7-43e7-44c1-ba70-6c994124f7f6', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9c979e4a-c7c3-4a88-8437-164795fe37ef', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a62f352a-85c1-418a-a6a0-7ee31aed857f', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d40c4959-9b68-4883-9072-db666be591b3', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('650ae48c-675a-4ff8-9504-df1498504efd', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('fb8a286d-d448-41dc-932c-ec2d419d6e97', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('70b966af-93e3-44bc-a4ed-b1ba3bb89a2f', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('89dd3942-e09f-4ca1-993e-c79870fe3f25', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9aa52597-c510-4c01-971f-dc262efd57ba', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b1ca045e-5572-45e9-8e90-84774466e865', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e236bf16-9012-4481-9159-160935e7aaac', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d57a3b35-2cc9-49db-ae7e-895940131356', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e0de8062-6b78-425d-8fe2-287a5437cc2c', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9d46aca5-0bc0-4b8d-8d08-0c0aace9ba46', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('03862d1b-2ba7-4ae7-872e-2e4880d82bc1', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('3d34d826-8664-4fec-8641-37535f324c3c', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('74109fec-75b6-4f45-8e19-d187f6188dba', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('26a300df-4198-4225-88b0-e19cbfbf17b8', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('ec5ee4eb-972b-4f79-8d76-ca735cd0d36f', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9bd09f89-5f74-4019-a9e6-d77d834d629d', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4f6884b3-154f-48a8-b731-26604031a57e', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('77ad722e-db56-4f75-8ee1-4e9c7aa4fddb', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a12ea580-ffab-4f61-9146-d2c364e59fe5', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9571f981-7cc5-4514-b46d-e45f22316777', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('33f5f30e-3238-45f0-8d54-8d627404cd2a', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('17e823ce-eb7d-4186-bcbc-c49b4afd44ee', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('cce1189c-6a35-43e2-903a-ade74761cd55', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('62d8b868-a070-4dc0-827f-6d86bfe085f2', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4bd9d659-700c-4118-91bf-ea0a1b89e042', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c1d49822-53df-4b0e-92e7-407b597186da', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('be0feb7d-4ff1-468e-82a3-82d9cb4403fe', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('bd84ea00-647c-4ed6-8b55-1671b378b8f8', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('bc1556c4-0ded-4783-a9ec-bc7c5d4f25f4', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('63cba72c-a23d-489a-802d-34963c5b0bfc', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c1f82d3a-5908-4567-ac25-e175d7e49e16', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b5d30b46-47bc-4252-853e-22344acb800e', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('e7a61b74-3cac-421f-99aa-87597997eb36', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('b708b570-4d8e-4745-b552-702c79db87ef', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4c50259b-d52e-46c1-8b42-c73e35b288df', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('17a0283b-398b-4356-82d0-4bf07b9cd7ec', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('790476c2-4569-4a1f-b00a-63f9e2085473', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d5b54d7f-e1dc-4d81-9378-34f000ccdfdb', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c4159964-c5a2-4fa0-8578-b2283663b630', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('c9baaa37-921f-4945-b989-2d5249a13515', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('0737f8bf-4fb5-417b-aa74-6d37186738c9', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('761ab1e6-604e-4791-93ed-2a8d6cde1f5a', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('9a08b89d-cdba-4975-bbb2-2ce051ea80eb', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8d089987-8cb3-45d2-b0b6-a8277c2dbec9', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a400f0c9-f667-4c2b-adcc-d02ef2af1e66', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4aa87feb-01df-49d3-9de6-b1f66b28bada', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('62fbd124-2a67-464a-a4de-29855b0b039f', 'What indicates successful learning?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('d19e5c44-fe00-4f46-954e-58c6e2c2202f', 'What is a key concept covered in this module?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('a9865414-b4c1-46fc-984c-1323d07cdafa', 'Which skill is most important to master?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('8fcda1ef-cb8e-4685-8453-6fc6c6c674ae', 'What is the recommended approach for beginners?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('bd7a1f0b-1aac-4ac5-8f30-9222e3615cba', 'How should you progress through this material?');
+INSERT INTO `Question` (`QuestionID`, `Question`) VALUES ('4f0489d4-c8cb-4ab9-a7c7-5df964b403bb', 'What indicates successful learning?');
 
+-- ===== ANSWERS =====
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7e742cf8-9e15-49cd-89b6-c583f163cc6e', 'To add flavor', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('375dac44-c8fe-4b12-9d5c-a66bdfdc1c2e', 'To produce carbon dioxide for rising', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d19713db-9619-43e9-ab41-0ee9f52903cc', 'To add color', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ae34b57a-b1c7-4dfa-8ae8-28abb21b5ae9', 'To preserve the bread', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('63983482-ae3f-44cb-9d39-4d97ad88018e', '32-40°F (0-4°C)', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d7bb95b6-4286-44c3-ba62-90157e07dc1f', '65-75°F (18-24°C)', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2dadfd0f-480b-4c5e-9df5-76804466509b', '105-115°F (40-46°C)', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f80d1a50-848c-4aa3-9129-eb37a393fbbe', '200-250°F (93-121°C)', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b528f7b3-0bd4-4100-a3f8-7d485f896c66', 'Proper temperature', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('293cfbe5-2e07-4142-a60d-cc7d523fe25d', 'Gluten development', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('236951e7-db3e-439c-a779-5f505532ac43', 'Yeast activity', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6f12f658-4427-44e1-a508-b80494d55d15', 'Salt content', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c89cf4e2-e448-4d11-9bcd-80024eb1fbdc', 'Immediately', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9c565d3e-adca-4774-a152-e96c59a03b6d', '10-15 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e52d6b4f-c5b0-4d8a-918e-23c81757712a', '30-60 minutes', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9df0bed0-062a-4be1-9be4-a1430236451a', '4-6 hours', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('16a5fb5a-aa1f-4be8-895d-2ef74b61e3f2', 'Casein', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('010e1ae3-b5d7-4035-8edc-aa57b9031cf7', 'Albumin', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cf400bfa-8c57-4ddc-8f14-77bf4b69fee8', 'Glutenin and gliadin', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('128a7fcb-a5d4-4461-aa48-c3182c6333d4', 'Keratin', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('98f71d79-da7b-4ac1-aaa3-e21739c7091f', 'To add flavor', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7fcbeb38-6996-4ade-b452-6edd9e53324d', 'To produce carbon dioxide for rising', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a9455c14-f017-4950-a631-a2c747624bb9', 'To add color', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('752d6022-8ba3-4ffb-83be-07be12b53397', 'To preserve the bread', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('992435d1-4d6b-44f1-9d0b-fe2ce141d201', '32-40°F (0-4°C)', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7d10e353-ed2b-49e3-9609-6b12388457cf', '65-75°F (18-24°C)', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b3609038-ab62-467d-8656-5fb0bf2fdcef', '105-115°F (40-46°C)', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a7ef0ab4-76fe-4b4d-a1ba-f2f0c5bc2527', '200-250°F (93-121°C)', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b9d0e093-5af1-4788-98b0-90f2182efe2c', 'Proper temperature', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3637a745-0a66-47c8-a199-b2d32358829e', 'Gluten development', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f22fb940-4090-40d5-9e1b-4161d468c63d', 'Yeast activity', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('33e6350f-1e88-43bc-853d-5bf9e5039710', 'Salt content', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('15beb6be-ecee-4386-a2da-856867c2b9be', 'Immediately', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5b5c12a0-dda8-4cc9-8896-b6d0b55fa47c', '10-15 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('dab2c861-01ec-4aeb-97d2-d57166a009f1', '30-60 minutes', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ff48c713-5471-41c5-aacb-343bb1798c61', '4-6 hours', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d3341193-eb32-4fe1-9b57-e8b5c40075fb', 'Casein', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4b7f869b-b0d7-4c91-a045-0f1e4e327aa9', 'Albumin', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ae8cadf9-24fe-4852-8f74-1538fc5fc7db', 'Glutenin and gliadin', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a7aef025-d63c-4e98-a334-4efba600d0a3', 'Keratin', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('64448947-793b-4aed-8e1d-4594b1ca267a', 'To add flavor', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5682d0fa-a54c-4df1-901e-762a3afbdbed', 'To produce carbon dioxide for rising', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5a9d1cf4-99dc-4cf7-a332-84f2323ce7c8', 'To add color', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('484bb51d-421f-47de-bc13-1299ab64a573', 'To preserve the bread', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cf808e53-474f-45ce-a9d5-05b028e9e327', '32-40°F (0-4°C)', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0050a616-d20e-408c-b9ad-50d6eef1de54', '65-75°F (18-24°C)', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7970ae1d-18e0-4629-9165-e0d47ba3be45', '105-115°F (40-46°C)', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c83d1bc0-d3d1-45b9-a75f-32c1e23d1298', '200-250°F (93-121°C)', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('969328e4-0d50-4f4b-841c-d8e9d2c48504', 'Proper temperature', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('494b809a-832a-4b2f-93dd-5ec128e212ed', 'Gluten development', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d1c127f2-efbf-4a15-816b-5bb2b8d6c8a0', 'Yeast activity', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('173ba303-7f73-4653-9cc4-dcc217c0b64f', 'Salt content', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fb665e47-601a-4e0c-bb37-0ddc69902fe5', 'Immediately', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('23771dae-cf24-418b-a53f-47c9599927e8', '10-15 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5a5e3346-8b73-4205-8fbf-7eca8944a1c5', '30-60 minutes', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d2f1b807-f7ef-42e4-9480-8d017ef2da0a', '4-6 hours', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('aac47d3e-24f8-4e30-ad4f-898d3bcc4f29', 'Casein', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d5eda5fb-8950-4e24-914f-2465d01cdcaf', 'Albumin', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('646c2dc8-78a7-4582-919a-654f92d0a0d6', 'Glutenin and gliadin', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('94b185d3-88e5-4232-8b3d-56348940e8f3', 'Keratin', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5caf8bae-aa71-4288-bf11-37cc5ab566b3', 'Put on gloves', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ef8c7d94-38fa-4271-b5d9-4c62cf115677', 'Wash hands thoroughly', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('53fd9478-b674-469d-acd4-14548e3784d1', 'Arrange instruments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5c8a9a20-53e2-4411-83f3-a5946def9f89', 'Open sterile packages', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6cbcea4d-4637-4fb9-afe7-3dc462f0ce28', 'Simple interrupted', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9f7090f0-3f99-4703-9694-f85f30dfd128', 'Continuous', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('62f685fd-d9e3-48db-a37a-40dea5b1bc32', 'Mattress', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('73df53c9-6aa9-4fd1-8272-70b447996fd5', 'Subcuticular', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('366a88c9-a9e3-4a9d-86e8-9abba701f871', 'Patient comfort', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a0917c8d-da2a-4b07-93b6-27d5db906901', 'Maintain sterile field', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6681fa52-ce51-4bd9-af30-4d6e8aa06bab', 'Absorb blood', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('92699d30-bbf6-4839-af69-710f2ebc74bb', 'Mark incision sites', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f6cc1161-4305-48af-a24d-9285365bb1a3', '5 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cfc9aee4-9fdb-493f-b507-d61d7c1ca038', '15 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ef175f16-fca4-46b7-92de-cf40f5194470', '30 minutes', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f49f7e81-d209-4e5b-8c04-baac38389c7e', '60 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2c5bd6f9-c6f8-4801-9858-f773724e70b5', '30 degrees', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('48f04cc9-2bb9-4ea8-be0f-65c6b1c6d076', '45 degrees', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7f65f719-b5fd-4b38-b236-b0cf66381115', '60 degrees', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1e1cfa46-31ee-46a2-bdb8-8f185dcce0de', '90 degrees', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('84ce6cf3-aa1f-471e-85b7-a4f504f8539e', 'Put on gloves', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4816b506-4c0b-4dc3-a132-e9ceb44c0c48', 'Wash hands thoroughly', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('dcb32b97-9099-4c0c-9621-070b0cbe5866', 'Arrange instruments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('260122bd-519a-47ff-ae8d-a850bf8bf674', 'Open sterile packages', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('142285d9-d101-4908-b9d2-9ce0cb70004d', 'Simple interrupted', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b83ef381-bdbf-4053-82f8-c45eda21413b', 'Continuous', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a187eaac-4192-48c3-8acf-cc22835d5d01', 'Mattress', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a7c4f73f-3555-47e1-bfe8-4c21c79c627a', 'Subcuticular', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e742d2cf-df14-429b-8666-887075075ace', 'Patient comfort', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c912d803-0130-4424-a41d-00f6d3c8595c', 'Maintain sterile field', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('336593a7-5820-40f3-a051-f75e1f45732a', 'Absorb blood', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c6205ec1-63ba-424c-b5d0-05ecafc6da64', 'Mark incision sites', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9e155b40-0f2f-472d-ac5c-24c264e1cb62', '5 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e0f98d3a-1462-4fb2-ad61-eaa376eb71fb', '15 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b2f0b1a9-0688-43cf-97d5-e3a62820db78', '30 minutes', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('930f2ca7-a7b4-488d-b565-8d3c51c93c22', '60 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('061f52f1-a68a-4418-b77c-7708a647d0e0', '30 degrees', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3cc2ac63-18d1-4e09-95e9-3a7d9c0a2dcb', '45 degrees', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8475021e-818e-4f6f-a887-fb5748a3cdfd', '60 degrees', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('97d349d8-39e3-4b3c-ab4a-1121a92eb753', '90 degrees', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('29c211ae-eaba-42fc-9b0e-d00f8b313349', 'Put on gloves', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5fdcc979-8359-4fa5-85be-3a8a11c77979', 'Wash hands thoroughly', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1cc2a0b8-9b58-4210-9e7e-7a37eb8058af', 'Arrange instruments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4fe6dcb6-95ba-464a-9d7a-63d0cf039ff6', 'Open sterile packages', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b6760285-7d5a-46c2-bce7-1a98fc75d07a', 'Simple interrupted', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('993e703d-1146-4aa3-927d-5f280631167b', 'Continuous', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a88f4bd1-56e2-4be8-8a70-bf908ef7010b', 'Mattress', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a7064f8c-556f-4569-9379-8936f17894f3', 'Subcuticular', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5cb2bd05-6877-4848-afc7-d39aa73277f9', 'Patient comfort', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4c415f86-ea5c-4434-a624-27ab1a9d3887', 'Maintain sterile field', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7bfc3fb5-3944-4c4a-ab36-d351f5acc211', 'Absorb blood', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6760b100-9dd2-454e-b0e0-e0c6ed5b43ed', 'Mark incision sites', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('47611a15-5be1-4f40-94b7-68a4889339d5', '5 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('152dbd84-2d4e-4d42-83d7-15d2108a2769', '15 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ae079171-601b-4b6e-b3d4-2d873fb080ca', '30 minutes', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('49292cf0-cb49-470e-b2e6-633896b727d3', '60 minutes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('49424023-df95-45f1-91c6-697347f68248', '30 degrees', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a61685aa-af07-4620-99b9-87698fe7e0e2', '45 degrees', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('da600365-02a9-442f-bdee-480dd841c663', '60 degrees', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7d148683-6000-4153-a18f-4b27194569d0', '90 degrees', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ff1ad39c-3999-4967-9547-463c8c4bba46', 'Measuring length', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7444f678-d470-4f93-a50b-99cd563ce9b2', 'Checking right angles', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('356a1458-3b11-4d0c-b430-597153780340', 'Marking curves', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('41edf6bb-edc3-45ac-a9f5-af6fd84fbc44', 'Drilling holes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('298760c9-42ea-4f14-a80a-110f3187b02b', 'Butt joint', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d74fbccb-5369-4d70-aaf1-d2bfe5fce32e', 'Miter joint', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('130e4414-7c3a-4472-bef0-7233fa35b4f9', 'Dovetail joint', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('099f7abe-919d-481d-8838-bf54987718a4', 'Lap joint', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cb7dbb39-f1f7-4c06-b89f-987a7e71842a', '40-60 grit', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9b39e6c5-6c16-4bab-8511-e79743bdb22a', '80-100 grit', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7ac61db9-f8aa-42cf-913e-e00e3f9b409a', '120-150 grit', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a23d10de-ef21-4a38-b1f6-406c69165ed1', '220-320 grit', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3595cba7-fa6d-44fe-8723-389c013fff59', 'Circular saw', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('330ff02f-8ab6-4aae-8eb9-2a40b9400df1', 'Table saw', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c33d5862-fb47-445f-a245-06ddb0a43d58', 'Jigsaw', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b4e11101-380b-45d5-9d34-53637b3a1224', 'Miter saw', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4f8224ba-e2d0-4340-b8e4-7c2571ca7ca0', 'Seal the wood', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('181e2482-929e-4ad0-98ae-5779161956fe', 'Add color', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5dce58b7-cc07-4cc9-b544-c13a80e34341', 'Increase strength', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5246696c-b083-48e5-8de0-26528de4d3dd', 'Prevent warping', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1caf4403-a7c3-4b2f-b58f-42da858d8181', 'Measuring length', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4ae05145-dd5c-4ee4-a928-ef9c5dab31cc', 'Checking right angles', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('363e1e11-facf-45b5-9adb-c0f79feefec0', 'Marking curves', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('eaf9b97d-01cd-4347-b810-f301d53af614', 'Drilling holes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('39bc5032-ffc6-416c-b9b3-634213af4a93', 'Butt joint', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8c1827eb-a709-4bee-8b98-c4e56eadb309', 'Miter joint', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('afbb2ee5-f350-4d38-bf16-3df56f12828a', 'Dovetail joint', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('08ef0d73-adc6-47ad-b7f3-413e85ef1188', 'Lap joint', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('70e92318-f8cd-41e4-8dd2-5a5e5f9b69b4', '40-60 grit', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f9377acd-7c59-49ce-a641-095bd8cb68e6', '80-100 grit', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('385a5cbd-0bf8-4f5e-9229-740e6f511851', '120-150 grit', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bcf9ef9f-9a88-4c6e-be87-fb2001abe9f7', '220-320 grit', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7d30f454-90ab-4b4e-9c22-5cf65aa8d0af', 'Circular saw', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6121d1c9-98d8-4fe3-bc06-58d1f90c4b17', 'Table saw', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('dd54b21c-13c0-4bac-beb4-5f92b118fd2c', 'Jigsaw', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('30f220cd-2e5b-4b85-81e6-85302a0516e2', 'Miter saw', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('24162fe2-e882-4130-bbd8-750981a6f2f4', 'Seal the wood', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e2544365-5e4b-4fda-8534-1ab3a1324382', 'Add color', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c62b75f2-4f09-4bbe-8890-6b8456434fa1', 'Increase strength', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6fabdfe8-350b-42c1-8022-20fa7f1efe94', 'Prevent warping', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c3bc31e6-77aa-47dc-ae21-cbefcb92b3c5', 'Measuring length', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('89006893-c573-4378-9146-816fa21c9fae', 'Checking right angles', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8133f246-1c87-4697-9126-e3ac6fda91f7', 'Marking curves', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a4a7133f-ede9-4e86-b05c-6fb5cd630486', 'Drilling holes', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('82159875-8f4c-455f-a778-a9ea04362ef7', 'Butt joint', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e0e1c676-027b-4d64-aec6-6fe1cef984e0', 'Miter joint', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('142cd782-ec8c-42a5-9118-9140aa1494e3', 'Dovetail joint', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('97281478-8004-4c7f-a091-8808258072c7', 'Lap joint', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a87a1140-c9a4-4f90-bcb5-95e26d4bfd7d', '40-60 grit', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('64590d5a-b5a3-44d4-9bc9-75668c2bafd9', '80-100 grit', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4e7e219c-4e5e-45a2-8340-b78b04031d9b', '120-150 grit', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0ff5162e-a4dc-4652-b97d-263c7791348b', '220-320 grit', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6ff7d069-34d4-440f-a094-c70a77758d4d', 'Circular saw', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7962050d-5ab5-4a61-a81e-8733a3f4fb2f', 'Table saw', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2d487754-e9f9-4f93-9bed-cd54e75354d9', 'Jigsaw', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1d93c6e7-131c-4962-b6f4-63d422fef521', 'Miter saw', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('78b19ebb-7440-46fe-8a8a-9f91c59f0702', 'Seal the wood', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3b4a6bdb-de01-4e50-a263-103851cddfb6', 'Add color', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fe35d91f-0882-4c06-824c-f64fc4ab11f1', 'Increase strength', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('26381551-75bc-49d7-ba9c-33e40c6405bd', 'Prevent warping', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c3cc2b01-d470-42c3-973e-9d52481f5e3d', 'Watery liquid', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bee975a1-6aeb-424d-a178-eae4035690a1', 'Thick paste', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('481bb39a-56eb-4429-b468-8cde6b5e547a', 'Peanut butter-like', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('053ec8f5-67c4-4208-a5b0-ac88d1ef983d', 'Solid block', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a3619dd9-af69-4a6b-9f02-750099149b8a', '1/8 inch', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8c2d8c01-df65-44c6-8136-c47007cc5dad', '3/8 inch', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('12973f2b-995e-4920-beff-81896cf5b3ec', '3/4 inch', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('87b08bdc-93f1-4c2c-ae12-04920599182a', '1 inch', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cdd8f681-79a0-4927-950f-70116f38a3e1', 'Vertical alignment', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cb2cbd97-f2d2-4315-9129-24c53bde0cf8', 'Horizontal alignment', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8db9f2a3-1c72-41ce-b853-e3051464641c', 'Offset by half-brick', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2d507552-d3fc-4fb9-8c91-dd16493a31db', 'Diagonal pattern', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0c95a14f-49ac-4af8-80ed-1f54649e640a', 'Level', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c6f8ae30-c3cf-45f7-95ad-a2b8e6cea2fd', 'Square', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4869b445-28e9-44aa-9ef7-54779516eafd', 'Plumb bob', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('926a0a32-5988-4927-ad7f-cc8c69d10fb9', 'Chalk line', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e9e4d7e7-b28f-4958-b844-c4fdf1147795', '24 hours', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2bee1ce6-94b2-48a1-9eee-d1c049f842f3', '3 days', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9ff889a6-2421-4bf4-bd3b-46d1763a61ee', '7 days', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1432c603-f792-4af6-a2c4-8fd0eeec0369', '28 days', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('13883e71-f6fa-4ea6-a19a-c6b5afe21e69', 'Watery liquid', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('96fb0669-43ee-4b37-bc37-d6d763f76236', 'Thick paste', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a58b5232-2a74-45e0-9630-39926403934d', 'Peanut butter-like', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('eb29b1e3-441f-4950-8dcb-e8980891394d', 'Solid block', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ed72e2da-14a4-49cb-b94b-dfea6f50a8d8', '1/8 inch', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('db3e108e-09d1-4df1-b829-b7c06e3e4655', '3/8 inch', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ef48b74e-0678-4e3f-8573-aacbb77355a2', '3/4 inch', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('91c855e8-6fdd-4f79-9a39-1ec304aded80', '1 inch', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f4fefcbf-0add-49d7-b3fd-4ebc5fd2ff60', 'Vertical alignment', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8dad3c4d-d676-4f47-9265-72859f2d4985', 'Horizontal alignment', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('27498148-f6dd-4741-892d-616aedba9fa0', 'Offset by half-brick', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e20425a6-528a-442a-b330-af20f5c6b750', 'Diagonal pattern', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9282acd5-68b7-46c6-920f-e1ffd62105c8', 'Level', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('31546a03-fcc2-4073-9048-1a8eb13a6dd1', 'Square', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0a86c464-a250-4533-826d-fca3496be0db', 'Plumb bob', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6c2b62e9-c8b0-49cb-9338-0fcd65f48ed1', 'Chalk line', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a13760f6-3855-43a9-88e5-165d4c13eca4', '24 hours', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fbddebbb-f4e1-439c-8f6b-457168ae3389', '3 days', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ca56c0cc-e8f2-4b87-91a5-22a45b193213', '7 days', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6b70f7ca-9471-4939-8c36-45b7c8888ee0', '28 days', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('70bee09f-2bb1-4bb1-ae57-f201095d0604', 'Watery liquid', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('491d56fe-dc48-4c74-9e8f-160f087ad71a', 'Thick paste', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('70d90141-7db9-48f1-a221-a802b2db5631', 'Peanut butter-like', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f7f46516-7447-40e3-a669-496daeb5529a', 'Solid block', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0cbd349d-73eb-419a-a10d-f2e8cd2c8691', '1/8 inch', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6e1eb302-6bf2-4a64-ba57-e48f58555bf7', '3/8 inch', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bb8c3d57-71f4-4bac-bf8e-1c3a41498bea', '3/4 inch', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('50edf783-7ce9-4d38-9a78-e20b89838424', '1 inch', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e0d4c33b-726c-485b-ae6e-ad396a22f575', 'Vertical alignment', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e309c975-3e88-4543-b989-b55058581e05', 'Horizontal alignment', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c0ceb139-14b0-4e41-87a9-1920f95424ea', 'Offset by half-brick', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('318bb173-8da1-4a3d-b4c6-07221b98cc1a', 'Diagonal pattern', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f6825696-266d-4151-97d1-faa351b26ab9', 'Level', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c8530613-566a-407f-8849-5d0f7e65ab31', 'Square', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('26960968-29c3-4207-acbd-1dfa712f7d95', 'Plumb bob', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('196e90c9-4337-48ec-9677-16046ee63600', 'Chalk line', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('763cbb0a-fb03-4e74-9e92-44bc58c5c366', '24 hours', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('31301492-4ab8-48e4-a30b-7befa58657bd', '3 days', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5e0c3597-e47f-46b2-a66c-a21c3a5f7d25', '7 days', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('048b65f7-a955-4b91-b345-9b3d320b9cee', '28 days', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6ca8e61c-65d2-434e-9cc6-5cafa0b41895', 'Rodentia', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('891e9bb5-6d72-40e1-865e-7e1127ca55ca', 'Primates', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3cfcaa43-ec97-4363-8782-f6eccb515962', 'Carnivora', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('dbc777c5-bcfd-4d74-b90f-7abddca0168c', 'Cetacea', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6de391cc-53e9-44f6-be1e-e77de452ba76', '1 million years ago', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b6168dd2-48ee-4bd0-84da-412085bdc0e1', '500,000 years ago', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cf995a58-3a70-4246-b0b7-6a29b50a211d', '300,000 years ago', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('40b42a92-e418-4965-81f4-75e6a13c8804', '50,000 years ago', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('35db48b2-55cb-4d75-a42b-415258a6250f', 'Using tools', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8d504605-2460-4655-b95e-f10d0da920c8', 'Walking on two legs', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ec35e0e2-5aab-496f-a324-fc5d9ef6fcd7', 'Living in groups', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1e86b39d-c7be-4b6f-a205-cc85f5901401', 'Large brain size', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6af79f16-e899-4275-b057-3d9fb31ee9f3', 'Gorillas', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('85d12880-bb4a-4b57-9048-ca9f1899266f', 'Orangutans', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('091f03e9-55ce-4813-be87-8b058ff9bb75', 'Chimpanzees', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('758fb8c5-d070-4ec5-83f3-64a6ecd08813', 'Gibbons', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('47a8d5db-790f-4e1a-bb6b-75fe12d3e80b', 'Opposable thumbs', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b6af5b88-0a92-4a51-a640-b8bd319cc283', 'Complex language', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('67cb985c-2c54-4691-84ca-b9185ed0f9fb', 'Color vision', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('57ef74a6-0f89-433c-a37a-dbd3012771a7', 'Sharp teeth', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ca76d4b0-535a-401f-ac31-af3e267e6071', 'Rodentia', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0f1dcd47-4bf7-480b-bd09-5b10754cea6b', 'Primates', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ad535ff4-6a0f-4e17-8840-8b16eb679b8a', 'Carnivora', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8b36a768-628b-4359-9e6b-1a542514a1ef', 'Cetacea', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('87cb01e8-b3dc-443f-ada2-026b03f5f0e5', '1 million years ago', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a4690f55-bc12-4c04-bac9-a7e725137b3d', '500,000 years ago', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5e310ef0-bf3f-4bfb-8630-3ae514dc4e4b', '300,000 years ago', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1c50425a-ef25-472e-82f5-ee6c147906e2', '50,000 years ago', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8a29d677-aee9-43f3-9517-33787a203a48', 'Using tools', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0d0993ec-82e8-462a-bb6f-763f5d340d07', 'Walking on two legs', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0c95ec68-4649-4850-9d65-d5bb38427c68', 'Living in groups', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f2ec2437-402e-4ea9-b4ba-5c8f7c0901fc', 'Large brain size', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('639bc1d8-b4d7-4e63-a735-0123629c051b', 'Gorillas', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4d976089-ca36-4d96-a708-e6f7bac858f0', 'Orangutans', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d360ee63-94dd-4aa5-b898-421ca676ccc8', 'Chimpanzees', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('19312942-7210-4037-a8f7-27dab2b4026f', 'Gibbons', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('673809be-e649-404a-9973-8c983ecf4b77', 'Opposable thumbs', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('26675510-3863-414b-a101-72f24c58caa0', 'Complex language', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7c9125fe-2f64-4e62-960f-203e8e898a01', 'Color vision', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6ced9df1-e9e5-44c6-989d-eeb67a9dfd89', 'Sharp teeth', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('914831c8-e6e4-45cc-a6ba-0e2eddd892a6', 'Rodentia', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f01f5996-14ad-48a8-9ae0-1ec0eb90a1e8', 'Primates', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('144a2e42-158d-40bc-9a4c-5e663785caa2', 'Carnivora', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('65af3552-8692-4c42-b480-ad163397525e', 'Cetacea', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7f99b6db-1588-45d6-becb-2100e968db22', '1 million years ago', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0c7e1dcf-e5c0-400b-a6b6-242cbbfa176e', '500,000 years ago', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('973196f0-707e-4202-9682-343dea66ff57', '300,000 years ago', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1c9150ae-493b-4e82-8457-6ac46220bcdd', '50,000 years ago', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('de6efde4-0dca-4822-863d-598fae7931b5', 'Using tools', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('392f41e8-3add-4307-9d72-3e6e4b1a3685', 'Walking on two legs', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('74cf1273-a4e6-42e9-b2b8-637688f59eb9', 'Living in groups', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('de7531d9-89d5-4c69-bd16-5fc9455f750f', 'Large brain size', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('88da8766-649c-47d9-b017-51165d867346', 'Gorillas', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('111ba7c8-8c08-4914-9a50-4620a0fb0a74', 'Orangutans', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d8cfe799-20f3-43ba-9740-078e94afa729', 'Chimpanzees', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('62f43a82-a050-4ae7-9a41-488358f2fb52', 'Gibbons', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ca499bd1-659f-4a34-aea6-82f98137b5a5', 'Opposable thumbs', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fe698f85-a6a8-49a2-aa7d-5617fdd9c57b', 'Complex language', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4b9b3665-bb2c-4804-af03-1fb1004154d4', 'Color vision', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('310b7962-b0eb-4043-adbd-d83b1166c59f', 'Sharp teeth', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a00d443b-7a1c-4305-9e22-fb656086f612', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f969202b-7828-4b6e-a988-030df63420e8', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4b5e4098-aa87-4fed-b770-7e7e66405dae', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('556adc8c-5017-40e0-be3d-ebbd96eb560c', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bd14a19d-2088-485e-8515-a9e830fc086b', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('95e2e48d-5336-4a4d-9b16-fa1cb5a2d382', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a1972154-05d0-455b-9c29-fe5bb761f093', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('58aee8e0-9630-411c-845f-5649fd7db2e8', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4ac6ac75-383c-430d-9d3d-60c679e3467a', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('32a055dc-2826-4840-a19c-2b9348be3497', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b6bafbf9-840a-4a9f-b782-83e5642f5c1c', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('403731ae-4a5d-4c7e-b0fc-03883b986f97', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ee0f69c8-4c8b-4447-b331-019670345bc7', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('34c4c0be-5e5c-40bf-930a-03c490428415', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('07554660-99ea-4d2c-9847-55fd571d5af6', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('004a6241-3e94-4dff-a8fe-2cc2e513235e', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2f688921-cd48-4ec5-ae6f-1788ddce7990', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9592a5ae-8acd-422b-ad18-5110bb0ef338', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c07a87a6-77ac-4197-9fac-d727539d38ef', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4002dba4-69f7-4a63-9725-0124e1c492a8', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5e94ff28-ca54-41cc-8442-0517d8f0d28d', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2fcdd4d2-2fb2-4414-8f2c-d3263b32e709', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('313829b9-9c7c-4a84-bf25-6fa59511eeed', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ada7d932-1dff-46fa-a367-5b10979b1860', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a3536a8d-98eb-44ca-b5b0-9117289f71aa', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('73a775f8-796d-4852-a719-d4b2111ff023', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8b13e81a-755e-4d4c-8388-9f4f905f0c82', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d61f3c83-24ee-4965-9c8b-2f2157b46fbf', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('913feb69-8f52-4f1b-aaae-1c779761f4d4', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('19f3a114-1cd8-4e0a-86ab-8b6ea3514749', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('61c46306-d643-455a-bd4a-7954c794de0a', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('14a057b3-972c-4bf4-836b-95520fcc49f2', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('884e7599-6083-42ac-9a09-b530d1a8c5f2', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('65a7ef3a-92d4-49b6-86f7-eeb85d0cc37d', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e4a3e415-78f5-4565-9977-475fd508b2bd', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8402c720-7bbd-4354-ad93-dad649cd035b', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('70eec91d-8a2b-4b7f-a83b-5c2ec7a19404', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f8a15995-b3b1-4a6d-8549-1dd5ba262537', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('60157471-9b96-453a-a689-37eda194298f', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e4acbd92-fa42-4dc7-b79e-5a0db17c7f18', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b361cf29-dd36-4282-80a1-869894145aba', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1387dea0-67be-4ad0-81d5-3fc35b07803a', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c32a8c42-6540-4be4-9ad8-58da3477e796', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('81922262-7054-495b-964f-ec8ae563e7a3', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2abe7020-c0f1-4544-ac43-ecb640bd8297', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d8bb728f-3bf4-4209-adea-4c7efa091a6f', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('51762d69-10fd-4290-b928-c5ecb4aa1016', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3e719b3e-0a71-44e1-9cb4-abea4ea3853c', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ada81117-148d-4d77-8ec9-bd3401ba894a', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('20df5105-3111-4c91-98e3-0bb6dfc3690a', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b0c43c55-7564-4f33-9c09-dee47aa8b21f', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5d7fb1be-e184-4576-9a0c-004e4deaf7ff', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a5e0ce06-9af8-4d21-86d5-4e771edfd2db', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('84c84533-5af7-425d-8f1a-70961ed1c9f5', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('20621b9c-eb18-40d2-bc71-d97ee879e6a6', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3cc0bbce-0a22-4ab6-bbb7-876c2f6fa9e1', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('12c208a7-a612-4233-b2f2-7e4c31ae88b2', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('52f501e0-f82a-4a27-81f9-74a7b08f3e90', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('50f79278-ac1b-43e4-8a99-d6ea2a051038', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('869922db-ec82-45e2-9338-dc2e4846253e', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('eb36fdb1-bd06-4d37-813c-99b78bee4e44', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('866d3f32-7e2f-411d-b9e3-c4bc0d6249de', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4775d972-bbe5-40ea-b344-11c5ab2e9ce3', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6019cdc7-3737-4ef3-a68e-8cce36d8950b', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('29c595ae-6254-48ae-9450-c885a941198e', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('875a3a17-4c95-4042-a42f-b3eeab18470f', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('06da20ac-e2b5-4c8b-8352-791b277d9a22', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('694b87fb-019e-41c2-aa15-a41466f9fc10', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2c21f5cb-0356-45ca-ba10-1ce3bf681f06', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e60a57c0-6b58-46ab-b758-f38ad709a9b9', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3cdf56d7-cbc9-4281-ba3b-ae4c336878c4', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cf353023-cfeb-432f-8988-4d0530871ede', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c1c37a4b-da29-4113-bb0d-d5de05e7404d', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('19fa7754-2be9-4549-badc-cfd3c292db00', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a0752886-6753-4a03-8458-9eac2393c103', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5e4b411c-5503-45ef-8b70-3c9e2945bc4e', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bb6d2502-3b10-4ff0-9335-14b25d11f684', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b8be1442-0160-4639-8516-b2951ccc4d85', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('12d8ec30-2327-4402-8c88-f55fff0b9ed6', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ecabd040-4c98-4785-913b-0f4d370faf29', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8b63d4b1-049c-447c-8188-63055252f900', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ee76b3b1-3264-490d-901b-c6f3ff860320', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4d4dcb74-afa0-4c16-863a-56181838e4eb', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d6c7df58-a2b8-4d38-a676-d0a2373809b7', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('57eb72a9-b5fd-470c-9418-15dbb19e3444', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3bc4a155-f881-4a4a-9863-2db06d0a02a8', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b85fe0fc-4316-4c8a-9a37-6d8b532695b6', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('50568c28-a60d-43f2-9452-95702e25337c', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('264d4c65-6376-46a7-a2bb-45ea40664d95', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('51c29f65-62f8-4d4e-a2b2-0f1c86c9b270', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7af6235f-b3d8-4c65-a09e-6c8c32dd9595', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ba96562e-ff86-4948-856e-dd2177ced4d8', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b58d1f8d-fa30-4bd9-bc1b-591efb26cf0e', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e4f10fa0-e731-4ca4-b258-9f833ea6b34b', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cae4956d-103c-46e7-9557-a0da3cb15e04', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('69b27e50-6970-4855-9106-39bd1ee47b87', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('36b632c1-c96f-4c8d-a53d-92b917ef1102', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('69249073-4f84-44b4-8fae-ddf402dc30d8', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5c6ec61b-7b39-43eb-af48-11b7567adcd5', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('23eccec7-d93c-469d-b8e8-1b650d0f557a', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ce2f3f49-e3df-4df7-9f06-086637492d4c', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e5d46cf0-c840-4a87-bf83-37177d25882a', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('12081dff-61ac-42ba-abff-d66f0a111587', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2e933cf2-7bbf-4aa6-9630-73dbd3df982e', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('669b9850-df47-4701-bee1-4b2f7ec30dfe', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fb22e55a-8f64-4fed-a15d-8597e8c655ff', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('66934399-7399-46bb-9029-471a25834ade', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('023b68e5-327c-45a8-8fe9-8ff82124356e', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9ebe9ef5-e2a7-44bc-ab54-70f9cb23347f', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('744894e0-96eb-4e2b-bb11-2ee131a32ada', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('22f1951e-080a-4020-a2a7-07b041b943ad', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c917e8c7-611d-46a9-ae75-dfdd30f9cdfc', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d0f373fd-b7d9-4a02-80e0-fd62ca468381', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('da51ac03-4780-44d6-8f96-80df33e38016', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ab0d62fd-544e-458b-804c-dcd746e9b1f0', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c7d92421-77c9-4bef-889b-c4232e25a1bf', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('95c63ca7-cdec-49d4-9986-45d7def21791', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('18e02cc0-9252-4a13-be12-d10b133af521', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4bae3950-d24d-40c3-9c7a-f6915e10339a', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('59b434fe-6e3f-4a2a-b535-1ee3f75e2aca', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('422f8c35-599d-44b3-8d93-4cf57b07738c', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c30a1dd6-7e50-4607-96e2-a95700edef72', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('33b9b0d3-7ca0-4c4e-89d7-178e3ed481fd', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5cb58a0b-b51b-43fb-8130-808715073a6c', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cf011621-1e58-4728-a26f-e3e5575d0b8e', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7cc68487-d4c0-454d-9f07-1d563d402426', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a8e759e3-c74c-4ac8-8917-c6bdc0deb2ac', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9252b295-eb4c-4a58-a837-ad2225f6c6bb', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('061e49d1-63c1-46ad-8fc6-dca8e542031a', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d4ca2354-d070-4124-972e-f3eb6c94b555', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c62c7b29-5dc6-48c6-8563-83892883b002', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a2645551-9ec8-4bd7-bf8a-e26252c81661', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7f80849e-ca75-4673-80d2-4495b7a3c9d6', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('feaff97e-dfa4-4d12-9ebd-204d4221ce40', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6eae861d-e11a-4bbe-8173-8386b6cacc44', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('28ad98f7-0270-4e56-a441-b7baf06e7324', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('db821efa-09b8-45ed-8a36-8c5be90d96d7', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a671d058-9723-4e02-a946-a7f0f15ed6ab', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('599733cd-f5d4-4b33-a2ac-f9010341633c', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('84e4ef8e-47f7-4737-b431-4bb8fc25f766', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a50a5c3f-a155-4385-a22a-d78884ca088b', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('083245e3-cfa6-4581-afe3-f197250c4a1f', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b86ba01c-475c-48f8-937b-673670c74767', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f06e7e35-c16f-46f3-9309-6939c1bd18a1', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('18d58cd6-2599-49f1-bfe0-17ff795e3646', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1ff4a1e5-c222-47fa-860f-60ae37739d50', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0c42aba0-f7d8-4630-9306-3e31f8a0af25', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9d0915ab-660b-46c1-b42a-74acbda7a483', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('43f4d46e-f30a-4607-b597-4420d298cc74', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f2c88c25-8084-41e1-8414-7f2722ee71b8', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('53bd6e6e-6caa-4ab5-82e0-210222ed1431', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1fd6af8e-110a-45c9-8e36-4b2df4238d1d', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('447aaaaf-f1dd-45c6-a686-11564139eae4', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bb5c732a-6919-49ce-9531-a94897b0eee9', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c9542031-8219-49ba-bbad-eefab2650a52', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d4d38f5e-3517-4034-a81c-f72996c4e602', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('be222764-058f-4102-984d-73a1348eaa72', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3510a710-5e67-412e-8ce9-feda5e702d6c', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ee4bd9c2-5328-40af-8c38-a2fefe0690fb', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('06a209fb-e639-43a6-91cb-0f0bd96a6e43', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('865c957d-c48a-4799-902d-aec5480ea5f8', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cfd54bfb-8174-4b73-97ff-80f5fec05951', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('27b8f939-32cf-4790-9a45-4b94172a056e', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3fe41758-0ee2-447a-9f27-26a48b4add84', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d83f56f2-fae9-43c1-bbcf-c258a88335a5', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1e4e17ed-bc6f-4bf7-9068-28314a183f08', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3bec3c05-fff4-43b9-bc88-0b7479492b76', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e26283f7-df40-4f1b-8876-fc370ab8097d', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bbf3b13b-109b-427e-9c2d-7c569551a250', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('97060a12-49b6-4cf5-a292-771dac2d0f15', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e3c6897c-60c2-43da-9c4d-ce4882abe502', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ecaa0cbf-4d4e-4a8c-9251-fc1caed93311', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('51648c3d-5b3b-4785-94a5-372085307703', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9958fab7-23c1-4189-b23a-d5888fb3759d', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2a61a164-024c-4cc6-bd9b-c6ea4c8d5d2e', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('15553cd7-2564-464c-b2c4-540d36e50fbf', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2e48ffb5-14e7-4590-b93a-ac8f13ce35e8', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('272c1444-06cb-4ce0-8070-7960de20609c', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('202a3777-a2b8-43f6-b91b-368b1d231b97', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('620421d8-d89b-4c7d-bf03-c9df738fe90e', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e4c34598-1d3f-4f8a-b955-52c84cfa4836', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('425f7ed6-1d07-47c1-8309-13fe2b8aefed', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8caf9f98-9b05-4d97-a194-891491bc9ea8', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3a9eb128-1257-4f59-83ed-f18e67893c97', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3244cc5a-94f4-4c70-b7a4-c66f9e5853cb', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2486d1e5-eba7-458e-b1eb-dcb1958e63c7', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8a6653bd-1b56-4135-a795-59900956b6fd', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4b7a814a-6499-4e0d-bb31-de75dd145f7a', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2b9b688a-5e1a-4852-9417-d4b3905d59f1', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b404f7fe-2839-46d1-b484-5a82b84b42bb', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('73bd3389-33b5-4446-9564-dcf9da13c323', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9130a6d2-bcb6-481a-99c4-11c28d4560ac', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e0e37047-0fb0-4c88-94b5-2163a659eb05', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('45183138-e617-49f9-aac9-1958e52a5fcb', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('82216952-9c4c-46d0-a6fc-f2d8d880c351', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a9f823e7-37c5-469b-aae1-e28c1ce6d6db', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('df23f7fc-75da-4161-ac15-a3ac39ed9769', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1f333b57-79e5-4d31-aa6c-d0bf41c5059f', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2f324c95-8f00-4d6d-889e-d0a53e9823a3', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a23cb834-9992-4428-89fe-9161a3ffd450', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8a65bc07-1160-47fd-b69f-7d5103fe276f', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('15ecc5a6-34db-40b6-827c-eecd3bc8b7cc', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('56f49055-831b-4894-af65-8a5da9f53340', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ddb44194-4302-4950-aaf6-12b8138c50ce', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c1498000-c5f8-4a63-91cc-b47330d9af04', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1029ab1c-e8a8-4170-887e-eaa9147cf268', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('07855391-ae33-438b-947c-d16fe6301421', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5df2328d-a9ab-44c9-8691-892a4c9ad3a0', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8ec2ddac-fe6e-4e17-a48c-0c5af2bf70a1', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a216eb8f-3b14-4499-a628-943ba45dab70', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('096de928-8c61-4b4c-94a1-1669e7b7a137', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('56bec1f9-526f-4b3a-b9f9-ffe0feb68049', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0825b088-584f-42d3-9619-3777893451f8', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('795613ac-0cfd-4faf-a4f9-2637efaa9a95', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f57f3bce-785f-48a1-97cc-6b6de6b20f4d', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('84b18242-db7f-4c39-8a32-3ec456799fff', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('68ed94f0-0303-4976-8c5f-031750de7f51', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('71346490-4673-44bb-bb27-daf6a0af744d', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c81974b4-a288-432b-bfe8-7a449e4f6fa3', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d0ba5eee-bfc3-4ef9-a2af-3f3d369e7f1c', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4a8b8482-2ffd-42b8-ba95-e24580a12086', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8ade531c-8306-42bc-a318-c29a1d95037f', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c8d1d3c0-e51a-4b86-ac05-3f100026aace', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4d9be735-fd77-44d1-a598-0e2179e7e6be', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1fb7c221-d05a-4f51-9815-753464ca5d36', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9171c8b1-779b-4bc2-bee8-a29be43be852', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2eca8e53-98da-4899-9ab5-c3a8316038ad', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4ed2e00d-5a47-4064-b496-f6f2d8c9f3fb', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('78d09292-f409-4341-bc98-2ea801c2e72e', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9fee036e-466a-49fb-9692-9bf4ed490a05', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('544514b9-6ea5-4828-9403-249fbda2d62c', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('75162f0d-e83b-4c83-bcec-0e9849cee566', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('94cee474-52fe-48ab-9163-f21ccb60cfe0', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('393eb783-1918-4d83-949a-edfcfd510cb0', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('864d17ed-fe2b-4d23-8867-64b7cf52300d', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('429269ef-be03-4cfc-a5d8-b8cdf5a54010', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fe7edb5a-4276-4f6b-88df-9477a93a0792', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0b9e47ca-7eb5-4dcb-8e96-fc0aa7968e62', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d631723a-1bdf-4ca4-a79d-7fa99a464fb0', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e646fa7f-2164-485f-bccd-d353a88c0524', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8fd2e2db-34da-4717-8acc-78f497db412f', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ca449abf-88f1-451c-8e05-1679baa2814b', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5307c3d8-a3c0-40c1-87f0-c24b71b06413', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1f7543f8-d7bf-4f8c-ad7a-e00eb4bfd239', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('30418471-3459-48cb-9d7c-99c78d10c42f', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1f48227c-0155-40cd-86c4-e4ef39e66249', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9d8b5ff5-b421-4b5e-810a-4e94806230b1', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4531d301-b081-4ce9-af73-13db4ba234f4', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('95a30d0d-c579-487b-a5b9-f891e8060613', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e4433144-c8df-43cc-bb3b-62b7c1035e0b', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('879ad75b-ba1b-4b35-9817-c941642dce2a', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('726caba3-8313-40c3-9731-39553e0c3674', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2725c9b4-8ca5-4a78-a75c-fb301c4e4f9a', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4517fd45-ffcd-4a74-9d1d-8a2becf7d440', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c726ad4b-81a0-421a-aa93-7aa044987da8', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('406d2f31-649f-4681-ba14-80b371b88349', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7f1ab5db-f4df-4fff-92dc-044735b40ffa', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9b4b39ab-1b44-4fc5-957d-2c6429460074', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cc913e44-0e33-49bb-8cd7-3429379af0be', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('60406c42-2d39-4d4e-b539-6fe9ee7b3ff3', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4a514979-45e5-47f1-b336-22c2929dc086', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('687fa03c-7217-43ac-96f5-cb8e36688aaf', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('63652e4b-fc7b-47fa-b677-4b2b4319bd86', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9044691d-b7a3-429c-8ecd-98961dffde9b', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('284b2510-aa3c-4abb-9188-4e1848db4a2b', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e327628d-c46a-420a-9a61-f0ddae7bf6d4', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cf83b315-dc58-4072-803c-2d77ccf27194', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a6791ee9-1d94-4dea-a3c6-7251c1c9732a', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('39aa79c2-c36b-47ef-a95d-5b2fdb04fdd8', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b1d1eaff-3a97-41e4-bfa2-c2b589a8d82f', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('32c1e491-747d-404d-965a-c2f699a19aa4', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('86c6a7c5-6bf6-4c6b-9a54-ec8d15417c38', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('38d1462b-cc31-4aaf-b83d-64bd6567ed13', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c182a411-7c15-4f17-943f-b3eae468c073', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a92ecece-ce13-453d-a377-aa0c3ce27ed4', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1e729b7f-d481-49fe-9cfd-84b4378bc61e', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8f5c18e4-b71e-48e4-90e2-8a3331020bed', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6b0a6e8a-f712-4d3a-840e-a14f2044f507', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('76b41d1a-cf03-40a4-9e52-3057987814f2', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ef2a5f60-9124-4f89-b61a-e51e07537571', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1ae86d25-586f-4e42-9e63-50d7beee8c4d', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2c32b41f-fead-48d3-bbbe-0b1d4112097d', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('10836733-4333-4d1a-8888-5eae023525e0', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1b3ee89b-ca7a-4999-a164-16b15a985682', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ee3c433d-46fd-4644-9c45-1e4665ea7a9b', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d936891a-7215-4522-8799-8e2da16cbf7b', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('592d4994-4975-43ff-8a7e-a5ddef048a1a', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('17442f16-3502-4320-b037-fbc6e264d320', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5eecb86f-9816-43df-be6f-354d6468629b', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9be92511-abd4-486f-bf23-14626dbb5e9b', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('86961a62-387b-4c00-b57e-a435ed5cba5d', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('dc08a72f-4d1d-4fa6-a3a0-1efcc5cbc463', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d8bea50a-aa35-48fa-b2c9-934b1387af21', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2e7429db-5f8b-4c31-b6a8-b34a96038e45', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('629ef78b-0577-4257-a9a0-422acd329c89', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('44d6de0e-bcb5-45f9-976f-f276f0fcbe90', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('48c3160c-5074-4686-b9a6-d572cfc36359', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('85df7f06-9659-4712-84a8-01110ea6b20e', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('deab1428-a893-4cb0-823f-768faa212c7e', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bb502fcd-0629-4f50-924a-398e9acf8634', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('76d20fea-2b3c-4712-a639-94282e30c6cd', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2c1a4648-34e1-4110-988a-9c7336a845a5', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('36fc3aac-0783-4b78-a26b-d55c1b270161', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('32e8bb8d-3e79-47bd-a751-20fae86b5d96', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('483c66a2-c918-49ca-9a65-2f9f08a8bc6a', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6bd26355-52b2-4494-9222-a0ae4a9f28d6', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ae61401b-1c2a-4c8f-b470-114f0c06b004', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('09e52deb-62cd-412b-8139-236317b5b89e', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('98654147-8aa5-4fcb-a00d-d84330015d2e', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('17dd2f15-0ba3-489a-aaf4-e4619d4ecb36', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('35eaadfc-e52a-4335-9bb0-deb880ce9360', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3e8c5013-348e-4d81-86e7-3304c2fdb39c', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('25ed0f2b-2319-4040-8705-64240978c41f', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2dae209f-bdf4-4950-8595-5c02bbdba8c9', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bc6d579d-c037-40e3-8fd9-7e2e3b285650', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4ff62bde-6eee-4df8-ab13-05dc741fc94c', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('841ba64f-356a-435e-b94e-675cd26c7859', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7940d47e-2d38-4d7e-8b19-845d0a5595d7', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fe1c06f1-b4cc-4109-950f-2120915454b3', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('45eaf571-53fe-48cf-8355-f63efa7eeaf8', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d07911bb-1161-4326-9a10-3195e8c0590f', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c1c57a0a-cb40-4fc8-820c-ae679f72a59d', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7159b1fc-6652-46c0-82d0-a6e52f9c7eaf', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bd3372ba-5365-48e3-883c-85a2cb0bfd28', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7b532d15-0b73-43cb-b84b-998e424f554d', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ecd0fb46-0350-4e65-aa28-4f895bf0362b', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f8cd8bc2-8dac-4747-bd20-ff9f9d53ca7b', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6e10049b-e2c1-4b37-be6c-e7e7b1f21d74', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c0c7d012-01e6-4bb2-be22-0c16e72a86b0', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f13f5860-16ee-4fcd-bede-0b01da666437', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9e5be7c8-5763-4ecb-8fed-85f6110bcb92', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c0efc484-289e-4a9b-af6f-628c856cf014', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e6821044-5790-43a2-a8de-d8d56a00d0ca', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b05560a9-a0fd-4d88-bdf9-8767fb6ddd30', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e6d40352-57dc-49ff-9a5a-4e4de4229e1c', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('02b152a4-445b-4f82-8746-b01c1cd07bd8', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('19ea4768-f3e2-4aed-bdbf-b6668e3bae9e', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('233dbfb5-fddf-411d-8c1d-e99b675c1b50', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5437e0f3-9d0a-4a78-8d2b-23290a07b662', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('43597a05-6860-404d-b065-6feb35595c2b', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cc16091d-57f5-4170-b732-85add97f82a3', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('373c5f15-d6cb-4fc1-86d9-db0ba739b5c6', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6af73158-a2b4-4a8e-8aca-c231c5438213', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d5beeb0e-f665-4333-852b-56c2b77dc149', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3914b4ea-3264-401f-a3f7-ce9a5a7ca672', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0b7309ef-aab2-4f2d-aaa5-548d5b6856e8', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9aecb934-2fc0-49f7-950b-51487eb466fe', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ff9d4633-a1a6-45e8-b45f-44a9f1c0a8d7', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('35fc0668-9878-49ad-91bb-4caae0d47d4f', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bddcc7e4-b16d-46f1-9946-d0d237799ae1', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e8ce172c-035c-4801-a911-4339d5440945', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('452092f3-5dd6-4d6f-b895-45f24bbd515e', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e5821e6c-cfcb-4245-83f0-8721dbbff569', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f41db876-97e8-4291-8426-35272b219eec', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('90c7b3ee-7d0d-40d8-b2cd-01f7ed498488', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5109f9ea-5bec-4107-a0f7-34a6fba6cdaf', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4c0d9fbd-bd04-4cc9-aef0-848fb1f72df1', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('eecbdb85-45c2-4d37-8e9d-f0170f0d923d', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('180eb800-be0c-4b8c-abfb-0a00f892d54e', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3f7b691f-94bc-47f0-9b38-5afd77e1e037', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7b35ac78-c7ae-466b-9703-527c2f211703', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4afac4de-68fa-48e0-9cbf-df60d4b18dae', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3193e0bb-dd94-44e5-aab5-d1e0605b254a', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('61957e4d-08fa-418b-96ea-c04839a16b79', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9cf8bb14-c026-477b-995e-951a812ea570', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e33489ec-c5c0-4ab2-8e3d-c2431464f686', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bb4c6c14-97f7-4938-95f0-701fe4855b88', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('32939ff0-2c78-47d1-b872-a26c8ead37e7', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b10c8177-0155-4397-9462-82665f8a94af', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('03ae1cbf-a1bd-449b-a0fb-bc6f695839b2', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('41aab1b3-4333-40d7-80b9-b619fce29c40', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('958fe60a-5fc8-4fd0-8a55-cf3b4b343273', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('45725ca1-f2be-4474-8131-3b0a018d8966', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bffb74f2-8d51-4ca2-bf1e-6ae22f045112', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a02edab2-85f7-41a3-8314-a3701a8b7122', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8ba75845-a5ef-4256-ab28-bc6a110de5d4', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e857222d-2ade-4559-a4bc-25079ec09412', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c2565461-fdf9-4dcd-9f5f-ccaaa9a01ced', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ff35ded4-3c2c-4263-95c2-280287ddd337', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9cc5d704-bcc0-4024-9641-365563290e52', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1fe05de8-4010-4251-bfcf-b76bca446bd9', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b3455902-5720-4bf4-9eef-da2f9e0f617a', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('521f7599-1bcc-4e05-945d-61a94ae41ddd', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0fa0f0fe-f3ef-4ab3-a8fd-1a689437de27', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6da977e4-c1fa-4c62-b6f5-33ff263b31aa', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('da1a5568-21a1-45d9-b67c-4694cf72dc58', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('12cfde88-4482-42e0-bde8-a9f319f53d9b', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9183fd1b-eec1-4051-915c-3017036d79c6', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a9b32cc8-f5f3-433c-8215-50af50ffc800', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a18853fa-8fe7-4de6-b6df-339347045d08', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('da84918e-9e44-4375-ad5f-b994a2410c11', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7fd6fd48-507e-4b2b-8ef6-ac5af627a83b', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1f1deeaa-c9f4-46f3-8b0e-dbfce720e270', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2709d293-df64-449c-b7af-67e804c73078', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6897e5ab-1ebe-42f3-bdc0-9008f14efed9', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('40083f0d-c76c-43a2-94a1-ae61db8de1d9', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('823497b1-adb3-4d7a-a085-336422dc65bd', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d3e250b2-7de2-47b4-8986-d7cc7ff81d8d', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('098fff32-341b-46b9-92d5-62da1c2f2a5e', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5e59fe9c-032a-4173-aaeb-4e97629db7ca', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5e3adfb8-ae3a-4f3f-a736-1d60ced3e876', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a6a5ed6e-8212-49a0-944f-46b598eb502f', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c1de4155-53c2-4920-96df-af64a69c9083', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a1d69e5d-c82d-4de4-a7d7-c434753c9f28', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8de96d8e-4552-483b-8287-eff9c37517fe', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e93ffd63-277a-4587-92e7-0167da5eda5c', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f686b906-9426-4832-8f62-13e1f4bf6111', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4910a5da-29ac-46d3-9ea7-aa52af8bae8f', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3bbb113a-45bf-4eff-b0cd-483b84a8980a', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('618500b6-a0e4-43b6-a07e-928942109fd1', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2b23c17f-221f-4a89-be96-781d5c382c45', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f78f1061-35c2-4612-ba50-f88d988dd742', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('de3d9d38-5772-4c6b-a1e2-3736c11e1ed8', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d7184f02-f98a-4c41-92f9-15c3b22d370a', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ab46729e-1677-4be0-b0a9-1421fae0244b', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4a497f0c-3ecb-45c4-8460-b3c3ae521437', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6547c41e-77a7-467f-b147-328a6633c6f8', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('95dc8972-e4d2-4db3-a0c1-653662bdab48', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7b5780c8-a120-46b4-8c4d-64765cd63bbe', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2236b24e-c5fb-4356-a976-f29a97c0069d', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3dd6a54f-e2e8-474d-a6d8-73203fd4f42e', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('752d11cc-1072-4659-94e0-9ee2cdb354b1', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('735359fb-5c57-474b-9459-a5c3fc484656', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('708374a5-6d46-4520-80d8-54c58f5a18aa', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('252396e3-84b2-4737-8acc-6b027d4359d8', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d49d09a6-6eb8-4916-baf2-7198e50604c2', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fb5cc73e-e8da-4df7-b64e-758b67d0c679', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1fd70e58-030d-4aa0-972a-7ebd2791ca33', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('530f6cc7-d055-465f-be39-ef0e33968146', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c99f3835-6ae0-4322-ae5b-da58def74692', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('86f1fea4-6503-43ce-bfca-b779977be4c4', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4e92bfe6-a8c0-4dc9-81f7-db7e25430bbd', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('dadd17ff-5f8b-47a1-8232-047454d577c2', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('89e02f18-fd49-4107-af7d-a4fcfd5081da', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('97d3eb87-e067-4c52-a046-9e1ca557d746', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('442f5fce-5c32-46e0-9ce8-e23bbee6291e', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('75ead8e8-2b99-4f69-8021-5a152df43e92', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a4f530a7-1543-40a1-863d-59ce30dbc8ff', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('95dc9cb7-12ab-4c50-aebe-d40e5841f2ae', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1b260c40-7462-4252-8408-56274b34b337', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fa00bb4f-c606-4961-aadd-5a52f32b99d9', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4484e9e9-49fa-436f-8c42-39c4a8c06f0d', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('17dd01ad-a9d8-44ef-bf9c-2428a054fdef', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e99c7df3-724b-4561-9a65-a7d672a4e58b', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('878bc3bf-c24f-4457-b669-d09365682bf0', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('acf8a64a-dba7-4acc-8727-a4529659a9bc', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('65f7741e-b9a7-4977-bb93-727ee21fa39d', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0c0b315d-3efc-4705-999f-13d8891f156f', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2ef89acf-6bd0-4b1c-b029-9d85e5914f5e', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7054977b-770a-4986-b255-056493adcf7d', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('02f7c347-33d7-45d3-bfed-12b4a3796350', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('631d13ba-aa6c-4ca7-8999-05a8caf0bc8c', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2fc6cc18-2fc4-4321-90b3-a42bc662ee44', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ab136743-f0a7-4799-a9b8-8700f8cdda29', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c44890ca-b2da-4fe5-b525-b0832111a812', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('589d04fe-2c7f-40c7-aa23-1dbf556df122', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1ea9c97a-9452-4405-853d-f8dbf23023c0', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8bb0bcfd-fa58-4fa7-ac72-77c83669f36b', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f9fb3ef1-47a3-4862-85e5-baf62d7d28bd', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2770d610-8211-4fa7-b5d6-481121dcc921', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c225aa50-5dec-48e6-975c-7189eb7a3c18', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('07d18047-9361-4371-bd12-eb6b0a863f31', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fcc175b3-e2bc-45e3-9827-fdaf37c768ba', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0c21dad7-51c6-4f7c-99e8-ca0025cc126a', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8f1d0344-8849-43af-890f-c582abe06dea', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2f322013-bd9f-4a10-b270-f41e5361a2bc', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a4e88839-753b-4a07-abf3-e3133e66d566', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('044fd2a7-0cce-4b49-a8a1-92efca723590', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('74e53e90-a6f7-4d7b-8431-aad6094875e0', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b641b4a7-1142-4d06-b2ca-85216196d270', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ef8c8bcd-bb16-4e09-8516-b83f1a957da4', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bdd85258-9115-4b61-beb4-93a02f547bf4', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6882759c-6db8-4939-a6c3-9b02b2e5887e', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5565b253-bb54-4390-a45d-cb101078f31e', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9d733632-0f7d-4fd0-9240-626f215adee7', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('be20a39b-c7a2-414e-a09c-a093a020cbe3', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7616d8b1-f39d-494b-a393-cb7c5cc8462f', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4b0fcb1b-d8c1-4581-b5d7-b115414a0a9e', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7f984c28-921f-4565-ad0e-206c332ec090', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2c532612-2a2b-4fc6-b2cb-4c0e659ea839', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('19f94952-2450-4ed0-a668-d2b58d7e630b', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0f3ea8a5-9f7f-48f1-a53f-31f2bca0ccf8', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('efcf1e03-5b40-42bc-8264-27fcecfa71d4', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('85ac609a-2c30-4088-a8c5-4dd12b29a5a5', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('de8e91fc-77cc-4615-b96c-fe5359b9402b', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('64572837-7675-4fb0-9fb3-f0ea92155d60', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('261da507-b800-46e5-b59a-22ef2d702eb2', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cc309908-d27b-4c2d-93c1-14ed4c61efec', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e70e8ce1-80cf-4a84-9710-dd8e617aa4b1', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8a503e8c-b061-408a-9b44-11da1f7c6a1f', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4d62e754-6f93-47e3-975d-44bf986f07c2', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e1603878-38a7-47f1-b6e6-2772a784c1cb', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d71354f3-f308-4aa3-948b-4662eba2b67d', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0a81e927-fc63-43bc-9680-8a764ceed798', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c363b8b1-8b06-47ad-b923-c05ae7d5a817', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('83bbaad0-fbb1-451c-abd8-7b0a4c7d068b', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a3718408-2367-40a5-beca-d0fcada6f984', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c7d8096a-37ba-4599-b86e-61fdf2707ba4', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('03fe67f0-cf63-44ed-9820-f6f706674d17', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('acccebe3-9dad-481e-bab2-689fe11ec40d', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c2a6ca8b-fbcc-4e82-b474-2b295bcc9425', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8e8f7d88-8214-4ee9-9f67-1c23855f1ac0', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5e30cf12-4b38-4694-bbf2-df0fe87cf621', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a54601e4-2c85-491a-b5fd-5f2877f9039c', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('60e7c7d2-7f1e-4ae6-9d14-d078cfbdff8c', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cac37000-5689-464f-9c16-90c8899a9836', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b894a1c6-26a1-4e71-82b4-2a4eecdba56a', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e7e0985d-b869-4fe0-9328-ddf477b9506e', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a04eaf21-b96d-42b9-b737-63d9448ed1d5', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('40b93bae-3bd8-4cda-b9a8-e2749d32de4f', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a97d722a-79fd-4e59-9da2-568da66d5b7e', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('38607192-4bd2-4db1-badc-8a04ac2df10a', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bf1faffd-b54b-45a2-8ea6-fdf8bf96b0ab', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('325c7b9e-bf25-4316-ba32-f60c60900a9a', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('63a9738e-de08-4db5-bb92-6f1d4e5a458d', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('caed2197-ba67-485e-8f3d-fe83247b525b', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('df60d411-4350-49ad-9cb7-fe36491b37d5', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('289abe6c-a31f-488d-a6c9-96fe06f13f29', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('00916f5f-d31d-4c92-92e9-9f35818f97d6', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('45850bcd-752d-41ab-939e-a38bcae3fd26', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0aa46682-f308-431f-8957-1801a7ea3059', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3ae559cf-cf8b-4f10-aa3c-15fa4504b8b6', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c83bbd79-c93b-402c-b285-d174423afa48', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('af63b874-be15-492b-ac20-af7390f310a0', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b5507acb-6cc7-428a-a48e-d99074c3124e', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ac802a56-aabf-4c3e-94ac-1acc32afcf13', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('620fdf2c-5a7c-490f-9530-e493dc6520f2', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0df57c6f-44ac-4b66-940b-92af2b7346c1', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c870f37f-794f-434b-8562-689fc27391ac', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7e5b4ef3-e646-4c4d-a361-79483e7bb21e', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4b709170-c241-4b65-8d9d-4284333ac725', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a7bba28d-2449-4f92-bbfb-e918f1edac9e', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3784d9c8-cc35-4096-bd37-2ac60d90dbcc', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5e5b118c-e6a6-4e52-8a61-55aa3b00e5c9', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('09860e03-3aae-4973-b1bd-25d783b92742', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6028c78c-2b55-4ebf-a25b-06f7495a1d74', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('21800c2a-0ae5-48ba-87d9-3a2e3d9c4b02', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8c6ec0b6-ee87-48ae-ab16-52b3d3fc903a', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c378edbd-427a-42bd-a10e-0ef920a62654', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ea04a736-bc88-4cd8-938b-a3cf8ff4bbe3', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('af18866d-7d64-46bd-b2fc-d5e2e653e460', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a4e8c918-03bc-4a2c-b19d-7f88d9206df5', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('788a653d-d51f-4925-821a-9e96983e8e4f', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('014526b7-d6dc-4b74-bfcf-90a112c8e111', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fc4a865b-4fd5-4f71-a87a-dcf7fee05bb4', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a447da44-ffe3-499d-aee0-0391cc0d6ad3', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f6750b2e-fdc0-45be-8c30-868e52439863', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('34615ad9-29f7-44ae-8710-72594f812d44', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d5d53139-9acf-47ca-b8ae-cd18c3c7f79d', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d85414b7-1797-4034-85f7-6853b0061ace', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cae8e7ca-4225-41fb-bf38-833bbc2c4f19', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2df31c80-6f27-45c5-96b1-942fafef5936', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5082c814-06db-4b6a-b9ef-0e42ef2499ef', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8a491fbe-c0ed-4c88-9866-5933b2fccf68', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4ff427dd-26ed-4547-bc0c-dd0065f6964d', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('236971ab-b2a6-446a-83d3-ffcb9b938a6e', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0d978c3e-557d-4416-a94f-89fbbaa74c97', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2886c384-a9c9-4197-a76d-7891712c9fae', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b822b243-73e2-4f25-a967-022f752a0b80', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a61c1c55-35a4-4336-a69a-d44600de5a50', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c42a9f87-32fd-46d7-910b-fd8f4af7520d', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cd71df1e-f5eb-477f-9f5b-7e14b5e2835f', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('996e0b0f-9195-4d65-99cd-35cc3dab110d', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0951a496-e6dc-423c-9adc-e20d0be54142', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('37f64e1e-85fd-4a4a-9c43-de57de053201', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('eceec16e-3780-486d-b809-1b8509879f28', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ad6c13ff-5096-4d55-ada5-2bfe782c41a7', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f48a664f-65a5-4198-bff6-0f8c110e3ab5', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2ecb76f7-7eba-4bcf-9cba-eef37dfe19f4', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ee6be842-11d4-4dd9-b4cb-50b9cab410b7', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c1d1a9ce-b5ed-4cd6-82a4-b39f1225955c', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('811b0687-4b6d-42e8-81dd-fa825e4806f9', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('60816256-9b46-4f07-bb44-2e8f87ccb81e', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('49174d28-dce3-4a69-a526-1e069afc6c40', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c4e1dc2e-4d1d-4d17-a7dd-49f6e70d81fd', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('86ee4ad2-9d11-4ae9-bd06-8f449072d003', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7e687177-c03d-4e34-955c-eb1510e5dd58', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('70a954d7-d351-41c8-bac3-05153f91696a', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0d6b7e6a-e3ed-47bc-8323-fe277c6ca1ed', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2d95f483-55c2-4657-bb80-3192b5cbedf0', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('33415ddc-d669-4d3d-8a0a-9dfc931dc05b', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('027636ca-4273-4381-95f2-aca0fbcfe35b', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a39a55a9-6d74-40ba-a9c3-b2d283caaed5', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f2574198-6449-481d-ac32-b44d6c7a2790', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('78633114-c9e5-455f-ad98-7fc28b16b026', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a6777396-b194-47a9-a64e-c9976b4e5c38', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a3e7c41c-708c-4c85-81aa-434788019246', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('58ecf180-21a5-4dce-8b13-3e0227bdc57b', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('927a5f38-09ad-4b63-87ea-4ad2282eff51', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a0e614da-03ac-4c3d-94a7-65bf6ca1e4d1', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('be35f42c-1032-40da-8d48-e242374be323', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('05158112-c138-4d1b-8b93-31b338c5e75f', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('12011b81-7a61-4969-b0e5-798b906f586c', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('aa920c8c-871f-4999-8630-a8211ec2e37b', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('89c4b728-0d7b-4a79-a9b3-4e39a2042724', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cd48374e-bf91-4ada-a56c-9bdf6f3cc3b9', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('af8148f5-181f-47e5-9db1-ed6dfc96248d', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d5a0c70d-66cd-4169-aa1c-9aa3af0a8009', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d87231c8-9e78-41fd-a9aa-272c5dc237cc', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9a61dbec-323b-4044-aaa0-d11a47db9f26', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1102cab0-c348-4b0c-ac83-9e06fa645e42', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cd5996aa-07d0-47a1-b6e8-03dd89fca643', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('21aaa6b1-db7f-4c88-906d-e50d59ea8bec', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('14e22a42-9a36-4748-9760-5c24bb900370', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0df6fe8a-de3e-4f7c-9a25-28397e4f65ef', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('af7a9fae-a737-4d2e-9fd1-79889b7af4ac', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2832a27e-622a-46c1-88aa-06d5fab9cc64', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6b5e0a18-d74a-42de-ba5d-43cf1dcf97a6', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('379a60fc-7e65-4815-9103-91a94d3fb4da', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('04c59037-88f0-4033-b85e-e81abeb3d881', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('184703a9-76c2-4f32-b5bd-c29b8dd2db2f', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('264ec183-a38d-48e6-91d6-cfc98453a7ed', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1e6e63e1-27e2-4dfe-aa96-5963b47e771f', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d78c0f2f-3902-41ac-9196-6058a4f46573', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('97a52e31-8592-4291-a00a-ed2f2519ec9b', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f89f83a1-7c9b-43c4-9098-5a74ae7a5019', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7d6ef37f-c954-484a-a8c6-ec29efc47ffe', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cd946372-59e7-4c2d-83ea-80aa370129e9', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7a458ebf-f271-478a-afc0-376235cf66ba', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('336c104d-a4ca-4cbd-821d-cad6041b73f0', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d0f863fe-a860-43b8-be1c-5d91b18b71ed', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1a346b15-af8c-4d1c-82b2-8be08099c230', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6ed26218-7502-4b42-b232-8e86038ef37a', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('69e9fccc-a0c4-458b-8879-63818fc5c6a7', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0514da28-7e1d-4270-a56c-e644beee482f', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('75fdc26a-ace3-4e9f-b20c-998045c56cd8', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a7757688-d1e3-46f3-a554-d45003dc51e6', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5c2cd7b4-4c54-4a7a-a319-ef049f6a0912', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('68fb327d-3611-40b7-8926-b51378f4e12f', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a46c467e-8f90-4cc4-b6d3-32b6a0d6ea07', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c3b15532-5145-439a-82ce-603cd0f0507c', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0a96a60f-74b0-4be1-82c0-0470c2a3f865', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fc862c96-ade6-4ea9-b094-ed060ea1e1ba', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('53bd6e0e-caaa-4e28-bf51-19da0bc10a7c', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e676a306-9ae1-4a99-9500-b7661dd66892', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fb4a2477-852e-498c-bcf7-7fd43a2cb1c2', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('367b1cf2-a265-401f-bedd-f6751fe64b0d', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('33f9e682-97bd-4788-ac2b-518f14112779', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('678c4a2d-32ba-4887-8f0e-b4b4c65c4f61', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1691ef40-e49d-4823-81de-ae57ca6a932c', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a43aa7a6-4817-4982-a88d-fa3421ec83f6', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4eb6d3ed-fc49-48b1-885f-44a038a3ae1e', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('00e8886b-d344-4dea-b381-a483dded3d5a', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d05ca781-f6eb-48e4-bfe6-3b00e0250766', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c4ab3865-5a5c-4a22-8dd3-2f1460d70c9a', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3bfeb58f-38be-400b-bbc7-ca052fe0b25f', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f5ff98fa-699e-4ef1-b6c1-a433205a4823', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('900ad733-3f1d-45da-b406-ac6af0749ff7', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('936dee01-2bd6-4f23-bef1-e800904b3593', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a5ce2e18-ab2f-41b4-a549-b11ce8b64d48', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c4778cac-499e-4d57-ad72-785fdcc4976b', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('79ec71b9-086c-4765-8434-ce92c8393142', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0384c59d-7e67-4fd6-83ce-06579af83fcb', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('365d293f-a2aa-4f39-b478-bb3e4327da0a', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f9a93051-7425-4b9f-96c2-c5c65696024a', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0258f11d-399b-4ff5-af7f-fc563991d091', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9925c14f-f15e-45d4-8e97-9a7133302f9e', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f9b28a82-d956-41a9-94a7-feea90d0550a', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('12fa8e59-b7b8-469e-a21c-ba1c1ddda7a1', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3eff2d20-9e70-4591-8b6d-70aeb870595c', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cff5a080-0b82-48a9-ac93-fa439c5280ed', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7e75fe11-9bb4-471d-89de-4f9cbae6018c', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('63d715a6-a495-4117-998a-3cfdce9b793c', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4ede7317-a746-46c2-946d-52d3476a81fb', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('00e328a2-ac61-4e96-923f-7245ce183491', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bb151e0d-dc8e-4e23-91c8-14437a219e37', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('eb79b719-75cf-4a1c-8a69-3f25c3afa747', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('be293d70-2a5f-477c-8731-c6db6b78d9cc', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a6058f6a-7149-493f-9aca-aeda76a15e50', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e4d0cb86-0de1-4e19-ad35-ef861115d0ca', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('64cb8e96-8a8f-425f-88c8-96c3d0f1a0de', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('842f5a90-a3e8-4639-8158-3f3b20125e03', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('733c9758-08dc-42da-a61e-fb4400875b8f', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('83af5cc2-a462-42c2-ba9a-37527d029c6e', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b3332b7a-6eba-4809-a3e3-90657982d21f', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('35733810-6d2b-44a5-b2f5-a80f25facca0', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8229e77e-7402-439a-904e-6b62f58d0c6b', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d37f19a7-7cb9-4a4e-b309-b966f223b750', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('22037a2e-93f4-4a6a-b157-bdb1fe30ffeb', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3126ad7f-72c3-4af8-bfc7-8ad4dc8728f8', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b3b1fa1d-53ad-4b44-a7f2-20fe789f67bc', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c0fc4a49-2e59-4963-b44f-b38d52c8588d', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bcdef530-963f-4437-b215-78bb90604440', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5439f122-4628-4830-9658-ca86274b9b0e', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e111e787-ddaa-4665-bd42-3df26372a07f', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('36c3c9f6-24f7-4b41-834c-021a5d2425eb', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('be696215-f13d-4334-b367-66e3d496b3ed', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a5dd7726-2849-43ac-b9d9-7ab4eeecf2d3', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2081403c-d7f0-4d53-bab9-8c1d2dd66ebd', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c8644c9a-4a59-4716-96a1-af43729d0ec9', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5eb5260d-17f5-43c6-a12b-424831c56edb', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5528893f-242a-4d9c-a317-28f3acdb994e', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3d2ec436-acc6-4863-a842-8c32a9172490', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1f610af9-49d9-4018-986c-71c3efa1495b', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('14d581c2-b254-4588-af61-b3f16b54e9b4', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fcea8442-2dae-4101-bd66-51de618af71f', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('66480c6d-2acc-45f0-8a23-2437d64b0848', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e469001a-7b56-4c16-83e3-aeff4bfbb384', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('659ec55f-23ee-4db8-98d9-d293e6e1e32c', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a73d9f67-0216-41a5-92b0-09c0f4403040', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('29c4adbc-23da-41ce-931c-160c750187e9', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4b45ad3e-712f-44f1-ab82-f7d9f86c113b', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f49f2f75-1582-4de7-a4ff-d99a3eda751b', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('272613d3-e41d-41a7-a950-5dd7a8c61071', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8848f2a4-082a-4a94-9c05-eb216ae8d76d', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('faabe1bd-bdb8-4d14-854d-3e35001fbf4b', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a9c5470e-8732-4f6f-b4df-e49fec68b30a', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fa7e2a92-ba8c-487d-ab2d-bea0c1030688', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7fc74686-c9e3-485c-bd9f-884465c936f0', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b9f1dfa9-b21c-4ccd-8e2b-d3ee32c57c38', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('49f609b8-e901-4418-bced-ec1ca69bfc3b', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d077e859-6d1d-4fe8-a16a-8a8587670625', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c6a600d5-6277-47bb-9fe4-6980a05c8f7a', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e4566035-963d-4929-a879-ee4e044c169e', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6b569d5c-3a86-496a-b0ed-80747373b628', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8e4b573e-1142-4b67-aa2a-72f90d3ed4ce', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fb1d5f92-3601-4393-a798-0fbb59742245', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ccd7c64c-7d82-4c49-8816-4928c63d7c9d', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fe1ef101-e865-4c6e-afb3-8295f8e5a868', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fc428931-f402-47df-9277-514b2f4321c1', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('198c5cf8-d666-46a7-8fdc-024b700df23a', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b685b894-1c79-4379-90d0-66c8172ed1b6', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bde6e539-13e9-4d53-a59d-01f64cc42b0f', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a3da32a3-dd57-4364-ae4c-eadc1a13cd35', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('30e81636-7392-4abf-851d-02fdfabf2efd', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('24333ac6-9ca9-44fc-8514-c95e461be0d4', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c0a3b4e5-0337-4635-9941-10e01c921ea4', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d763883e-8b6c-422c-a7f1-5b536010e2a4', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d9721831-5dc0-4298-bca1-775334c50c8f', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6720ee0c-fba2-4db5-8e1e-4be80b41644a', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('42037c3a-8725-40e5-94fa-597a338ee514', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('81c87014-c967-4abd-841d-ed0bf0a51168', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('772c85a2-35ba-440f-80bb-693c36613942', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('94135e12-fc06-4b73-ad53-2701801be646', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('eb4f9706-9757-410d-860b-bef2b8e5c36d', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('661f1ed6-e8c0-4dbe-a93f-234dabb5c304', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8653bf43-8d19-4b96-b6fd-00447623552d', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6928ba31-f1b9-4ce6-be59-f9856a05151c', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cdfdcae9-63e8-4f8e-8d24-a17d515e3470', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('293753a4-4826-4fe7-8019-b606a5402b89', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b58ef350-3503-4003-aead-7eb1bbfa8b0d', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ad03b0a3-8c76-492f-8c59-20c1296b0444', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bf0adb27-1047-49ca-a1b7-9f075f6b5192', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6c0844ba-f572-49f4-9560-0bc1e42f6bce', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6a3017b2-430f-4d42-a930-0cfc9b376230', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('822d0962-e805-45f7-9bbb-bb637ee27548', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('59e7ae8d-d79c-47c4-a7d4-c621d023adfc', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8da5cb49-c1ca-465d-b2fc-487697129639', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c3248fad-3148-4235-bb5a-dd3ada010f4e', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('91cebeaa-7c85-4d00-a30e-1cfeccf4382c', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('75e0ab62-6eb5-4415-946d-e9d684c4005f', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2df8f19c-e803-47f2-ad20-07f348de4fed', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('36d298dd-5273-4670-927a-4635299a6076', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('51d4ffee-8be4-4548-99a2-d65faf928ec6', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c3901370-e4cb-4ef4-9c83-4038744a2280', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3e4c83e5-781e-42d1-a78e-b5869de88aa1', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('efd4d5de-d81d-4c02-ab71-555f1200b505', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('02bb44c4-5d53-4f9d-81fb-075627cd675a', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('91778e59-1a3b-4aba-9f10-2e62d676172d', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7785e539-e7a6-492b-904d-38f223652c77', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a46e8b93-11a0-409c-ae90-4624886d9ea4', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0a5c2c3a-5441-4e3d-b0d0-7f2c96de2530', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ed8005db-9590-41e8-a5ff-f678140ce378', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('acbfb151-33bd-4c2f-8d53-626a06d51db5', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('13657444-e866-47b3-8beb-c9c339c55824', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b9cdc3f6-96f8-4a93-858c-af808661e371', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('00541d0c-9a53-49b1-8ba5-9cb98880a743', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4620a459-a0ca-495b-a12e-c412774b54a8', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6e304520-89c6-447d-8d6c-6da302b031dc', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a56bf225-ebdb-4ce3-b897-3ac9dd55d972', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f74dbc5b-fd2a-44a5-9759-ba6ee0ab5dab', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0830b893-1e58-4f23-8ee9-33e1f8cb25df', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c7c4486f-3dd5-4a65-bcea-0a07d7360336', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f6a77b3e-f840-41ae-b473-bd5181679a88', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('38fe81be-4da4-4450-943e-157ceb86395e', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b882fbef-212a-4eae-ad5d-8e1219d0332b', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8e8dd5af-2cff-4f36-95d9-b92a475cdd15', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cd052717-8676-4a81-8d47-a53dfa99709a', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a26ba1b2-9ed4-4b73-9dd1-f9c26a613e46', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('de782244-4fcd-4c14-96a4-97645241c3b3', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5043350e-972c-4de7-94bd-c439f8e17795', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('72359d7e-e416-4c09-bf01-a8abb41ddd0e', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bee4747f-b99c-4186-afe9-b400e4527407', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9bed46fc-3484-4933-849a-8c9e3812dc93', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e0921425-9ade-4335-b970-9ee443d0bbc7', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5d748415-16ab-4879-936a-f50d15daa897', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f0887d15-0ca9-4b2f-91e7-5c358d1beb03', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('df1a4fa7-b284-4751-b249-bcef322a4dcc', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d00c4c7b-3121-4325-8ece-691271da3cff', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('fd3d6100-1b8d-440b-b073-1e3cadd94177', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6b4280b2-dce1-4332-a8cf-ff37f292df89', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ce8a784a-3d69-4ffd-9f88-bab2445f38dc', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c2e8699a-e32e-412e-ab10-775bb193e648', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('850f1825-86ca-469b-86e1-af1ea102d404', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('949f600f-3706-4d4f-b795-7e8f46d5e1fe', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d256eea7-ffaa-411a-9b18-4d3066590024', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bc6feaeb-0232-4664-959c-67413547fbe7', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c385beb0-30a4-43b4-8775-e3793fa465e0', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cc696141-cbb3-429a-b8a7-262f69324335', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('70a94820-89f6-4163-9cdf-33645ad65e04', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('16a3e42f-6bb0-43e7-a6df-1c1a747b89d5', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4dd81137-b773-47af-9d7b-fc84dea2f5a0', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d7e45160-8a53-4106-896c-16ddc234957b', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9c0b4103-2b06-4691-afb7-5353e13f0f5c', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('63ec3d38-52b7-4852-82f7-e2d8d4e97636', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e88dd642-c781-4a7f-a39b-41b879e322fd', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c3a81de5-8167-43e3-afd1-e5022127102e', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7c8bb87e-b0f7-4c67-9984-77bca478b2b4', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7a3fa06a-ba8a-4769-9b6f-5aac4fd6f4d4', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e6b45df1-c3bc-4c4b-a1b7-ebc0685b3c8c', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9410c015-d1db-4f6e-b3fe-c1a7d7901e96', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('45e97027-6008-4c76-b4cd-5b4d78af917a', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('935725bf-c158-4b2c-a04c-ce8494901199', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0176b0ab-fcb2-4054-8406-c2b790485800', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('dda7abd8-6133-43c0-acd8-10e172b251fd', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b8aaea33-ff2b-4a36-a259-b5b6213b760a', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('15f713cc-27ca-4547-b86d-1bd1f83a7f8f', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('acdf0f3b-c96d-4bb5-8b9d-cab90f5a0b25', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c0c216c0-4ab8-4123-bb97-f73e3162a584', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b30c331b-5630-4143-a598-65d1dccb3021', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f3274bed-da13-4410-9c50-38edf816b38c', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('920629b2-6f29-4fe3-82d8-fbee22b536b3', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b9a5b526-74ac-4b4f-bc6f-99fb3ee28605', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3373e0ee-e376-48b5-894b-861e32783e9b', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7badd90c-4410-4544-98ec-02e750a65be6', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f07a9616-cd4b-4d4b-828d-b6eea7d04b6e', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6aa80880-5ee2-46ed-b855-9903429142c6', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d06f1d95-4eec-4ccb-b11c-5447730c2adc', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1eabfea3-e621-4842-adea-3b7b3efafaee', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9b347422-84e4-46fa-a5a5-a39a4448d15d', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6227ee92-ff8d-48ea-b8b5-003095f15d89', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c37c509e-b635-4cc9-a8a3-3488a7e475f9', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1df597c2-d5db-475a-8f10-9df32dc588b2', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7dac8ea6-0c9d-4308-b36c-1a959f165f9e', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c93017dc-3b62-4041-96db-1f8eac2b2a02', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('56fc96a6-6d33-45fe-8e4a-5be4e3cbb56f', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('57bc1365-d237-4b52-850c-b65659be7e72', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a0a65c05-cb2a-4bcc-a49f-2bb66dcaf9f9', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('12dd7612-46da-4794-9e87-a96a6950c022', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c97e783d-60e5-4c02-bcf6-7110861b4379', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('263106e2-971c-44a6-9a12-00388e042370', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('523e67af-fcb1-413d-aad4-2595ea9050d9', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('16eb2237-d733-4e3d-ac66-61c492af328f', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('29d1a052-5cf0-4a62-9b4b-8e22e668900d', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2a2e6c33-d889-4cc6-a899-d9a1c1fc07ea', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('00e5e484-c529-4b33-9ae8-5bb12c78c460', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2beb21be-1635-4ad4-a91d-34c760d0c9fe', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b01fa347-726f-4e1f-ab3b-7234a9b8c4b9', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('80cf51d0-148b-4844-8b41-ae5dfbd99e9b', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b05a246f-373a-4a64-a055-413dd33790ef', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7070d336-ee92-4199-9ce5-02c0f15fb852', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('74e3e76e-593e-4ae5-a504-896ac7aa1b90', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('671ab0a3-bcc7-4b2d-81da-c02479e6113e', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bfc4ca45-3f22-45f0-9b6c-ad1f09d2e2d4', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b55b7634-42f7-4c0f-af8f-9cb83b7d5a25', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6b842e3d-09e3-433c-8774-58d018c83d77', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4f1fbf48-9de9-49a7-a971-2cbac3c128de', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ddb58805-c9a7-49b8-becb-19487296f42a', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1bcc11bf-dcdb-4e46-8cf4-19633bba57b7', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9102b693-0ee0-4227-88be-37e7c3eb1b26', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3bb3c5f9-f69e-474f-a563-47161d25a854', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ab50d595-f4d7-44ad-a8b9-94b825ad15b7', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('18dd3e2a-e49f-4538-8d3d-9eec5c6a7c20', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c30bd180-2e42-4bf1-921b-53450ad4db7f', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0686188c-8bff-45bf-8ff8-12303112308b', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('43364198-2856-4927-84ce-137fe7216cb9', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bf2417ec-6855-4446-bbe4-ea0f40a82e6e', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('45831241-bf89-4350-bd17-c5dec4108aa3', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('242d1a8c-d1bd-4adf-b129-c5a4df3c65e4', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f8828db6-7a7c-45ea-bcf5-b5047a53b87f', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('852edd82-0238-4040-93cc-0b197893ebc5', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('29e98c94-2cb7-4f5e-aa93-d8165079a3e5', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('716aa352-a747-4008-a1b0-bdd3a4c6f4b3', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('83a8f5e1-6e44-4134-80c9-0c4dd5e8e1e3', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e4439e21-7147-4bec-b7f4-2a848d865fd6', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2d064e08-97ca-4b64-b878-abdc17b30447', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('90f68c6f-894e-402e-9d21-693381ccc1ae', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('082a3d84-b9e5-4954-a9cb-d5a9a38b0536', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9c2405d5-cd1e-4438-82f7-0f07e4ccd15e', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0ed9b97f-86ab-43a3-86f9-d9aeb3423e19', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1630cfd8-7d11-4eaa-bfc4-c90ddbb70c6d', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c95c68e3-e5c5-4b10-94ae-a9269c36379e', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c1cc8645-08c1-4d27-ad55-b91e6ea27222', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d49628b2-ecf6-41cb-a464-888ed9701fb6', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f91de6fb-c0b2-4720-9b42-e51b9931e0e6', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e319ed92-8b77-4cac-942a-8975685c952a', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('a39b9394-81c1-4cd8-97e6-6a3625b521b9', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('da4f5041-2a81-4ee2-9251-b02c02316c33', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2c86c1a4-d1b9-43cd-bbaf-3fcc8c66629b', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6bc03be0-1588-4ed0-8ec5-a691c55c0b3b', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('21271b63-f73a-4026-8f4b-9b3dd32937f8', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8e925be8-3600-42ef-b9ef-a5b8fa942b7a', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3fc16f13-43ad-4346-ac65-087a2afe7e6a', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8aee84c0-fca4-4cf9-8c26-2096e5db1466', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('371a4379-3999-4bad-ae98-bfcde0bef626', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('af63cb5f-9743-4d36-b4e3-fdafea21db6c', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bd6bffdd-ea1f-4f6c-bb00-0897cc9b3d1c', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('40878750-b357-46b6-bba5-966ba349b441', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('03289c14-65b2-4fc9-8152-a2bd57c1b5db', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c563a81e-6060-4d5a-8869-61a346303036', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('36dbf709-22f6-4e8d-913a-ea0a79eb7427', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('28e22fe9-d660-44e2-a19f-3f48d974ab23', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('84275d69-66c9-4deb-b7a8-fc4d8b359e0c', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('278aed3e-5c30-450f-bb62-4b4886717ae5', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5040594f-f98b-4c45-b225-042c50ba38ed', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('54fad715-ba75-4270-931b-44e1173c90f6', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bd0a38a4-6ed8-488b-a1ef-e022d368b1d6', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('13ed8348-39e2-4530-9bf7-f8c64698dcbf', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4b35cbf0-9be6-45c1-807b-593cf45c7335', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f32f78c2-0d9b-42df-97e2-0d29c1eadd49', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b2d59c11-eca6-4e83-bffa-7d703c852adb', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8b85e6b2-164e-431e-972c-8913bfa412c7', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('bd50a17c-a41e-4571-b72d-a60588fd3fad', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('59fe0219-1ed0-4f47-9d50-a1c5a274930b', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('50dca375-6617-4116-b026-01c95b119b89', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('edd97a81-9225-4d82-9828-b0f181f84429', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('2e1f8e7e-1471-4c0f-aab7-e0983f4242d4', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('30fd084e-d66a-4f76-a031-bcfcd993eafc', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d39e34db-8bca-4af8-a4c0-74faf600a1af', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7653eeab-be19-4006-8fb5-6f79044070e3', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('81649116-4937-4269-83d3-cd7add349bda', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('53c372d3-7cfc-4571-896e-6aecb225471e', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c092eb13-14b6-4546-8348-3285504735a4', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c423410e-5f25-4852-85b3-f4f3b416ee73', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ed159d60-2d01-4f45-97d0-df0634421a33', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4b473d9f-b2f3-4a7d-ad8e-e901e4f76e1e', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('9a7c2b66-8304-4dbc-ba88-a580b61f00f3', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1de5480e-5cbd-42c8-9317-ebb054d72ef1', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('70b0a6f0-ee82-41ce-bdc5-a62b6675676c', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3d99c064-e902-4ee4-aa79-ee7af6960932', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('13dacbe4-1354-4d2e-9f8a-8af555461611', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('60fd89c4-c488-471d-8605-bf7e3dc019cf', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c53261fe-8f39-4988-8f86-33da1d2bfa53', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7f094f71-87a8-4887-9300-0130e192e056', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('e9b76d28-3d8e-41c1-ab92-0a572acb86e6', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('32f01661-ea02-4376-bc1e-592806dac65d', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('cf59a386-1252-4ccb-b9f3-006fa28c5bbb', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3bbebd85-0dbf-4611-b9eb-c0ff17d1199d', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('f1e1cd5c-d399-4c98-9bc9-e6fe7218ba0b', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('3c14d78a-d7c7-4571-b468-bbbe56587f3e', 'Skipping assessments', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b8b7a777-468a-46e9-893a-37cd9e0cb560', 'Minor detail', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('0aace317-4a6d-4c08-99e4-b71e37c6b522', 'Core principle', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('8fedfd35-5028-4ac5-8974-d62b5f63420a', 'Unrelated topic', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7c31cc60-12bc-4d1d-85e8-b9539dc12731', 'Optional skill', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ef3f36b4-8195-4a31-af9e-dff22c883217', 'Basic technique', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ee009b47-6fa0-43fd-9c5d-26be1d3dbf42', 'Fundamental practice', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('730591db-bb47-45c7-95c5-f817b45b5e05', 'Advanced method', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('1b954ebc-53d9-4796-b194-a955ca61a8dc', 'Optional variation', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4cd6272a-c09b-4b91-a361-52143b47dbdb', 'Skip basics', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('ede36488-7fd4-415b-90db-4c471c3d2d08', 'Start with fundamentals', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('21fb8e0e-cc62-45b6-b3a6-5610b079f482', 'Begin with advanced', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('4fff4986-8dcb-42a4-83e8-e19d0f7350e5', 'Learn randomly', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('d227916c-147d-4c21-a12a-e50059148e70', 'Jump ahead', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('b85eaff1-6917-4bc4-9b0a-11d1d27a3524', 'Follow systematic order', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('7c6ac645-8150-40ba-9018-b53aed0fb8ae', 'Study backwards', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('74c63775-d2b0-498e-966f-45f1092fea35', 'Random selection', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('c7478082-c598-4f93-b9e7-5b6ef2f9e9cd', 'Speed only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('092ff31c-c46b-47ca-a790-ea29a343a0a7', 'Understanding and application', 1);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('6a5e9213-3818-4091-98b5-ff5f84d7aa7d', 'Memorization only', 0);
+INSERT INTO `Answer` (`AnswerID`, `Answer`, `IsCorrect`) VALUES ('5ca60788-a22f-487f-9db7-1d4f70c0af6c', 'Skipping assessments', 0);
 
--- SUBSCRIPTIONS
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`, IsMostPopular)
-    VALUES (UUID(), 'Basic', 15.99, TRUE);
-
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
-    VALUES (UUID(), 'Standard', 22.99);
-
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
-    VALUES (UUID(), 'Premium', 28.99);
-
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `PricePerCycle`)
-    VALUES (UUID(), 'Ultra', 35.99);
-
--- COURSE
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'A complete guide to cats',
-           2,
-           'This course explores feline history, biology, and behavior, offering a comprehensive look at domestic and wild cats. Students will learn about communication, health, and human-cat relationships. Practical sections focus on responsible care and understanding cat psychology.',
-           'Animal Studies',
-           450,
-           8,
-           1,
-           'cats,animals,biology,behavior,pet care'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'How to hunt',
-           1,
-           'Learn the cultural, historical, and ecological perspectives surrounding hunting practices across civilizations. This course emphasizes ethical considerations, wildlife conservation, and safe equipment handling theory.',
-           'Survival',
-           250,
-           12,
-           2,
-           'hunting,ethics,conservation,wildlife,outdoors'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Cleaning 101',
-           0,
-           'Discover foundational cleaning principles for home, office, and personal spaces. This course covers organization strategies, essential cleaning methods, and choosing safe, effective products.',
-           'Lifestyle',
-           125,
-           4,
-           0,
-           'cleaning,organization,home,habits,productivity'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Wilderness Basics',
-           1,
-           'An introduction to the fundamental skills and knowledge required to safely experience the outdoors. Students will explore navigation, shelter concepts, weather awareness, and responsible environmental practices.',
-           'Survival',
-           550,
-           16,
-           2,
-           'wilderness,outdoors,navigation,survival skills,nature'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'How to Mine',
-           2,
-           'Learn about the history, science, and environmental impact of mining across the world. This course covers mineral types, geological processes, and mining technologies at a conceptual level.',
-           'Earth and Environment',
-           450,
-           10,
-           3,
-           'mining,geology,earth science,resources,sustainability,needed in adria'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Fishing 101',
-           1,
-           'Study the basics of aquatic ecosystems and the cultural importance of fishing traditions. Students learn about fish species, ethical angling principles, and environmental stewardship.',
-           'Survival',
-           250,
-           8,
-           1,
-           'fishing,ecology,aquatic life,conservation,outdoors,needed in adria'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Basic Culinary Skills',
-           0,
-           'A beginner-friendly introduction to essential cooking methods and kitchen fundamentals. Students will learn knife safety theory, cooking terminology, and how to follow recipes confidently.',
-           'Culinary Arts',
-           225,
-           4,
-           0,
-           'cooking,culinary,beginners,recipes,kitchen'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'How to Raise Children',
-           3,
-           'Explore developmental stages, emotional needs, and supportive caregiving approaches in childhood. The course draws from psychology, family studies, and cultural perspectives on parenting.',
-           'Parenting & Psychology',
-           300,
-           6,
-           1,
-           'parenting,psychology,child development,communication,caregiving,needed in adria'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'How To Train Your Dragon',
-           0,
-           'A playful, fantasy-based exploration of dragon care inspired by mythology and literature. Students learn world-building, creature-design theory, and storytelling techniques.',
-           'Mythology & Literature',
-           100,
-           4,
-           0,
-           'fantasy,dragons,mythology,storytelling,creativity'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Bird Blindness: A Deep Dive',
-           2,
-           'Examine the scientific, neurological, and perceptual mechanisms behind species-specific vision limitations—both real and theoretical.',
-           'Science & Biology',
-           450,
-           8,
-           2,
-           'biology,vision,perception,neuroscience,evolution'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Psych 101',
-           1,
-           'An introduction to the major theories, research methods, and thinkers in psychology.',
-           'Psychology',
-           500,
-           16,
-           3,
-           'psychology,behavior,cognition,research,mental health,needed in adria'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'King Von-ism: A History',
-           2,
-           'Study the cultural influence, storytelling style, and legacy of rapper King Von within modern hip-hop history.',
-           'Music & Culture',
-           800,
-           9,
-           3,
-           'music,hip hop,culture,history,storytelling'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Surgery for Dummies',
-           2,
-           'A high-level overview of surgical history, ethics, and medical advances—strictly conceptual and informational.',
-           'Medical Science',
-           1200,
-           48,
-           3,
-           'surgery,medicine,history,ethics,science,needed in adria'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Baking Bread for a Modern Household',
-           2,
-           'Learn the science and art of bread-making adapted for everyday kitchens.',
-           'Culinary Arts',
-           150,
-           4,
-           1,
-           'baking,bread,cooking,food science,culinary'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'World History',
-           2,
-           'A sweeping journey through major civilizations, global events, and cultural developments from ancient to modern times.',
-           'History',
-           200,
-           16,
-           2,
-           'history,civilizations,culture,politics,global'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Primates and Pizza',
-           0,
-           'An interdisciplinary course exploring primate behavior alongside cultural food anthropology—especially pizza''s fascinating global evolution.',
-           'Anthropology & Food Studies',
-           100,
-           6,
-           0,
-           'primates,food,culture,anthropology,biology'
-       );
-
-INSERT INTO `Courses` (
-    `CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`,
-    `PointsOnCompletion`, `EstimatedDurationInHours`, `SubscriptionRequired`, `CourseTags`
-)
-VALUES (
-           UUID(),
-           'Intro to Bricklaying',
-           2,
-           'Learn the essential concepts of bricklaying, including materials, tools, and foundational construction techniques.',
-           'Trades & Construction',
-           325,
-           4,
-           1,
-           'construction,bricklaying,skills,trade,foundation,needed in adria'
-       );
-
--- COURSE MODULE
-INSERT INTO `CourseModule` (`CourseModuleID`, `ModuleName`, `CourseID`)
-    VALUES (
-           UUID(),
-           'Lesson 1 - Frying',
-           (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Basic culinary skills')
-       );
-
--- CustomerCourse
-INSERT INTO `CustomerCourse` (`CustomerCourseID`, `CompletionStatus`, `ProgressPercentage`, `StartDate`, `AdriaID`, `CourseID`)
-VALUES
-    (UUID(), FALSE, 20, NOW(), '8fcff41a-0342-4f57-a12f-3e771a6dcea1', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'A complete guide to cats')),
-    (UUID(), TRUE, 100, NOW() - INTERVAL 10 DAY, '8fcff41a-0342-4f57-a12f-3e771a6dcea1', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Basic Culinary Skills')),
-    (UUID(), FALSE, 50, NOW() - INTERVAL 5 DAY, '8fcff41a-0342-4f57-a12f-3e771a6dcea1', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Fishing 101'));
-
-INSERT INTO `CustomerCourse` (`CustomerCourseID`, `CompletionStatus`, `ProgressPercentage`, `StartDate`, `AdriaID`, `CourseID`)
-VALUES
-    (UUID(), FALSE, 40, NOW() - INTERVAL 3 DAY, 'c3d8b6a4-6a9a-4df0-9322-9b8c71f12a5d', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Wilderness Basics')),
-    (UUID(), FALSE, 0, NOW(), 'c3d8b6a4-6a9a-4df0-9322-9b8c71f12a5d', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'How to Mine')),
-    (UUID(), TRUE, 100, NOW() - INTERVAL 15 DAY, 'c3d8b6a4-6a9a-4df0-9322-9b8c71f12a5d', (SELECT `CourseID` FROM `Courses` WHERE `CourseName` = 'Primates and Pizza'));
-
-
--- COSMETIC ITEM
-INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`)
-    VALUES (UUID(), 'Spooky time', 'Frame', 500);
+-- ===== QUESTION-ANSWER RELATIONSHIPS =====
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f49078b9-ad61-41ec-9e82-0a643de6490d', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '7694bc79-d3ae-44dc-9b83-b633428b8afa', '7e742cf8-9e15-49cd-89b6-c583f163cc6e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d81d05b8-ded5-48a0-a8d9-b78f876854a8', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '7694bc79-d3ae-44dc-9b83-b633428b8afa', '375dac44-c8fe-4b12-9d5c-a66bdfdc1c2e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('33362cdd-1435-4329-8d01-06c1fddc448f', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '7694bc79-d3ae-44dc-9b83-b633428b8afa', 'd19713db-9619-43e9-ab41-0ee9f52903cc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('43cad1b9-1cf4-41a8-bf16-6fc273aad138', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '7694bc79-d3ae-44dc-9b83-b633428b8afa', 'ae34b57a-b1c7-4dfa-8ae8-28abb21b5ae9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('068a3d7a-3cfe-4282-acc2-a551ebecc5c1', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '2a104584-24ca-4acc-9b72-9448721e4215', '63983482-ae3f-44cb-9d39-4d97ad88018e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1168ac88-ddc1-4b8a-9fa2-9df188bb6633', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '2a104584-24ca-4acc-9b72-9448721e4215', 'd7bb95b6-4286-44c3-ba62-90157e07dc1f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4cb491ea-8181-454c-8bb2-115df46cf2d9', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '2a104584-24ca-4acc-9b72-9448721e4215', '2dadfd0f-480b-4c5e-9df5-76804466509b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bb63c92e-d55a-4876-aa79-dfb147b12e63', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '2a104584-24ca-4acc-9b72-9448721e4215', 'f80d1a50-848c-4aa3-9129-eb37a393fbbe');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a4c13282-c4e4-4cba-9d79-91165d6ae690', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', 'e11d1bad-0ee1-4c8b-a3ae-ed2dbb648ad0', 'b528f7b3-0bd4-4100-a3f8-7d485f896c66');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b595293e-86e3-4c58-b304-d250f75425d6', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', 'e11d1bad-0ee1-4c8b-a3ae-ed2dbb648ad0', '293cfbe5-2e07-4142-a60d-cc7d523fe25d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a6eda993-10c7-454a-8142-f5dcfb4c8cf8', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', 'e11d1bad-0ee1-4c8b-a3ae-ed2dbb648ad0', '236951e7-db3e-439c-a779-5f505532ac43');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ec4566e7-464c-43af-91a9-18a4b6a1d71a', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', 'e11d1bad-0ee1-4c8b-a3ae-ed2dbb648ad0', '6f12f658-4427-44e1-a508-b80494d55d15');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d37cf4dd-aadf-457c-8566-a68042db8f74', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '1d5844a6-51d0-4fda-a492-86a21f089ad3', 'c89cf4e2-e448-4d11-9bcd-80024eb1fbdc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b2cf7cfe-0411-4fb2-82ef-0809501425fd', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '1d5844a6-51d0-4fda-a492-86a21f089ad3', '9c565d3e-adca-4774-a152-e96c59a03b6d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b46d6756-7299-4414-a692-cd1c34d69d2a', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '1d5844a6-51d0-4fda-a492-86a21f089ad3', 'e52d6b4f-c5b0-4d8a-918e-23c81757712a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('14948835-2308-448d-b2c3-6af22d282c5e', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '1d5844a6-51d0-4fda-a492-86a21f089ad3', '9df0bed0-062a-4be1-9be4-a1430236451a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1d86e5fa-8dea-42d0-a8b5-af587f72fead', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '3dde5971-6878-4696-9a35-1cc03db5e64a', '16a5fb5a-aa1f-4be8-895d-2ef74b61e3f2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('89a58a55-f734-4fd5-b348-bbc89033634d', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '3dde5971-6878-4696-9a35-1cc03db5e64a', '010e1ae3-b5d7-4035-8edc-aa57b9031cf7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ac37b88b-d5d9-40ac-bbea-846ad47ab015', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '3dde5971-6878-4696-9a35-1cc03db5e64a', 'cf400bfa-8c57-4ddc-8f14-77bf4b69fee8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('faf02c88-2bde-4515-834a-56a217ff7161', 'f0ba7fa5-4e99-454c-8703-e0731d3307ef', '3dde5971-6878-4696-9a35-1cc03db5e64a', '128a7fcb-a5d4-4461-aa48-c3182c6333d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7734dc53-60b8-4ff5-9d4e-e8ff5775fcdc', 'e06b0192-74d4-4f10-9f89-f8a51625939c', 'fb163bf0-1f50-4e6f-b1cc-3f79e44ff81b', '98f71d79-da7b-4ac1-aaa3-e21739c7091f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0bec8d95-6b16-4693-9eb4-28a97ec0aee7', 'e06b0192-74d4-4f10-9f89-f8a51625939c', 'fb163bf0-1f50-4e6f-b1cc-3f79e44ff81b', '7fcbeb38-6996-4ade-b452-6edd9e53324d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('68ce3464-ec7d-4480-aa1f-fbbc7a3023bb', 'e06b0192-74d4-4f10-9f89-f8a51625939c', 'fb163bf0-1f50-4e6f-b1cc-3f79e44ff81b', 'a9455c14-f017-4950-a631-a2c747624bb9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('256f369c-7f32-402c-b76d-851e293056ef', 'e06b0192-74d4-4f10-9f89-f8a51625939c', 'fb163bf0-1f50-4e6f-b1cc-3f79e44ff81b', '752d6022-8ba3-4ffb-83be-07be12b53397');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('40153a35-573f-4b31-a49f-e9887b6052aa', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '3648442a-272f-44b9-9fdd-83b09faf14b2', '992435d1-4d6b-44f1-9d0b-fe2ce141d201');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d2b5cf42-872d-419a-a86e-a4e5c3403396', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '3648442a-272f-44b9-9fdd-83b09faf14b2', '7d10e353-ed2b-49e3-9609-6b12388457cf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fecbb79e-e28c-4f99-be00-59fc8f102201', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '3648442a-272f-44b9-9fdd-83b09faf14b2', 'b3609038-ab62-467d-8656-5fb0bf2fdcef');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3e53fc61-24d1-4fdd-9017-26cfaf3ef2f5', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '3648442a-272f-44b9-9fdd-83b09faf14b2', 'a7ef0ab4-76fe-4b4d-a1ba-f2f0c5bc2527');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0f23a350-7c0b-4bc5-9919-ff82de7ef1d3', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '9f7206c7-fe53-4329-9171-462b2b5a206d', 'b9d0e093-5af1-4788-98b0-90f2182efe2c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5bb6d448-3653-40a5-9dff-8aee52c8eb4e', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '9f7206c7-fe53-4329-9171-462b2b5a206d', '3637a745-0a66-47c8-a199-b2d32358829e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('672dd6fb-965e-49de-b3b9-f66c17f3d6cf', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '9f7206c7-fe53-4329-9171-462b2b5a206d', 'f22fb940-4090-40d5-9e1b-4161d468c63d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('90ba428b-455f-4006-b0d1-fc7dd7201fd8', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '9f7206c7-fe53-4329-9171-462b2b5a206d', '33e6350f-1e88-43bc-853d-5bf9e5039710');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('49c1bca1-f44b-47f9-b5a8-1ab21fa7bc86', 'e06b0192-74d4-4f10-9f89-f8a51625939c', 'aab51b9f-c074-44b6-b3bc-fe395423cb1d', '15beb6be-ecee-4386-a2da-856867c2b9be');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f60be74c-8978-497d-99ea-a39804a03c50', 'e06b0192-74d4-4f10-9f89-f8a51625939c', 'aab51b9f-c074-44b6-b3bc-fe395423cb1d', '5b5c12a0-dda8-4cc9-8896-b6d0b55fa47c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ebb4ac33-b8e1-47e1-9333-bd2abaf8caad', 'e06b0192-74d4-4f10-9f89-f8a51625939c', 'aab51b9f-c074-44b6-b3bc-fe395423cb1d', 'dab2c861-01ec-4aeb-97d2-d57166a009f1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1518561e-103f-47d4-936d-220f71adf7b7', 'e06b0192-74d4-4f10-9f89-f8a51625939c', 'aab51b9f-c074-44b6-b3bc-fe395423cb1d', 'ff48c713-5471-41c5-aacb-343bb1798c61');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('771b6e59-2530-4456-b2ba-899d71c86cf5', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '7fb79b77-3fe2-4140-a09f-d5dbfb48d102', 'd3341193-eb32-4fe1-9b57-e8b5c40075fb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5af66006-1f91-42a9-8ce3-397fd6f0d5a0', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '7fb79b77-3fe2-4140-a09f-d5dbfb48d102', '4b7f869b-b0d7-4c91-a045-0f1e4e327aa9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('23e60dbb-e934-4cab-a148-090e73bbb020', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '7fb79b77-3fe2-4140-a09f-d5dbfb48d102', 'ae8cadf9-24fe-4852-8f74-1538fc5fc7db');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('39a48a25-20c6-4732-b017-78232a96f7d6', 'e06b0192-74d4-4f10-9f89-f8a51625939c', '7fb79b77-3fe2-4140-a09f-d5dbfb48d102', 'a7aef025-d63c-4e98-a334-4efba600d0a3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2b85d79a-989d-46f6-a83c-fc282f12d824', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', 'f620a249-953f-4a67-945b-744a6bbd40b1', '64448947-793b-4aed-8e1d-4594b1ca267a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2ba54862-6c0e-460e-b20a-1a4de3adb881', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', 'f620a249-953f-4a67-945b-744a6bbd40b1', '5682d0fa-a54c-4df1-901e-762a3afbdbed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0b3cf988-d93c-4afb-add2-3131fdb6e7f3', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', 'f620a249-953f-4a67-945b-744a6bbd40b1', '5a9d1cf4-99dc-4cf7-a332-84f2323ce7c8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ff4f5b33-0185-4ecc-9e57-1cead013ed98', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', 'f620a249-953f-4a67-945b-744a6bbd40b1', '484bb51d-421f-47de-bc13-1299ab64a573');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1f54c7f1-cde8-43fe-b481-0275f0cebc61', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', 'd6148094-d81b-46a3-8b4c-e7a9081d9c15', 'cf808e53-474f-45ce-a9d5-05b028e9e327');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5ebdb1ba-ef56-4252-84f4-057f7f699549', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', 'd6148094-d81b-46a3-8b4c-e7a9081d9c15', '0050a616-d20e-408c-b9ad-50d6eef1de54');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('80714ed2-882a-41e5-8175-c678bdfcdc19', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', 'd6148094-d81b-46a3-8b4c-e7a9081d9c15', '7970ae1d-18e0-4629-9165-e0d47ba3be45');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('be7906ab-b76c-46d6-81cf-ef61faa14188', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', 'd6148094-d81b-46a3-8b4c-e7a9081d9c15', 'c83d1bc0-d3d1-45b9-a75f-32c1e23d1298');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('85b3c7d7-d0cf-4763-82e1-d416dd1f19b4', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '2093bfaa-2df5-4f07-9d8a-01823239b769', '969328e4-0d50-4f4b-841c-d8e9d2c48504');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('43b77727-e2d7-47dd-9e36-766c588469f4', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '2093bfaa-2df5-4f07-9d8a-01823239b769', '494b809a-832a-4b2f-93dd-5ec128e212ed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('49b83c6b-6e05-48af-a1a9-f7bc3d422fc5', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '2093bfaa-2df5-4f07-9d8a-01823239b769', 'd1c127f2-efbf-4a15-816b-5bb2b8d6c8a0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ede719e9-017c-4d08-b88e-b81596799734', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '2093bfaa-2df5-4f07-9d8a-01823239b769', '173ba303-7f73-4653-9cc4-dcc217c0b64f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0eb98250-56f8-4c95-983e-540c8ecf66a8', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '5860a442-4388-45f8-bb25-83861db22f3e', 'fb665e47-601a-4e0c-bb37-0ddc69902fe5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('eac00f1c-aca9-4910-8006-83080e71681d', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '5860a442-4388-45f8-bb25-83861db22f3e', '23771dae-cf24-418b-a53f-47c9599927e8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('737807f3-0744-4e12-8815-11aa6c1a8ca0', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '5860a442-4388-45f8-bb25-83861db22f3e', '5a5e3346-8b73-4205-8fbf-7eca8944a1c5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5f43ed3f-7430-4780-95e7-9ef5b74ce3b8', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '5860a442-4388-45f8-bb25-83861db22f3e', 'd2f1b807-f7ef-42e4-9480-8d017ef2da0a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b5c38dfa-9e2b-41c2-92d6-db7137d50a87', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '8fd584b9-321a-499b-857a-34532e9ff6fe', 'aac47d3e-24f8-4e30-ad4f-898d3bcc4f29');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bda5cd90-bfcf-4b77-94f7-3ab3f2eacfa4', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '8fd584b9-321a-499b-857a-34532e9ff6fe', 'd5eda5fb-8950-4e24-914f-2465d01cdcaf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a26f1d46-2e82-4828-97ec-d69b97b19d8e', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '8fd584b9-321a-499b-857a-34532e9ff6fe', '646c2dc8-78a7-4582-919a-654f92d0a0d6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ce3ca821-f834-436f-9b38-9f355ac7d916', '2bcfb9de-3849-4b53-b8ef-b08368101a9e', '8fd584b9-321a-499b-857a-34532e9ff6fe', '94b185d3-88e5-4232-8b3d-56348940e8f3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0e584c9c-d8a6-44c2-9e54-a7ac4de4b7ac', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', '1ecb810e-c20a-4e97-ae02-4e3af206a47d', '5caf8bae-aa71-4288-bf11-37cc5ab566b3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bb3b83f7-68a2-4deb-a618-a42390fa0dd4', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', '1ecb810e-c20a-4e97-ae02-4e3af206a47d', 'ef8c7d94-38fa-4271-b5d9-4c62cf115677');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('41385f74-48c3-4fdd-bee7-7fc52bd03f32', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', '1ecb810e-c20a-4e97-ae02-4e3af206a47d', '53fd9478-b674-469d-acd4-14548e3784d1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('47737896-4d13-40bb-b121-88f436fc3b73', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', '1ecb810e-c20a-4e97-ae02-4e3af206a47d', '5c8a9a20-53e2-4411-83f3-a5946def9f89');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a4cbf360-9b9c-498f-bf0f-09315442090d', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'a7369940-9769-4bda-875f-1f1e98f61855', '6cbcea4d-4637-4fb9-afe7-3dc462f0ce28');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('585f8f44-cfce-492f-8ce7-b5253235ae6b', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'a7369940-9769-4bda-875f-1f1e98f61855', '9f7090f0-3f99-4703-9694-f85f30dfd128');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('52f91a1d-9369-40b8-9b64-57f4a3adec73', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'a7369940-9769-4bda-875f-1f1e98f61855', '62f685fd-d9e3-48db-a37a-40dea5b1bc32');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c3012df5-82b6-47aa-a99f-23e396a3f9ba', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'a7369940-9769-4bda-875f-1f1e98f61855', '73df53c9-6aa9-4fd1-8272-70b447996fd5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3b3e11e9-4775-4407-b737-7c389fbb17af', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', '5afdc0d9-652e-44d5-a61d-455071cef451', '366a88c9-a9e3-4a9d-86e8-9abba701f871');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('27fe58ad-4dc3-46b4-a8f8-f8bc18a891a2', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', '5afdc0d9-652e-44d5-a61d-455071cef451', 'a0917c8d-da2a-4b07-93b6-27d5db906901');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('78537f3e-a24d-4cd0-b980-522939a3b9e9', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', '5afdc0d9-652e-44d5-a61d-455071cef451', '6681fa52-ce51-4bd9-af30-4d6e8aa06bab');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2cb48ec0-98b3-4d38-a2d9-6391db362cbd', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', '5afdc0d9-652e-44d5-a61d-455071cef451', '92699d30-bbf6-4839-af69-710f2ebc74bb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2ab75ed0-7965-4a49-9b5e-499edc66d8e3', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'fb88cb27-44f2-494a-88fe-023e6b971f65', 'f6cc1161-4305-48af-a24d-9285365bb1a3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ccd81fd1-fb8e-4a25-9b0d-7c9bb62b8262', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'fb88cb27-44f2-494a-88fe-023e6b971f65', 'cfc9aee4-9fdb-493f-b507-d61d7c1ca038');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9c4bf70f-ae8f-4497-bb70-c0b6365a1f90', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'fb88cb27-44f2-494a-88fe-023e6b971f65', 'ef175f16-fca4-46b7-92de-cf40f5194470');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('43e6bbb2-e07a-497f-a511-05a98f689fa1', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'fb88cb27-44f2-494a-88fe-023e6b971f65', 'f49f7e81-d209-4e5b-8c04-baac38389c7e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('af3605d3-7632-43f4-8d55-61115c279be0', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'de172038-2b45-436a-b483-ac6916e5cdf9', '2c5bd6f9-c6f8-4801-9858-f773724e70b5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7c7eb9db-6b10-4a61-bdbe-f9e0c486b339', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'de172038-2b45-436a-b483-ac6916e5cdf9', '48f04cc9-2bb9-4ea8-be0f-65c6b1c6d076');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cba904b5-fbfd-4db2-958b-59df53dbb954', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'de172038-2b45-436a-b483-ac6916e5cdf9', '7f65f719-b5fd-4b38-b236-b0cf66381115');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a98429fc-cea6-4095-937a-b80a5a7f9800', 'e8e5a1c9-53b9-4aec-8828-1bed37b156ef', 'de172038-2b45-436a-b483-ac6916e5cdf9', '1e1cfa46-31ee-46a2-bdb8-8f185dcce0de');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1fe4b230-a3cc-4d24-9869-ff667be4adb7', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', 'dfba90d0-a149-403b-821c-e26ef60c9ad0', '84ce6cf3-aa1f-471e-85b7-a4f504f8539e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7abf8905-8c16-49e6-bc48-31f54bd6eebb', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', 'dfba90d0-a149-403b-821c-e26ef60c9ad0', '4816b506-4c0b-4dc3-a132-e9ceb44c0c48');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9b1d20e4-ea05-4f30-b152-6409f9047e1d', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', 'dfba90d0-a149-403b-821c-e26ef60c9ad0', 'dcb32b97-9099-4c0c-9621-070b0cbe5866');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('db49da25-d94b-40ca-b15d-ad509a50a827', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', 'dfba90d0-a149-403b-821c-e26ef60c9ad0', '260122bd-519a-47ff-ae8d-a850bf8bf674');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c0c7e56a-2633-484d-bf8c-f161d861e606', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '7b387aba-1b9e-466b-a476-60eb4a50656c', '142285d9-d101-4908-b9d2-9ce0cb70004d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0734ba72-7b54-4db1-84a8-b71ff0250216', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '7b387aba-1b9e-466b-a476-60eb4a50656c', 'b83ef381-bdbf-4053-82f8-c45eda21413b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('12385e3d-ea32-48a9-acb5-97902fb0cc2f', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '7b387aba-1b9e-466b-a476-60eb4a50656c', 'a187eaac-4192-48c3-8acf-cc22835d5d01');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a52277a7-0513-44c3-83b9-b455a864e0a1', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '7b387aba-1b9e-466b-a476-60eb4a50656c', 'a7c4f73f-3555-47e1-bfe8-4c21c79c627a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('08d6b52a-c31a-466d-9cd2-9d481e2ea862', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '4ccad532-13ba-43de-a3f0-d003a3ab3c88', 'e742d2cf-df14-429b-8666-887075075ace');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6d7e32fb-4193-41fa-98d7-2343ade8d00e', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '4ccad532-13ba-43de-a3f0-d003a3ab3c88', 'c912d803-0130-4424-a41d-00f6d3c8595c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9be75771-1726-4fe6-b1a8-b46985d8de7a', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '4ccad532-13ba-43de-a3f0-d003a3ab3c88', '336593a7-5820-40f3-a051-f75e1f45732a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5757cd30-fc2e-4708-bdd3-c5849bc5a061', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '4ccad532-13ba-43de-a3f0-d003a3ab3c88', 'c6205ec1-63ba-424c-b5d0-05ecafc6da64');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bb84e537-9df3-46ad-80e6-ff0a8134c37e', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', 'd0e0328b-71e4-40f1-be63-73064e3f2e79', '9e155b40-0f2f-472d-ac5c-24c264e1cb62');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('20c4b7f6-264a-4186-bc4c-66a0b758b4a0', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', 'd0e0328b-71e4-40f1-be63-73064e3f2e79', 'e0f98d3a-1462-4fb2-ad61-eaa376eb71fb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('873cae0a-87ab-43af-987f-a09c668a3c25', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', 'd0e0328b-71e4-40f1-be63-73064e3f2e79', 'b2f0b1a9-0688-43cf-97d5-e3a62820db78');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('41663e1b-bc5d-4868-9730-2911bfd3197e', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', 'd0e0328b-71e4-40f1-be63-73064e3f2e79', '930f2ca7-a7b4-488d-b565-8d3c51c93c22');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('301ca632-ac97-49e0-9181-1437d9fdb27c', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '5c141acb-c7a1-47f1-b630-eca2d6adad95', '061f52f1-a68a-4418-b77c-7708a647d0e0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6374b594-7a4e-4951-a857-32bc81287947', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '5c141acb-c7a1-47f1-b630-eca2d6adad95', '3cc2ac63-18d1-4e09-95e9-3a7d9c0a2dcb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9e01465e-83c8-4562-93cc-afc385374bcf', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '5c141acb-c7a1-47f1-b630-eca2d6adad95', '8475021e-818e-4f6f-a887-fb5748a3cdfd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4e7a48c5-a9ee-4d98-9462-a8b5a21d4232', '6a22eb13-7058-4db8-99e4-08e6c1a088d5', '5c141acb-c7a1-47f1-b630-eca2d6adad95', '97d349d8-39e3-4b3c-ab4a-1121a92eb753');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('734d6f45-0e09-4ac3-b28f-9e14a8b80696', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '4a4c003f-7346-4b6e-baed-9d4d5c782e25', '29c211ae-eaba-42fc-9b0e-d00f8b313349');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2bae4021-cbf7-4744-9148-a3f006877de8', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '4a4c003f-7346-4b6e-baed-9d4d5c782e25', '5fdcc979-8359-4fa5-85be-3a8a11c77979');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b62ffab8-61ec-4737-be01-788908be4f07', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '4a4c003f-7346-4b6e-baed-9d4d5c782e25', '1cc2a0b8-9b58-4210-9e7e-7a37eb8058af');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bfa85e28-5cfd-4292-824e-352d2261b01d', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '4a4c003f-7346-4b6e-baed-9d4d5c782e25', '4fe6dcb6-95ba-464a-9d7a-63d0cf039ff6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1e23d467-9a44-4e11-b8e1-d891e6003c7e', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '4e2705db-6751-446f-aa49-45a58d7574f3', 'b6760285-7d5a-46c2-bce7-1a98fc75d07a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('35f0660e-100c-43a0-a398-bdd373f47088', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '4e2705db-6751-446f-aa49-45a58d7574f3', '993e703d-1146-4aa3-927d-5f280631167b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('164c592a-cdce-4f9c-acce-8c78c73b0b82', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '4e2705db-6751-446f-aa49-45a58d7574f3', 'a88f4bd1-56e2-4be8-8a70-bf908ef7010b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e8b3eb63-a063-43e1-886e-8eaeb40ca6f1', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '4e2705db-6751-446f-aa49-45a58d7574f3', 'a7064f8c-556f-4569-9379-8936f17894f3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e4d59475-6d0b-4b60-99dd-fdf196ff4461', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '6d300b7d-f6b9-4f72-a5bb-e6bdb0934eb7', '5cb2bd05-6877-4848-afc7-d39aa73277f9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a81e2e5a-9f9c-4a72-893a-d646a2b21165', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '6d300b7d-f6b9-4f72-a5bb-e6bdb0934eb7', '4c415f86-ea5c-4434-a624-27ab1a9d3887');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('67bf5d1c-3a8e-4fe7-aea1-48d9fc2b5e8d', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '6d300b7d-f6b9-4f72-a5bb-e6bdb0934eb7', '7bfc3fb5-3944-4c4a-ab36-d351f5acc211');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1e1e6451-abae-46bb-8894-4fbb736b9403', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '6d300b7d-f6b9-4f72-a5bb-e6bdb0934eb7', '6760b100-9dd2-454e-b0e0-e0c6ed5b43ed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fdfdccec-a1c6-4180-b1fd-faa5e4054a4d', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '65be3d9a-86a9-4cfe-a5d7-7a6cb7e6c290', '47611a15-5be1-4f40-94b7-68a4889339d5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2a3508ee-754f-4ea0-b383-727f5d9d08de', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '65be3d9a-86a9-4cfe-a5d7-7a6cb7e6c290', '152dbd84-2d4e-4d42-83d7-15d2108a2769');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fe486a5b-2d33-4919-bce8-77d17ed972af', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '65be3d9a-86a9-4cfe-a5d7-7a6cb7e6c290', 'ae079171-601b-4b6e-b3d4-2d873fb080ca');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('95b233fd-56e2-4e8f-ad21-d1cc51661a50', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', '65be3d9a-86a9-4cfe-a5d7-7a6cb7e6c290', '49292cf0-cb49-470e-b2e6-633896b727d3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1c44428a-52a5-47ea-aa42-bfcddb35c79c', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', 'c972729e-66b9-4c8f-8a26-0a0679592cae', '49424023-df95-45f1-91c6-697347f68248');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e7f5c5b1-984e-43b2-8e1d-4a967d7860ce', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', 'c972729e-66b9-4c8f-8a26-0a0679592cae', 'a61685aa-af07-4620-99b9-87698fe7e0e2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ba57aae7-0b78-4bd0-9ff4-efcac33add72', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', 'c972729e-66b9-4c8f-8a26-0a0679592cae', 'da600365-02a9-442f-bdee-480dd841c663');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a06ce5c6-0981-49a6-952c-1c693cdd1188', '21dc89af-fd56-4aee-a2ec-6abb2c31f273', 'c972729e-66b9-4c8f-8a26-0a0679592cae', '7d148683-6000-4153-a18f-4b27194569d0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9cce01cd-1346-49cc-b148-c0b7f0a9c38d', '295fd5e3-801f-4648-8c99-381470be7c41', '72416a51-d591-425a-8983-9bf68067da45', 'ff1ad39c-3999-4967-9547-463c8c4bba46');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('eb7c7544-7827-4003-8db8-6dab302578c2', '295fd5e3-801f-4648-8c99-381470be7c41', '72416a51-d591-425a-8983-9bf68067da45', '7444f678-d470-4f93-a50b-99cd563ce9b2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('054cf143-310a-4b46-8e81-dc8168fbfb69', '295fd5e3-801f-4648-8c99-381470be7c41', '72416a51-d591-425a-8983-9bf68067da45', '356a1458-3b11-4d0c-b430-597153780340');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b129f0f6-b663-4104-9546-1485629b1dc8', '295fd5e3-801f-4648-8c99-381470be7c41', '72416a51-d591-425a-8983-9bf68067da45', '41edf6bb-edc3-45ac-a9f5-af6fd84fbc44');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6d072621-adb5-49b5-8c19-c52670f82f49', '295fd5e3-801f-4648-8c99-381470be7c41', '287a1949-307b-410b-81d9-1f92fb546484', '298760c9-42ea-4f14-a80a-110f3187b02b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('73e3d3b3-5aa0-49bb-a77d-604ca3094a8c', '295fd5e3-801f-4648-8c99-381470be7c41', '287a1949-307b-410b-81d9-1f92fb546484', 'd74fbccb-5369-4d70-aaf1-d2bfe5fce32e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('39556cac-8d68-47e9-abfa-d18d59a81af7', '295fd5e3-801f-4648-8c99-381470be7c41', '287a1949-307b-410b-81d9-1f92fb546484', '130e4414-7c3a-4472-bef0-7233fa35b4f9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('036c6636-b44c-4783-8d05-1ea12aac5723', '295fd5e3-801f-4648-8c99-381470be7c41', '287a1949-307b-410b-81d9-1f92fb546484', '099f7abe-919d-481d-8838-bf54987718a4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fa339e4d-58f1-491a-8310-a9cff3f20410', '295fd5e3-801f-4648-8c99-381470be7c41', 'bb6ad342-6225-4ec9-8977-2bebc7fd2fba', 'cb7dbb39-f1f7-4c06-b89f-987a7e71842a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ed907977-940b-40c4-8ff1-2654befcda21', '295fd5e3-801f-4648-8c99-381470be7c41', 'bb6ad342-6225-4ec9-8977-2bebc7fd2fba', '9b39e6c5-6c16-4bab-8511-e79743bdb22a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d2d01a0a-4b2c-479e-b80c-2be0d492bef7', '295fd5e3-801f-4648-8c99-381470be7c41', 'bb6ad342-6225-4ec9-8977-2bebc7fd2fba', '7ac61db9-f8aa-42cf-913e-e00e3f9b409a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('75850399-671c-4955-a398-8c08c2b3735f', '295fd5e3-801f-4648-8c99-381470be7c41', 'bb6ad342-6225-4ec9-8977-2bebc7fd2fba', 'a23d10de-ef21-4a38-b1f6-406c69165ed1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c1bd00ea-d529-409f-acf6-d53cffc8d3e5', '295fd5e3-801f-4648-8c99-381470be7c41', 'ef65d4a8-c099-4e1f-b019-1a42379f788c', '3595cba7-fa6d-44fe-8723-389c013fff59');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6785b741-5d04-4104-9ec7-5858f0d1768f', '295fd5e3-801f-4648-8c99-381470be7c41', 'ef65d4a8-c099-4e1f-b019-1a42379f788c', '330ff02f-8ab6-4aae-8eb9-2a40b9400df1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fac46abf-3000-45a4-8009-894b512e699b', '295fd5e3-801f-4648-8c99-381470be7c41', 'ef65d4a8-c099-4e1f-b019-1a42379f788c', 'c33d5862-fb47-445f-a245-06ddb0a43d58');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5649bb96-bf55-4762-a2e2-99e60190054a', '295fd5e3-801f-4648-8c99-381470be7c41', 'ef65d4a8-c099-4e1f-b019-1a42379f788c', 'b4e11101-380b-45d5-9d34-53637b3a1224');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ce2603ff-07c0-44e9-9d6b-0980f03320ce', '295fd5e3-801f-4648-8c99-381470be7c41', '97676ef0-1927-4a83-8c24-755fad346fa1', '4f8224ba-e2d0-4340-b8e4-7c2571ca7ca0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e77d0553-dde8-49c2-b8b3-c71e72a7b901', '295fd5e3-801f-4648-8c99-381470be7c41', '97676ef0-1927-4a83-8c24-755fad346fa1', '181e2482-929e-4ad0-98ae-5779161956fe');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8bb4a68e-e5e5-405b-8d26-2933c8d079fd', '295fd5e3-801f-4648-8c99-381470be7c41', '97676ef0-1927-4a83-8c24-755fad346fa1', '5dce58b7-cc07-4cc9-b544-c13a80e34341');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a5f21715-aef4-46f0-a2a3-0c142578612c', '295fd5e3-801f-4648-8c99-381470be7c41', '97676ef0-1927-4a83-8c24-755fad346fa1', '5246696c-b083-48e5-8de0-26528de4d3dd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6cbf889b-f932-4544-af08-e8f6d789c6db', '7ddcf202-240f-424f-9f20-87a28f641822', '5fec48b9-ffaf-483b-bc48-9ed0281149b2', '1caf4403-a7c3-4b2f-b58f-42da858d8181');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('737d4beb-5239-4a04-b063-1ba36ee3de06', '7ddcf202-240f-424f-9f20-87a28f641822', '5fec48b9-ffaf-483b-bc48-9ed0281149b2', '4ae05145-dd5c-4ee4-a928-ef9c5dab31cc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('db07599f-4d2f-4530-aacd-4fbf41e64342', '7ddcf202-240f-424f-9f20-87a28f641822', '5fec48b9-ffaf-483b-bc48-9ed0281149b2', '363e1e11-facf-45b5-9adb-c0f79feefec0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('403888ac-cd07-4e19-9217-071dbf8e63e5', '7ddcf202-240f-424f-9f20-87a28f641822', '5fec48b9-ffaf-483b-bc48-9ed0281149b2', 'eaf9b97d-01cd-4347-b810-f301d53af614');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ae25ec5b-209e-4bab-b77d-917c5f756f86', '7ddcf202-240f-424f-9f20-87a28f641822', 'c36d83e8-846a-43cb-a3e6-0ab24da288da', '39bc5032-ffc6-416c-b9b3-634213af4a93');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4efecd33-dd1a-4260-8971-c2f86af06757', '7ddcf202-240f-424f-9f20-87a28f641822', 'c36d83e8-846a-43cb-a3e6-0ab24da288da', '8c1827eb-a709-4bee-8b98-c4e56eadb309');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1de6327c-4aec-4deb-825f-3e077474cf3d', '7ddcf202-240f-424f-9f20-87a28f641822', 'c36d83e8-846a-43cb-a3e6-0ab24da288da', 'afbb2ee5-f350-4d38-bf16-3df56f12828a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1c1d7753-1ea0-419b-ac99-7d3e5693c52a', '7ddcf202-240f-424f-9f20-87a28f641822', 'c36d83e8-846a-43cb-a3e6-0ab24da288da', '08ef0d73-adc6-47ad-b7f3-413e85ef1188');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b55ed473-a265-47ff-8f1b-447550229a7d', '7ddcf202-240f-424f-9f20-87a28f641822', '5945f7d2-d3fc-4d1b-97ec-39aea649e3ee', '70e92318-f8cd-41e4-8dd2-5a5e5f9b69b4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('40bcd3b4-923c-4272-8926-885b4dfe442b', '7ddcf202-240f-424f-9f20-87a28f641822', '5945f7d2-d3fc-4d1b-97ec-39aea649e3ee', 'f9377acd-7c59-49ce-a641-095bd8cb68e6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('39a5c778-ea49-47a0-a672-f82a52f82b8e', '7ddcf202-240f-424f-9f20-87a28f641822', '5945f7d2-d3fc-4d1b-97ec-39aea649e3ee', '385a5cbd-0bf8-4f5e-9229-740e6f511851');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5c519558-3e86-4b35-8fd3-79a263a720ba', '7ddcf202-240f-424f-9f20-87a28f641822', '5945f7d2-d3fc-4d1b-97ec-39aea649e3ee', 'bcf9ef9f-9a88-4c6e-be87-fb2001abe9f7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('38c910ae-d490-4510-9d7b-f98232cb9751', '7ddcf202-240f-424f-9f20-87a28f641822', '8fb38ba9-ef69-4081-9484-c16f4e4414d7', '7d30f454-90ab-4b4e-9c22-5cf65aa8d0af');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cf8a9f67-90ff-43cb-9c6e-235f463f78e3', '7ddcf202-240f-424f-9f20-87a28f641822', '8fb38ba9-ef69-4081-9484-c16f4e4414d7', '6121d1c9-98d8-4fe3-bc06-58d1f90c4b17');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('aa3ee603-1197-4078-8751-40e994b783a6', '7ddcf202-240f-424f-9f20-87a28f641822', '8fb38ba9-ef69-4081-9484-c16f4e4414d7', 'dd54b21c-13c0-4bac-beb4-5f92b118fd2c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('571a1cc1-b34c-4e88-aa91-afbfa92638f9', '7ddcf202-240f-424f-9f20-87a28f641822', '8fb38ba9-ef69-4081-9484-c16f4e4414d7', '30f220cd-2e5b-4b85-81e6-85302a0516e2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5a1000d9-b948-459a-b0ae-fd9a97e57f01', '7ddcf202-240f-424f-9f20-87a28f641822', '3dbf9a22-f8a1-4e12-97d8-eb9902c51e4a', '24162fe2-e882-4130-bbd8-750981a6f2f4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('385ec57a-17db-4d48-b662-fef3d2ebb91c', '7ddcf202-240f-424f-9f20-87a28f641822', '3dbf9a22-f8a1-4e12-97d8-eb9902c51e4a', 'e2544365-5e4b-4fda-8534-1ab3a1324382');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dbf4ec85-0c11-4cbf-951c-df9f6e216a09', '7ddcf202-240f-424f-9f20-87a28f641822', '3dbf9a22-f8a1-4e12-97d8-eb9902c51e4a', 'c62b75f2-4f09-4bbe-8890-6b8456434fa1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('193598ad-e3bc-444e-b507-2b294fa45b6c', '7ddcf202-240f-424f-9f20-87a28f641822', '3dbf9a22-f8a1-4e12-97d8-eb9902c51e4a', '6fabdfe8-350b-42c1-8022-20fa7f1efe94');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e48b6c38-e408-4175-a6e0-971026e80f3b', '409b0df9-e78e-4c74-8925-e84a0143056c', '9902d2c4-eae2-463d-b976-4c40f95180c2', 'c3bc31e6-77aa-47dc-ae21-cbefcb92b3c5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1118f5e7-b100-4978-8d38-97317829b89a', '409b0df9-e78e-4c74-8925-e84a0143056c', '9902d2c4-eae2-463d-b976-4c40f95180c2', '89006893-c573-4378-9146-816fa21c9fae');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('88887554-2a7a-407f-9650-90e972e9d992', '409b0df9-e78e-4c74-8925-e84a0143056c', '9902d2c4-eae2-463d-b976-4c40f95180c2', '8133f246-1c87-4697-9126-e3ac6fda91f7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bc407301-1576-4909-b506-37a4c6785763', '409b0df9-e78e-4c74-8925-e84a0143056c', '9902d2c4-eae2-463d-b976-4c40f95180c2', 'a4a7133f-ede9-4e86-b05c-6fb5cd630486');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('02e67495-5bd4-40ad-b79e-ac04c62286bf', '409b0df9-e78e-4c74-8925-e84a0143056c', '212580a6-2561-4a36-8384-a5193b6c9c08', '82159875-8f4c-455f-a778-a9ea04362ef7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a80faece-9c77-4eb7-93ca-6629f35ff465', '409b0df9-e78e-4c74-8925-e84a0143056c', '212580a6-2561-4a36-8384-a5193b6c9c08', 'e0e1c676-027b-4d64-aec6-6fe1cef984e0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3367bef3-9c9b-49d1-98c2-69e234c9f76b', '409b0df9-e78e-4c74-8925-e84a0143056c', '212580a6-2561-4a36-8384-a5193b6c9c08', '142cd782-ec8c-42a5-9118-9140aa1494e3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('210d624b-4ead-4f35-8638-22e1ce2ae671', '409b0df9-e78e-4c74-8925-e84a0143056c', '212580a6-2561-4a36-8384-a5193b6c9c08', '97281478-8004-4c7f-a091-8808258072c7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('87d633a1-36bf-4781-8311-f6c61014c243', '409b0df9-e78e-4c74-8925-e84a0143056c', '64142513-4869-4e4f-911a-a31427fd02d9', 'a87a1140-c9a4-4f90-bcb5-95e26d4bfd7d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('abc3a42f-78ee-41b9-b0b1-3d4f78187092', '409b0df9-e78e-4c74-8925-e84a0143056c', '64142513-4869-4e4f-911a-a31427fd02d9', '64590d5a-b5a3-44d4-9bc9-75668c2bafd9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a3cbe825-040c-44dc-9c26-0a58eed1f6b7', '409b0df9-e78e-4c74-8925-e84a0143056c', '64142513-4869-4e4f-911a-a31427fd02d9', '4e7e219c-4e5e-45a2-8340-b78b04031d9b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d319d493-ece2-4b2d-99e0-035ab2d1d585', '409b0df9-e78e-4c74-8925-e84a0143056c', '64142513-4869-4e4f-911a-a31427fd02d9', '0ff5162e-a4dc-4652-b97d-263c7791348b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('76b43294-5601-404a-9ae6-ca17407e605f', '409b0df9-e78e-4c74-8925-e84a0143056c', '44be5384-beb6-4c39-9a84-8a331658e582', '6ff7d069-34d4-440f-a094-c70a77758d4d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('800055b4-9681-40b2-820f-ada9a28ee811', '409b0df9-e78e-4c74-8925-e84a0143056c', '44be5384-beb6-4c39-9a84-8a331658e582', '7962050d-5ab5-4a61-a81e-8733a3f4fb2f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1aefbad9-5911-456b-a163-f863f7d8752c', '409b0df9-e78e-4c74-8925-e84a0143056c', '44be5384-beb6-4c39-9a84-8a331658e582', '2d487754-e9f9-4f93-9bed-cd54e75354d9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f1be2d42-da21-4288-8762-be641ddbba6a', '409b0df9-e78e-4c74-8925-e84a0143056c', '44be5384-beb6-4c39-9a84-8a331658e582', '1d93c6e7-131c-4962-b6f4-63d422fef521');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('67f3aaaa-b9ce-43e9-8f5d-a4b52f76b06c', '409b0df9-e78e-4c74-8925-e84a0143056c', 'd86729e2-d5d5-40a6-be39-02ace4e884bf', '78b19ebb-7440-46fe-8a8a-9f91c59f0702');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('60911c58-e55a-4b9f-afd0-f51d8c3ae7b3', '409b0df9-e78e-4c74-8925-e84a0143056c', 'd86729e2-d5d5-40a6-be39-02ace4e884bf', '3b4a6bdb-de01-4e50-a263-103851cddfb6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('839baba8-b336-4e0c-9a2b-2f652e97ac86', '409b0df9-e78e-4c74-8925-e84a0143056c', 'd86729e2-d5d5-40a6-be39-02ace4e884bf', 'fe35d91f-0882-4c06-824c-f64fc4ab11f1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fe6d7c0b-244a-418b-a83c-421a11fd706a', '409b0df9-e78e-4c74-8925-e84a0143056c', 'd86729e2-d5d5-40a6-be39-02ace4e884bf', '26381551-75bc-49d7-ba9c-33e40c6405bd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ccac499f-05cf-4010-94a4-5017038c8993', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '07b1976c-5152-4a6e-8406-c34761a66e0c', 'c3cc2b01-d470-42c3-973e-9d52481f5e3d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6400cabe-1696-43fa-8c56-614e35383ba4', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '07b1976c-5152-4a6e-8406-c34761a66e0c', 'bee975a1-6aeb-424d-a178-eae4035690a1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2b7be170-0d8b-4a24-bc77-a754d7f1895f', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '07b1976c-5152-4a6e-8406-c34761a66e0c', '481bb39a-56eb-4429-b468-8cde6b5e547a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0af2de1e-a2f4-4183-be8c-aa4b13b2b727', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '07b1976c-5152-4a6e-8406-c34761a66e0c', '053ec8f5-67c4-4208-a5b0-ac88d1ef983d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('56516bdc-305c-4fdc-a221-09c8478c682b', 'a9b323b2-2b75-4f5c-8706-860dc090094b', 'd5f847bc-2682-442c-9f2a-0b940bb1b0d3', 'a3619dd9-af69-4a6b-9f02-750099149b8a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('562de44c-0c87-43f8-9a9f-c3854f921dc8', 'a9b323b2-2b75-4f5c-8706-860dc090094b', 'd5f847bc-2682-442c-9f2a-0b940bb1b0d3', '8c2d8c01-df65-44c6-8136-c47007cc5dad');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e600c4f1-ff2a-439e-a81a-5ac4fbb01fa8', 'a9b323b2-2b75-4f5c-8706-860dc090094b', 'd5f847bc-2682-442c-9f2a-0b940bb1b0d3', '12973f2b-995e-4920-beff-81896cf5b3ec');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1d4af829-ab73-4076-931e-196a45a47428', 'a9b323b2-2b75-4f5c-8706-860dc090094b', 'd5f847bc-2682-442c-9f2a-0b940bb1b0d3', '87b08bdc-93f1-4c2c-ae12-04920599182a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('74b8aee2-b547-4a30-b662-2da81ea0deb3', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '64f78915-971d-4308-a345-bae057dc5247', 'cdd8f681-79a0-4927-950f-70116f38a3e1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('babf5b7b-4e1e-451e-a3b8-1127e58ce884', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '64f78915-971d-4308-a345-bae057dc5247', 'cb2cbd97-f2d2-4315-9129-24c53bde0cf8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('844007ab-0bae-4454-b799-d31e05726f13', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '64f78915-971d-4308-a345-bae057dc5247', '8db9f2a3-1c72-41ce-b853-e3051464641c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5e82c1ee-01ae-4afd-af35-ef509fa38951', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '64f78915-971d-4308-a345-bae057dc5247', '2d507552-d3fc-4fb9-8c91-dd16493a31db');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dca54c83-634a-4364-87ec-181b206b0e5a', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '8ec202e0-d61a-4a6f-bb66-3bb21caeeaf6', '0c95a14f-49ac-4af8-80ed-1f54649e640a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('09bd82de-ae4f-45a8-a691-2e93746dc718', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '8ec202e0-d61a-4a6f-bb66-3bb21caeeaf6', 'c6f8ae30-c3cf-45f7-95ad-a2b8e6cea2fd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2143611d-fbd2-42dd-8a5a-90b689884d06', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '8ec202e0-d61a-4a6f-bb66-3bb21caeeaf6', '4869b445-28e9-44aa-9ef7-54779516eafd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c1ceaacb-4493-45b9-a7d4-c28babb7d3bc', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '8ec202e0-d61a-4a6f-bb66-3bb21caeeaf6', '926a0a32-5988-4927-ad7f-cc8c69d10fb9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('711a63cd-e05f-4e01-8b19-f2a37e5d3be5', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '705ca62a-507c-4e87-a909-c28834080661', 'e9e4d7e7-b28f-4958-b844-c4fdf1147795');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d5c8e0b0-8ce8-4dc5-8bf2-419fb17c45db', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '705ca62a-507c-4e87-a909-c28834080661', '2bee1ce6-94b2-48a1-9eee-d1c049f842f3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('43dad4be-0959-4d22-8002-46c43f8f9b99', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '705ca62a-507c-4e87-a909-c28834080661', '9ff889a6-2421-4bf4-bd3b-46d1763a61ee');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('de0c6388-2a8e-4590-ba96-a7888b61db79', 'a9b323b2-2b75-4f5c-8706-860dc090094b', '705ca62a-507c-4e87-a909-c28834080661', '1432c603-f792-4af6-a2c4-8fd0eeec0369');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b2c0e366-c783-484c-b411-c9164cb0597b', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', '80131e7f-8e4c-48bf-a643-60ec24c4732e', '13883e71-f6fa-4ea6-a19a-c6b5afe21e69');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8f9fa36f-c64b-4280-b850-8376ead9ed1a', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', '80131e7f-8e4c-48bf-a643-60ec24c4732e', '96fb0669-43ee-4b37-bc37-d6d763f76236');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('74609844-4408-46c3-a3c1-1975e9592770', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', '80131e7f-8e4c-48bf-a643-60ec24c4732e', 'a58b5232-2a74-45e0-9630-39926403934d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b7e6572f-e2b8-44cf-a3d3-b957dddd2475', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', '80131e7f-8e4c-48bf-a643-60ec24c4732e', 'eb29b1e3-441f-4950-8dcb-e8980891394d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4bba0bf6-36b8-4772-aee7-5683741611d5', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'a140b566-6d74-42db-930c-6b9ac423675a', 'ed72e2da-14a4-49cb-b94b-dfea6f50a8d8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('49fc40aa-3811-4810-ad4b-0dfcfee94dc0', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'a140b566-6d74-42db-930c-6b9ac423675a', 'db3e108e-09d1-4df1-b829-b7c06e3e4655');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('92180174-7fed-441f-897c-fb925199e27e', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'a140b566-6d74-42db-930c-6b9ac423675a', 'ef48b74e-0678-4e3f-8573-aacbb77355a2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('78e6c912-4f98-4585-9b9a-5b890746e09c', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'a140b566-6d74-42db-930c-6b9ac423675a', '91c855e8-6fdd-4f79-9a39-1ec304aded80');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('26f2d477-8bf2-4d7b-b578-96a0ec164e47', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'fc5f0de1-e730-4e61-84f4-91e96e9c31cd', 'f4fefcbf-0add-49d7-b3fd-4ebc5fd2ff60');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('95469a03-0a83-476d-a1dc-2439c2bd3b1b', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'fc5f0de1-e730-4e61-84f4-91e96e9c31cd', '8dad3c4d-d676-4f47-9265-72859f2d4985');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0794d483-b79a-46ba-85d7-a9ac99153355', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'fc5f0de1-e730-4e61-84f4-91e96e9c31cd', '27498148-f6dd-4741-892d-616aedba9fa0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('daca6f2a-c072-492b-8b16-dac999e2ca69', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'fc5f0de1-e730-4e61-84f4-91e96e9c31cd', 'e20425a6-528a-442a-b330-af20f5c6b750');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fbc6dc0c-5634-4de7-ab6a-f933bfdcb4e6', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'b4e588b0-9f78-47f4-b57a-4242f71fccb5', '9282acd5-68b7-46c6-920f-e1ffd62105c8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e1f57a2f-464c-4888-bd13-afa95d2dc273', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'b4e588b0-9f78-47f4-b57a-4242f71fccb5', '31546a03-fcc2-4073-9048-1a8eb13a6dd1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d6af5096-af45-44b4-a554-baff43ef2f96', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'b4e588b0-9f78-47f4-b57a-4242f71fccb5', '0a86c464-a250-4533-826d-fca3496be0db');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f63449d5-87ca-4887-8e00-8e27db7973d1', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', 'b4e588b0-9f78-47f4-b57a-4242f71fccb5', '6c2b62e9-c8b0-49cb-9338-0fcd65f48ed1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('885bea98-8f7b-47e8-86f3-3e041ac54bc3', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', '612a8842-4c83-4ac8-a636-60905b6d7f6d', 'a13760f6-3855-43a9-88e5-165d4c13eca4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8fe71767-729a-4900-9ecd-a4e28720e98b', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', '612a8842-4c83-4ac8-a636-60905b6d7f6d', 'fbddebbb-f4e1-439c-8f6b-457168ae3389');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('50ff3734-e70e-44ff-84b9-5136f2fe8731', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', '612a8842-4c83-4ac8-a636-60905b6d7f6d', 'ca56c0cc-e8f2-4b87-91a5-22a45b193213');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fec22997-5dfd-443b-bcdf-cbb644a744e0', 'f4172077-ed6c-4924-a83a-e4eae0dc3662', '612a8842-4c83-4ac8-a636-60905b6d7f6d', '6b70f7ca-9471-4939-8c36-45b7c8888ee0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fdb87bc8-7cf5-41d7-89e1-f0ff2a113edd', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'e65573ef-b0ce-45c9-bc13-f6522a87f5be', '70bee09f-2bb1-4bb1-ae57-f201095d0604');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('07c99bbb-8eec-4ad5-ae93-502bc454e986', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'e65573ef-b0ce-45c9-bc13-f6522a87f5be', '491d56fe-dc48-4c74-9e8f-160f087ad71a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c3922119-27ef-42ea-8f88-2e83e41ab8d3', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'e65573ef-b0ce-45c9-bc13-f6522a87f5be', '70d90141-7db9-48f1-a221-a802b2db5631');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('19cd31e3-e5fd-41c4-ab47-eb8b7deb50b5', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'e65573ef-b0ce-45c9-bc13-f6522a87f5be', 'f7f46516-7447-40e3-a669-496daeb5529a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d3dd405e-080b-4165-8958-deef540ef14b', '10201cac-3b52-4952-9cfd-83fe24d904e4', '0ca66077-15e4-484a-9896-a246ba922d55', '0cbd349d-73eb-419a-a10d-f2e8cd2c8691');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('afabd811-1300-4621-ab44-911a85c6c269', '10201cac-3b52-4952-9cfd-83fe24d904e4', '0ca66077-15e4-484a-9896-a246ba922d55', '6e1eb302-6bf2-4a64-ba57-e48f58555bf7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f2b6dbca-bf3b-4e1e-b87c-045f040eeb7b', '10201cac-3b52-4952-9cfd-83fe24d904e4', '0ca66077-15e4-484a-9896-a246ba922d55', 'bb8c3d57-71f4-4bac-bf8e-1c3a41498bea');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5f2961a5-066f-4da1-afd2-35077cff5174', '10201cac-3b52-4952-9cfd-83fe24d904e4', '0ca66077-15e4-484a-9896-a246ba922d55', '50edf783-7ce9-4d38-9a78-e20b89838424');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('69b460cb-9dfe-463a-bfba-aeaa31fbd711', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'd05f39e0-abff-4412-9253-c01879816033', 'e0d4c33b-726c-485b-ae6e-ad396a22f575');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4cbd6093-ecc5-4060-8cb3-ba742b33bce2', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'd05f39e0-abff-4412-9253-c01879816033', 'e309c975-3e88-4543-b989-b55058581e05');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('80111d7d-ad39-45c4-be32-4c5148d24132', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'd05f39e0-abff-4412-9253-c01879816033', 'c0ceb139-14b0-4e41-87a9-1920f95424ea');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('146dea3e-2373-4aba-9a12-e06bc7722128', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'd05f39e0-abff-4412-9253-c01879816033', '318bb173-8da1-4a3d-b4c6-07221b98cc1a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0f76f91d-6aa0-498e-b70b-da90afcd2db7', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'da6466b3-874e-4464-8b18-7d795f3e1939', 'f6825696-266d-4151-97d1-faa351b26ab9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('19632d95-eba7-4c39-88fa-72dac497df88', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'da6466b3-874e-4464-8b18-7d795f3e1939', 'c8530613-566a-407f-8849-5d0f7e65ab31');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('507c677c-00e4-43cb-8b42-338f8d361002', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'da6466b3-874e-4464-8b18-7d795f3e1939', '26960968-29c3-4207-acbd-1dfa712f7d95');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dce4e788-549a-4b61-8dc6-d792b54e4881', '10201cac-3b52-4952-9cfd-83fe24d904e4', 'da6466b3-874e-4464-8b18-7d795f3e1939', '196e90c9-4337-48ec-9677-16046ee63600');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('153dbac3-c4ee-4513-be00-32a33734cae9', '10201cac-3b52-4952-9cfd-83fe24d904e4', '2c4f8586-aacc-433a-b768-0f3bdb6280a1', '763cbb0a-fb03-4e74-9e92-44bc58c5c366');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b303e8ab-93da-4239-a0b6-1f0ec018cf17', '10201cac-3b52-4952-9cfd-83fe24d904e4', '2c4f8586-aacc-433a-b768-0f3bdb6280a1', '31301492-4ab8-48e4-a30b-7befa58657bd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('662a3fe0-33f3-4ef7-8c2d-1a254ef72833', '10201cac-3b52-4952-9cfd-83fe24d904e4', '2c4f8586-aacc-433a-b768-0f3bdb6280a1', '5e0c3597-e47f-46b2-a66c-a21c3a5f7d25');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3bf283e8-e62e-4c07-9de3-8bceee9ee216', '10201cac-3b52-4952-9cfd-83fe24d904e4', '2c4f8586-aacc-433a-b768-0f3bdb6280a1', '048b65f7-a955-4b91-b345-9b3d320b9cee');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('01f55386-c39f-42b8-adfb-028282c29a35', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', 'eeec3c09-7bcb-46dd-9aa1-673899d5ebc9', '6ca8e61c-65d2-434e-9cc6-5cafa0b41895');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('41554a7f-600e-4544-b339-d062185f3961', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', 'eeec3c09-7bcb-46dd-9aa1-673899d5ebc9', '891e9bb5-6d72-40e1-865e-7e1127ca55ca');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6d8856a7-0533-444a-8679-4d9730a7b0cc', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', 'eeec3c09-7bcb-46dd-9aa1-673899d5ebc9', '3cfcaa43-ec97-4363-8782-f6eccb515962');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b941129f-2fd3-4fc4-9d6d-b40813adc7bd', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', 'eeec3c09-7bcb-46dd-9aa1-673899d5ebc9', 'dbc777c5-bcfd-4d74-b90f-7abddca0168c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4018d071-b51e-4908-83b3-ab3a0eb2daac', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '6f8bc199-a6c8-4c44-b77c-b42920d37d92', '6de391cc-53e9-44f6-be1e-e77de452ba76');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f3c095f2-f2f4-4e33-b575-e7d534becd17', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '6f8bc199-a6c8-4c44-b77c-b42920d37d92', 'b6168dd2-48ee-4bd0-84da-412085bdc0e1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ab338dc4-1622-4fb0-8bc3-807e62807c23', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '6f8bc199-a6c8-4c44-b77c-b42920d37d92', 'cf995a58-3a70-4246-b0b7-6a29b50a211d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ed5688cf-1088-4d9d-96fa-accd8f3d64e9', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '6f8bc199-a6c8-4c44-b77c-b42920d37d92', '40b42a92-e418-4965-81f4-75e6a13c8804');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6ce0b785-8e7d-43b1-9876-c17be754a08f', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '86c70eef-6177-4e2a-84e8-bc85738d3cc3', '35db48b2-55cb-4d75-a42b-415258a6250f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cffb7c9f-d357-48b7-849c-3aae98acca82', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '86c70eef-6177-4e2a-84e8-bc85738d3cc3', '8d504605-2460-4655-b95e-f10d0da920c8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9230bd8a-e90c-47ee-9143-527f77d31c2b', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '86c70eef-6177-4e2a-84e8-bc85738d3cc3', 'ec35e0e2-5aab-496f-a324-fc5d9ef6fcd7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5812efe9-eea8-431d-9883-518ca6c7fef5', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '86c70eef-6177-4e2a-84e8-bc85738d3cc3', '1e86b39d-c7be-4b6f-a205-cc85f5901401');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('548b93ef-353c-4225-a8f1-b2251507b33a', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', 'bb27e469-9c49-4cc1-8001-a84cec272771', '6af79f16-e899-4275-b057-3d9fb31ee9f3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3f48bcc8-cfbf-485f-a305-ac8a53c1bd87', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', 'bb27e469-9c49-4cc1-8001-a84cec272771', '85d12880-bb4a-4b57-9048-ca9f1899266f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d26b2646-d85a-4e60-836d-166e5752177f', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', 'bb27e469-9c49-4cc1-8001-a84cec272771', '091f03e9-55ce-4813-be87-8b058ff9bb75');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('da1834a4-3c13-4308-a641-afc76493c8f3', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', 'bb27e469-9c49-4cc1-8001-a84cec272771', '758fb8c5-d070-4ec5-83f3-64a6ecd08813');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d3404e43-b82a-4229-8b05-bec74558e3f1', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '19350caf-db14-476e-8159-3315778577f7', '47a8d5db-790f-4e1a-bb6b-75fe12d3e80b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3ffd8f6b-bc1c-4888-b4e5-efcec817bb6a', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '19350caf-db14-476e-8159-3315778577f7', 'b6af5b88-0a92-4a51-a640-b8bd319cc283');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4d6e6d2d-a70c-412f-bfb8-8e1cbfaf2b65', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '19350caf-db14-476e-8159-3315778577f7', '67cb985c-2c54-4691-84ca-b9185ed0f9fb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f7415df5-ffa4-4e3d-a675-bc05cc436477', 'fac8b9a2-762d-415b-94fd-b7ef033ad1f0', '19350caf-db14-476e-8159-3315778577f7', '57ef74a6-0f89-433c-a37a-dbd3012771a7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2234fc2e-2185-4f57-9dd5-ceecb2d4c922', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'a832fdb3-d0cc-4b53-8027-99f1d46f0fcd', 'ca76d4b0-535a-401f-ac31-af3e267e6071');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('14e6a7a6-4e05-4f34-b302-3dfdb880eb09', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'a832fdb3-d0cc-4b53-8027-99f1d46f0fcd', '0f1dcd47-4bf7-480b-bd09-5b10754cea6b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5cca689f-b6ca-4ca8-9d5b-e1bd3be318ee', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'a832fdb3-d0cc-4b53-8027-99f1d46f0fcd', 'ad535ff4-6a0f-4e17-8840-8b16eb679b8a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ab69628f-40c5-4e57-8b7d-28ab18fdac85', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'a832fdb3-d0cc-4b53-8027-99f1d46f0fcd', '8b36a768-628b-4359-9e6b-1a542514a1ef');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b0c66c67-4b6b-4411-b011-ec52a9a6ca44', '10df1c29-7332-46a0-aad1-b433f2897ed6', '01eb54af-ef7f-4869-830b-918f991c94b9', '87cb01e8-b3dc-443f-ada2-026b03f5f0e5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cc592e00-aa41-48f2-baf6-203286fce4e3', '10df1c29-7332-46a0-aad1-b433f2897ed6', '01eb54af-ef7f-4869-830b-918f991c94b9', 'a4690f55-bc12-4c04-bac9-a7e725137b3d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7f90c572-dc7f-4472-a08b-12ec4de51554', '10df1c29-7332-46a0-aad1-b433f2897ed6', '01eb54af-ef7f-4869-830b-918f991c94b9', '5e310ef0-bf3f-4bfb-8630-3ae514dc4e4b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b296add3-cdb1-4f26-9246-82d3863954f0', '10df1c29-7332-46a0-aad1-b433f2897ed6', '01eb54af-ef7f-4869-830b-918f991c94b9', '1c50425a-ef25-472e-82f5-ee6c147906e2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b24f3dea-2f5f-43a4-ad23-bac162d24d14', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'c96de900-42b7-4e0c-b9ca-49290f76267e', '8a29d677-aee9-43f3-9517-33787a203a48');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1e94a335-470d-4510-99a9-70e6ee5a6db8', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'c96de900-42b7-4e0c-b9ca-49290f76267e', '0d0993ec-82e8-462a-bb6f-763f5d340d07');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6f25e8e7-79d5-4d0e-9596-51d94adbdaf7', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'c96de900-42b7-4e0c-b9ca-49290f76267e', '0c95ec68-4649-4850-9d65-d5bb38427c68');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('81dcb917-0838-4255-81ca-e3cd37b3a9c2', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'c96de900-42b7-4e0c-b9ca-49290f76267e', 'f2ec2437-402e-4ea9-b4ba-5c8f7c0901fc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e6e778dc-1d5c-4ce3-99cd-5cd58ad15117', '10df1c29-7332-46a0-aad1-b433f2897ed6', '6294ecad-032e-4821-9761-c566b1601a3f', '639bc1d8-b4d7-4e63-a735-0123629c051b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('69e38093-cabc-4a6f-8659-b1e20d73fd4c', '10df1c29-7332-46a0-aad1-b433f2897ed6', '6294ecad-032e-4821-9761-c566b1601a3f', '4d976089-ca36-4d96-a708-e6f7bac858f0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9756ea4f-e33e-4e16-95da-0b54b1b18afe', '10df1c29-7332-46a0-aad1-b433f2897ed6', '6294ecad-032e-4821-9761-c566b1601a3f', 'd360ee63-94dd-4aa5-b898-421ca676ccc8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('865fc90d-f055-48e1-92fd-9e3896e2e584', '10df1c29-7332-46a0-aad1-b433f2897ed6', '6294ecad-032e-4821-9761-c566b1601a3f', '19312942-7210-4037-a8f7-27dab2b4026f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7e634c96-9510-41da-a29f-b3856c7c929c', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'cb4bdd43-6a12-4863-9d01-524a7885b00f', '673809be-e649-404a-9973-8c983ecf4b77');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('71ec88b3-c99a-4538-af05-ca6cf71f63af', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'cb4bdd43-6a12-4863-9d01-524a7885b00f', '26675510-3863-414b-a101-72f24c58caa0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('285dcde5-4b3c-4ed0-8bec-c82776cd4588', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'cb4bdd43-6a12-4863-9d01-524a7885b00f', '7c9125fe-2f64-4e62-960f-203e8e898a01');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('68344961-6fad-43cd-bc63-1e9b86eba073', '10df1c29-7332-46a0-aad1-b433f2897ed6', 'cb4bdd43-6a12-4863-9d01-524a7885b00f', '6ced9df1-e9e5-44c6-989d-eeb67a9dfd89');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('00d4ceb3-1011-4a2d-b1d7-3a35f985afd0', '9362efd1-5b4f-46f9-a895-0458df0770e2', '52ed554b-7f9f-4f96-9c83-e6b5ae9758c4', '914831c8-e6e4-45cc-a6ba-0e2eddd892a6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('353ad79f-5892-445e-94a6-40e95adf2d74', '9362efd1-5b4f-46f9-a895-0458df0770e2', '52ed554b-7f9f-4f96-9c83-e6b5ae9758c4', 'f01f5996-14ad-48a8-9ae0-1ec0eb90a1e8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('95e02b1d-9c4c-4c73-a7aa-d76c3d120af6', '9362efd1-5b4f-46f9-a895-0458df0770e2', '52ed554b-7f9f-4f96-9c83-e6b5ae9758c4', '144a2e42-158d-40bc-9a4c-5e663785caa2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('41071a36-4c55-4b44-9f1a-64269b854e78', '9362efd1-5b4f-46f9-a895-0458df0770e2', '52ed554b-7f9f-4f96-9c83-e6b5ae9758c4', '65af3552-8692-4c42-b480-ad163397525e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('033a4630-b307-4bba-9fa7-95a14bf71883', '9362efd1-5b4f-46f9-a895-0458df0770e2', '0418ec47-a4ab-4b29-a7ae-ee976c598528', '7f99b6db-1588-45d6-becb-2100e968db22');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0f23ee50-b1b5-445e-a818-2c1629e15c4d', '9362efd1-5b4f-46f9-a895-0458df0770e2', '0418ec47-a4ab-4b29-a7ae-ee976c598528', '0c7e1dcf-e5c0-400b-a6b6-242cbbfa176e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f46a4bd8-e5ff-4652-9873-4813c89a80f6', '9362efd1-5b4f-46f9-a895-0458df0770e2', '0418ec47-a4ab-4b29-a7ae-ee976c598528', '973196f0-707e-4202-9682-343dea66ff57');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('de1c7f25-9225-48f0-a127-1d329ff5a8a1', '9362efd1-5b4f-46f9-a895-0458df0770e2', '0418ec47-a4ab-4b29-a7ae-ee976c598528', '1c9150ae-493b-4e82-8457-6ac46220bcdd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('627df1b8-0fb0-469e-82f2-1bb83a4ec1a6', '9362efd1-5b4f-46f9-a895-0458df0770e2', '681388f6-fd77-4320-b276-8b180c51ff98', 'de6efde4-0dca-4822-863d-598fae7931b5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9b082a90-b6fd-49d8-b341-88353d65e291', '9362efd1-5b4f-46f9-a895-0458df0770e2', '681388f6-fd77-4320-b276-8b180c51ff98', '392f41e8-3add-4307-9d72-3e6e4b1a3685');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d8c44979-6817-43c8-91a5-496abc56991b', '9362efd1-5b4f-46f9-a895-0458df0770e2', '681388f6-fd77-4320-b276-8b180c51ff98', '74cf1273-a4e6-42e9-b2b8-637688f59eb9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bb515795-272f-4922-8206-aeff71e0a071', '9362efd1-5b4f-46f9-a895-0458df0770e2', '681388f6-fd77-4320-b276-8b180c51ff98', 'de7531d9-89d5-4c69-bd16-5fc9455f750f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('980de85d-5d13-48f8-9ee2-c86a09305ab5', '9362efd1-5b4f-46f9-a895-0458df0770e2', 'c20baa6c-eac9-4d37-b1d2-82ed34b3e5e0', '88da8766-649c-47d9-b017-51165d867346');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('579262ae-2acf-4729-8406-674c4618bd0a', '9362efd1-5b4f-46f9-a895-0458df0770e2', 'c20baa6c-eac9-4d37-b1d2-82ed34b3e5e0', '111ba7c8-8c08-4914-9a50-4620a0fb0a74');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('71db9d96-95eb-4c34-b16f-bb9ae5ab6bd2', '9362efd1-5b4f-46f9-a895-0458df0770e2', 'c20baa6c-eac9-4d37-b1d2-82ed34b3e5e0', 'd8cfe799-20f3-43ba-9740-078e94afa729');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e0eecf26-fd8b-4d3b-87de-54939e830f59', '9362efd1-5b4f-46f9-a895-0458df0770e2', 'c20baa6c-eac9-4d37-b1d2-82ed34b3e5e0', '62f43a82-a050-4ae7-9a41-488358f2fb52');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('658b7914-c59c-4bde-a151-dda389d759e4', '9362efd1-5b4f-46f9-a895-0458df0770e2', 'becb8dbf-568a-4bcd-96d9-bc7a0b88d3c7', 'ca499bd1-659f-4a34-aea6-82f98137b5a5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9d2eda05-6572-4847-b799-39a0d5be6898', '9362efd1-5b4f-46f9-a895-0458df0770e2', 'becb8dbf-568a-4bcd-96d9-bc7a0b88d3c7', 'fe698f85-a6a8-49a2-aa7d-5617fdd9c57b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7926600c-a696-44c9-b8cb-1a392c331065', '9362efd1-5b4f-46f9-a895-0458df0770e2', 'becb8dbf-568a-4bcd-96d9-bc7a0b88d3c7', '4b9b3665-bb2c-4804-af03-1fb1004154d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7d75515a-8941-4e96-af9b-9beb94054a58', '9362efd1-5b4f-46f9-a895-0458df0770e2', 'becb8dbf-568a-4bcd-96d9-bc7a0b88d3c7', '310b7962-b0eb-4043-adbd-d83b1166c59f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('65acd3b6-a105-48ee-99fd-c028ddf00c1d', 'd98bf8ea-309f-43c4-8854-10af781209b1', 'eb428a5b-af81-4f0d-b4b5-e5c4f4b8c25b', 'a00d443b-7a1c-4305-9e22-fb656086f612');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('154b2d0e-b691-4e6a-bae5-c03ea2f9b038', 'd98bf8ea-309f-43c4-8854-10af781209b1', 'eb428a5b-af81-4f0d-b4b5-e5c4f4b8c25b', 'f969202b-7828-4b6e-a988-030df63420e8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('532f9ee6-6832-40f9-84e9-675bf7c90b57', 'd98bf8ea-309f-43c4-8854-10af781209b1', 'eb428a5b-af81-4f0d-b4b5-e5c4f4b8c25b', '4b5e4098-aa87-4fed-b770-7e7e66405dae');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9aa9eb15-7db2-40be-a79c-3fca37f18aee', 'd98bf8ea-309f-43c4-8854-10af781209b1', 'eb428a5b-af81-4f0d-b4b5-e5c4f4b8c25b', '556adc8c-5017-40e0-be3d-ebbd96eb560c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e3f6f50b-b058-464d-9e19-d1ef3cd4f7ac', 'd98bf8ea-309f-43c4-8854-10af781209b1', '0012859e-d972-4b6c-9ab8-352fc517b6d7', 'bd14a19d-2088-485e-8515-a9e830fc086b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7289d93b-3697-4376-9161-40af29a05976', 'd98bf8ea-309f-43c4-8854-10af781209b1', '0012859e-d972-4b6c-9ab8-352fc517b6d7', '95e2e48d-5336-4a4d-9b16-fa1cb5a2d382');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5712508d-f90c-4837-b217-1ed8a2b213ba', 'd98bf8ea-309f-43c4-8854-10af781209b1', '0012859e-d972-4b6c-9ab8-352fc517b6d7', 'a1972154-05d0-455b-9c29-fe5bb761f093');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c64b71e5-b618-4c63-96cd-d255e3238069', 'd98bf8ea-309f-43c4-8854-10af781209b1', '0012859e-d972-4b6c-9ab8-352fc517b6d7', '58aee8e0-9630-411c-845f-5649fd7db2e8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e61fe8b1-02d3-45a6-b27b-3703aa0f82f6', 'd98bf8ea-309f-43c4-8854-10af781209b1', '69063cee-fc6c-4fbc-acc6-e91f6ee699dc', '4ac6ac75-383c-430d-9d3d-60c679e3467a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b36693c5-8a17-477f-ab50-75c4ac749301', 'd98bf8ea-309f-43c4-8854-10af781209b1', '69063cee-fc6c-4fbc-acc6-e91f6ee699dc', '32a055dc-2826-4840-a19c-2b9348be3497');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e9c50e22-5c68-44f7-b5df-ca97a9240c14', 'd98bf8ea-309f-43c4-8854-10af781209b1', '69063cee-fc6c-4fbc-acc6-e91f6ee699dc', 'b6bafbf9-840a-4a9f-b782-83e5642f5c1c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d5417327-28bb-428a-bd82-34e0e9b06d17', 'd98bf8ea-309f-43c4-8854-10af781209b1', '69063cee-fc6c-4fbc-acc6-e91f6ee699dc', '403731ae-4a5d-4c7e-b0fc-03883b986f97');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4ddf8e60-08e9-473f-aae8-8655932bdf99', 'd98bf8ea-309f-43c4-8854-10af781209b1', '9922553b-9b2a-4bf4-8fd5-d876a15931f6', 'ee0f69c8-4c8b-4447-b331-019670345bc7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8d6f2ec7-70c7-4d66-94a9-bb8552026d32', 'd98bf8ea-309f-43c4-8854-10af781209b1', '9922553b-9b2a-4bf4-8fd5-d876a15931f6', '34c4c0be-5e5c-40bf-930a-03c490428415');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c53e7fb8-3333-48e0-b5aa-76d124501cc7', 'd98bf8ea-309f-43c4-8854-10af781209b1', '9922553b-9b2a-4bf4-8fd5-d876a15931f6', '07554660-99ea-4d2c-9847-55fd571d5af6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('82de735e-250c-4660-962d-009287fb00bc', 'd98bf8ea-309f-43c4-8854-10af781209b1', '9922553b-9b2a-4bf4-8fd5-d876a15931f6', '004a6241-3e94-4dff-a8fe-2cc2e513235e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('25c79ca4-77a3-4e4e-b6f6-c6bb12d18f37', 'd98bf8ea-309f-43c4-8854-10af781209b1', '24e73961-f6af-4318-9077-c00cc4c15db1', '2f688921-cd48-4ec5-ae6f-1788ddce7990');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1c1aaedd-98b9-44a4-a1e7-a0c6e266b87e', 'd98bf8ea-309f-43c4-8854-10af781209b1', '24e73961-f6af-4318-9077-c00cc4c15db1', '9592a5ae-8acd-422b-ad18-5110bb0ef338');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c2484ead-b9ac-43a6-9771-8c30a71806a0', 'd98bf8ea-309f-43c4-8854-10af781209b1', '24e73961-f6af-4318-9077-c00cc4c15db1', 'c07a87a6-77ac-4197-9fac-d727539d38ef');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('23dc5d50-c7d5-4423-80c0-ff22f2d93fb1', 'd98bf8ea-309f-43c4-8854-10af781209b1', '24e73961-f6af-4318-9077-c00cc4c15db1', '4002dba4-69f7-4a63-9725-0124e1c492a8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d3c377d1-5651-4786-b29b-ff85ff81875a', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '0bd4b4b6-ab23-478d-be68-31dd4409e625', '5e94ff28-ca54-41cc-8442-0517d8f0d28d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('11b414d2-9bfa-47ea-b818-d1eff812babe', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '0bd4b4b6-ab23-478d-be68-31dd4409e625', '2fcdd4d2-2fb2-4414-8f2c-d3263b32e709');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bfd09c7c-9f6d-4894-b73d-6ba48898f844', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '0bd4b4b6-ab23-478d-be68-31dd4409e625', '313829b9-9c7c-4a84-bf25-6fa59511eeed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cbde1257-f6e3-450b-93ea-e203de14589e', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '0bd4b4b6-ab23-478d-be68-31dd4409e625', 'ada7d932-1dff-46fa-a367-5b10979b1860');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dd8dc230-620e-44b2-8776-845dbe861a16', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '53abbbba-e036-464f-bf4c-e396f7fa7c70', 'a3536a8d-98eb-44ca-b5b0-9117289f71aa');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e6daa06f-437b-4bbe-9ca5-75a56ced6c15', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '53abbbba-e036-464f-bf4c-e396f7fa7c70', '73a775f8-796d-4852-a719-d4b2111ff023');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5f81b323-2294-4132-b2c2-6c76b893874f', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '53abbbba-e036-464f-bf4c-e396f7fa7c70', '8b13e81a-755e-4d4c-8388-9f4f905f0c82');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e8c2b6df-9ef6-4fe5-8d26-c696df4c610f', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '53abbbba-e036-464f-bf4c-e396f7fa7c70', 'd61f3c83-24ee-4965-9c8b-2f2157b46fbf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('77185dfa-0fc2-48d1-ba21-202cb5e6a1fa', 'b344a63c-bf29-479b-a8e9-00a4965216ed', 'f6dbefec-1bcc-4414-8d48-7057c7b8e2a0', '913feb69-8f52-4f1b-aaae-1c779761f4d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e5ca97aa-4dc0-449a-9d43-0c30d02632b3', 'b344a63c-bf29-479b-a8e9-00a4965216ed', 'f6dbefec-1bcc-4414-8d48-7057c7b8e2a0', '19f3a114-1cd8-4e0a-86ab-8b6ea3514749');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8cbaf5f8-594a-4325-8c7d-e501c770f8a0', 'b344a63c-bf29-479b-a8e9-00a4965216ed', 'f6dbefec-1bcc-4414-8d48-7057c7b8e2a0', '61c46306-d643-455a-bd4a-7954c794de0a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('88d71228-6dca-427d-913b-23d2c1ac3b73', 'b344a63c-bf29-479b-a8e9-00a4965216ed', 'f6dbefec-1bcc-4414-8d48-7057c7b8e2a0', '14a057b3-972c-4bf4-836b-95520fcc49f2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('93e889ca-756e-404e-ac92-2f8b8979d75f', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '2f4ef9e3-6170-4ff5-bd39-3513af70d81a', '884e7599-6083-42ac-9a09-b530d1a8c5f2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('21b44bf8-4e2d-442c-ad74-775a0318fa37', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '2f4ef9e3-6170-4ff5-bd39-3513af70d81a', '65a7ef3a-92d4-49b6-86f7-eeb85d0cc37d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2e1c0e73-19a2-4ad6-8f4c-64037a3861e1', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '2f4ef9e3-6170-4ff5-bd39-3513af70d81a', 'e4a3e415-78f5-4565-9977-475fd508b2bd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6fb4c354-cc51-4c8f-9b45-3d2bdcea0355', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '2f4ef9e3-6170-4ff5-bd39-3513af70d81a', '8402c720-7bbd-4354-ad93-dad649cd035b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d70764f7-b93f-4edf-92c0-119a08dac979', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '8318bc9c-893d-4aef-95ce-8cc51c5608cc', '70eec91d-8a2b-4b7f-a83b-5c2ec7a19404');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b2d9ce98-2daa-4ff6-ac50-5bbd86e0b10f', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '8318bc9c-893d-4aef-95ce-8cc51c5608cc', 'f8a15995-b3b1-4a6d-8549-1dd5ba262537');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c6719744-7a2e-4862-8634-16657c1ea4a1', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '8318bc9c-893d-4aef-95ce-8cc51c5608cc', '60157471-9b96-453a-a689-37eda194298f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4d4ff836-b2c8-43c1-87bc-46253a97dae9', 'b344a63c-bf29-479b-a8e9-00a4965216ed', '8318bc9c-893d-4aef-95ce-8cc51c5608cc', 'e4acbd92-fa42-4dc7-b79e-5a0db17c7f18');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8db37b41-5742-4227-b56e-2070f674b537', '0ad14129-208b-49a4-84e5-112acdf64188', '027dde8a-4207-4845-857f-8dda9519d239', 'b361cf29-dd36-4282-80a1-869894145aba');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('881bc4c6-f905-460a-9110-abe830c9afcc', '0ad14129-208b-49a4-84e5-112acdf64188', '027dde8a-4207-4845-857f-8dda9519d239', '1387dea0-67be-4ad0-81d5-3fc35b07803a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('091034a4-8e5c-411a-8139-5fe349531791', '0ad14129-208b-49a4-84e5-112acdf64188', '027dde8a-4207-4845-857f-8dda9519d239', 'c32a8c42-6540-4be4-9ad8-58da3477e796');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e06f74d0-5519-46c7-b827-fc076a19fad6', '0ad14129-208b-49a4-84e5-112acdf64188', '027dde8a-4207-4845-857f-8dda9519d239', '81922262-7054-495b-964f-ec8ae563e7a3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d10b2acc-cedd-42e9-86c7-8fb0fc2e49e6', '0ad14129-208b-49a4-84e5-112acdf64188', 'f5168000-3c75-4b14-8252-b688e2520fb8', '2abe7020-c0f1-4544-ac43-ecb640bd8297');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7f22e8d2-2e58-4e60-af20-12973a53eb44', '0ad14129-208b-49a4-84e5-112acdf64188', 'f5168000-3c75-4b14-8252-b688e2520fb8', 'd8bb728f-3bf4-4209-adea-4c7efa091a6f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a35ebcb3-d978-4e9a-9185-b0b1122159d8', '0ad14129-208b-49a4-84e5-112acdf64188', 'f5168000-3c75-4b14-8252-b688e2520fb8', '51762d69-10fd-4290-b928-c5ecb4aa1016');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d9ea41cc-9d40-4628-9969-9d9e4ada59e0', '0ad14129-208b-49a4-84e5-112acdf64188', 'f5168000-3c75-4b14-8252-b688e2520fb8', '3e719b3e-0a71-44e1-9cb4-abea4ea3853c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('809edc21-7f36-4e12-b5ea-a118cc349ff5', '0ad14129-208b-49a4-84e5-112acdf64188', '87cbac4e-52bf-46c6-a8fd-ad4bdee8bb69', 'ada81117-148d-4d77-8ec9-bd3401ba894a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('71505e62-2685-441c-a7e8-9e7a58407f62', '0ad14129-208b-49a4-84e5-112acdf64188', '87cbac4e-52bf-46c6-a8fd-ad4bdee8bb69', '20df5105-3111-4c91-98e3-0bb6dfc3690a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0d418e6d-ddac-44d4-b59a-3df3d347536e', '0ad14129-208b-49a4-84e5-112acdf64188', '87cbac4e-52bf-46c6-a8fd-ad4bdee8bb69', 'b0c43c55-7564-4f33-9c09-dee47aa8b21f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5fb20366-c5d3-4bda-b9fa-0c59a22d57bd', '0ad14129-208b-49a4-84e5-112acdf64188', '87cbac4e-52bf-46c6-a8fd-ad4bdee8bb69', '5d7fb1be-e184-4576-9a0c-004e4deaf7ff');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e39e3775-38f4-4190-87d3-47255e32c70b', '0ad14129-208b-49a4-84e5-112acdf64188', '850182ae-fb28-4c72-8506-b4d8dcefb40f', 'a5e0ce06-9af8-4d21-86d5-4e771edfd2db');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('11f613f7-c0de-4ca5-be38-45b7e9c8b91e', '0ad14129-208b-49a4-84e5-112acdf64188', '850182ae-fb28-4c72-8506-b4d8dcefb40f', '84c84533-5af7-425d-8f1a-70961ed1c9f5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('73bbf018-7bec-4dce-9124-a45c5f6de590', '0ad14129-208b-49a4-84e5-112acdf64188', '850182ae-fb28-4c72-8506-b4d8dcefb40f', '20621b9c-eb18-40d2-bc71-d97ee879e6a6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b4144a01-16f2-49a4-8651-4c3e2f92e3f8', '0ad14129-208b-49a4-84e5-112acdf64188', '850182ae-fb28-4c72-8506-b4d8dcefb40f', '3cc0bbce-0a22-4ab6-bbb7-876c2f6fa9e1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7db214e2-3376-48d8-a5c9-70d5cede5c84', '0ad14129-208b-49a4-84e5-112acdf64188', '5b339646-08d7-4108-904e-b4f11aec48cd', '12c208a7-a612-4233-b2f2-7e4c31ae88b2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9caf135f-50c9-4b9e-9c9e-4109e4cc1213', '0ad14129-208b-49a4-84e5-112acdf64188', '5b339646-08d7-4108-904e-b4f11aec48cd', '52f501e0-f82a-4a27-81f9-74a7b08f3e90');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1b7510ea-f833-432a-a2e0-c3a603e61621', '0ad14129-208b-49a4-84e5-112acdf64188', '5b339646-08d7-4108-904e-b4f11aec48cd', '50f79278-ac1b-43e4-8a99-d6ea2a051038');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('21893ef7-d7e1-4e48-a644-dfc41112f34d', '0ad14129-208b-49a4-84e5-112acdf64188', '5b339646-08d7-4108-904e-b4f11aec48cd', '869922db-ec82-45e2-9338-dc2e4846253e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('33e5c8dd-50cd-4996-8e65-2eece7b7d778', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '0c59a2cd-2fe2-4978-9975-ba228e6c9b4c', 'eb36fdb1-bd06-4d37-813c-99b78bee4e44');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('247cd837-b149-49be-aa9c-7cd3b4ba5a6e', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '0c59a2cd-2fe2-4978-9975-ba228e6c9b4c', '866d3f32-7e2f-411d-b9e3-c4bc0d6249de');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('29496391-c8f8-4aa6-9ee6-bb6932d0a988', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '0c59a2cd-2fe2-4978-9975-ba228e6c9b4c', '4775d972-bbe5-40ea-b344-11c5ab2e9ce3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f75f9531-d405-4302-a5a3-4bcff9db9c1a', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '0c59a2cd-2fe2-4978-9975-ba228e6c9b4c', '6019cdc7-3737-4ef3-a68e-8cce36d8950b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fd200426-e7c8-488c-8c55-10f485e28ab9', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '0421db9d-8582-44c5-8d50-bdab22855cf8', '29c595ae-6254-48ae-9450-c885a941198e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('539cb0c4-480f-4bb1-aec0-62e36c9a43c6', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '0421db9d-8582-44c5-8d50-bdab22855cf8', '875a3a17-4c95-4042-a42f-b3eeab18470f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9ecc8978-ead1-47dc-b89a-f903aab75146', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '0421db9d-8582-44c5-8d50-bdab22855cf8', '06da20ac-e2b5-4c8b-8352-791b277d9a22');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f8cffc18-22fc-45a6-bb70-847c6e44bf9a', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '0421db9d-8582-44c5-8d50-bdab22855cf8', '694b87fb-019e-41c2-aa15-a41466f9fc10');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3263f783-05ec-434b-998b-9ed4deb26e14', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '2aa5a5c4-4e03-46ba-bb06-22d07aa38491', '2c21f5cb-0356-45ca-ba10-1ce3bf681f06');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('636c6a0b-4e82-4990-ab37-a418be5d9669', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '2aa5a5c4-4e03-46ba-bb06-22d07aa38491', 'e60a57c0-6b58-46ab-b758-f38ad709a9b9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f9ac223a-a7a3-413e-974b-bcab77a7e2d0', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '2aa5a5c4-4e03-46ba-bb06-22d07aa38491', '3cdf56d7-cbc9-4281-ba3b-ae4c336878c4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fac6a253-2b44-45ac-9085-17a1e1e91bd7', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '2aa5a5c4-4e03-46ba-bb06-22d07aa38491', 'cf353023-cfeb-432f-8988-4d0530871ede');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3fc3dd6b-298e-4e6b-9606-eff008ef5485', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '308c1adc-fad5-4550-b7d7-a34d0f36923d', 'c1c37a4b-da29-4113-bb0d-d5de05e7404d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('455959ae-405b-4db5-ab1f-e71b6f358a71', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '308c1adc-fad5-4550-b7d7-a34d0f36923d', '19fa7754-2be9-4549-badc-cfd3c292db00');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2a77e4aa-f7f7-407d-8f7e-094a152f14e3', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '308c1adc-fad5-4550-b7d7-a34d0f36923d', 'a0752886-6753-4a03-8458-9eac2393c103');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b61a0de1-038d-456e-98ea-65b21bac81db', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '308c1adc-fad5-4550-b7d7-a34d0f36923d', '5e4b411c-5503-45ef-8b70-3c9e2945bc4e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b646eb2d-0df9-4734-885d-4d8e3fe7c228', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '13a35beb-b608-483a-9973-0e63fd7f3bf0', 'bb6d2502-3b10-4ff0-9335-14b25d11f684');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0e11d133-4d3a-4abc-88b6-f31aa1cd390d', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '13a35beb-b608-483a-9973-0e63fd7f3bf0', 'b8be1442-0160-4639-8516-b2951ccc4d85');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('73540101-231c-4d73-89e6-f89a12a5f3b4', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '13a35beb-b608-483a-9973-0e63fd7f3bf0', '12d8ec30-2327-4402-8c88-f55fff0b9ed6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('929eeb3a-8950-4cc5-8d61-807b0f3430c3', '2aa9b9d7-8269-446b-817d-ff475d9a5dc3', '13a35beb-b608-483a-9973-0e63fd7f3bf0', 'ecabd040-4c98-4785-913b-0f4d370faf29');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('291adaf0-3418-47bd-aeec-630525b5bc1b', '8cb181ee-3743-4522-84e4-85942a7e8cba', 'ad92b372-cf8e-4353-ad9f-821027d71381', '8b63d4b1-049c-447c-8188-63055252f900');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9826a509-c201-43a6-b0de-f4db8711e225', '8cb181ee-3743-4522-84e4-85942a7e8cba', 'ad92b372-cf8e-4353-ad9f-821027d71381', 'ee76b3b1-3264-490d-901b-c6f3ff860320');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9fc1e2b1-7e61-48c3-9b4b-ae2e74232620', '8cb181ee-3743-4522-84e4-85942a7e8cba', 'ad92b372-cf8e-4353-ad9f-821027d71381', '4d4dcb74-afa0-4c16-863a-56181838e4eb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('80bb2a30-a2c9-43f3-8407-74ec0d1872cf', '8cb181ee-3743-4522-84e4-85942a7e8cba', 'ad92b372-cf8e-4353-ad9f-821027d71381', 'd6c7df58-a2b8-4d38-a676-d0a2373809b7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a07072cc-dab3-420d-8670-6695e52b5a92', '8cb181ee-3743-4522-84e4-85942a7e8cba', 'ebd6bb91-3157-41c0-a0b3-005c184f85d0', '57eb72a9-b5fd-470c-9418-15dbb19e3444');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2174ea52-425c-42b1-aad8-7a1c096a3c06', '8cb181ee-3743-4522-84e4-85942a7e8cba', 'ebd6bb91-3157-41c0-a0b3-005c184f85d0', '3bc4a155-f881-4a4a-9863-2db06d0a02a8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('132bb9b8-f7c7-4a28-b1e4-78c7ee310180', '8cb181ee-3743-4522-84e4-85942a7e8cba', 'ebd6bb91-3157-41c0-a0b3-005c184f85d0', 'b85fe0fc-4316-4c8a-9a37-6d8b532695b6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c6c1e290-2aab-46a4-acd6-e73c391ecbda', '8cb181ee-3743-4522-84e4-85942a7e8cba', 'ebd6bb91-3157-41c0-a0b3-005c184f85d0', '50568c28-a60d-43f2-9452-95702e25337c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c0b64d76-69a4-4103-991f-f4b7d9ab65e1', '8cb181ee-3743-4522-84e4-85942a7e8cba', '5d8ad174-121e-4ad4-a87c-91f2248102ef', '264d4c65-6376-46a7-a2bb-45ea40664d95');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b555d412-733c-4e26-af0d-329339599762', '8cb181ee-3743-4522-84e4-85942a7e8cba', '5d8ad174-121e-4ad4-a87c-91f2248102ef', '51c29f65-62f8-4d4e-a2b2-0f1c86c9b270');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a12f0b72-1aaf-4372-abf5-4eb032337661', '8cb181ee-3743-4522-84e4-85942a7e8cba', '5d8ad174-121e-4ad4-a87c-91f2248102ef', '7af6235f-b3d8-4c65-a09e-6c8c32dd9595');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4bad4f44-7282-4b14-85ae-4344beaae5de', '8cb181ee-3743-4522-84e4-85942a7e8cba', '5d8ad174-121e-4ad4-a87c-91f2248102ef', 'ba96562e-ff86-4948-856e-dd2177ced4d8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('520f5da0-efc0-4107-86a5-eb6e63e32a06', '8cb181ee-3743-4522-84e4-85942a7e8cba', '035e4407-bba8-4e0c-9456-2cfedba3bc09', 'b58d1f8d-fa30-4bd9-bc1b-591efb26cf0e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('65ef97b1-e27e-490f-a628-c96bf89971dd', '8cb181ee-3743-4522-84e4-85942a7e8cba', '035e4407-bba8-4e0c-9456-2cfedba3bc09', 'e4f10fa0-e731-4ca4-b258-9f833ea6b34b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a4dfe0ea-4f41-4b58-8b6e-413fa65a2628', '8cb181ee-3743-4522-84e4-85942a7e8cba', '035e4407-bba8-4e0c-9456-2cfedba3bc09', 'cae4956d-103c-46e7-9557-a0da3cb15e04');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f4ce6fc5-ebe9-4d00-bff6-3b2aa3957660', '8cb181ee-3743-4522-84e4-85942a7e8cba', '035e4407-bba8-4e0c-9456-2cfedba3bc09', '69b27e50-6970-4855-9106-39bd1ee47b87');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ed8e30dc-1674-4022-938e-99f580cc9ada', '8cb181ee-3743-4522-84e4-85942a7e8cba', '6691c413-110e-42f3-bbd4-94ab4f8f1f20', '36b632c1-c96f-4c8d-a53d-92b917ef1102');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5d66b9a8-0dc9-499a-a0c5-8eb5c6e0ef8a', '8cb181ee-3743-4522-84e4-85942a7e8cba', '6691c413-110e-42f3-bbd4-94ab4f8f1f20', '69249073-4f84-44b4-8fae-ddf402dc30d8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fb9c9842-a686-48e5-9f6e-075d5260eceb', '8cb181ee-3743-4522-84e4-85942a7e8cba', '6691c413-110e-42f3-bbd4-94ab4f8f1f20', '5c6ec61b-7b39-43eb-af48-11b7567adcd5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d1df3ab3-d19d-410d-98a3-ff92b9460a2b', '8cb181ee-3743-4522-84e4-85942a7e8cba', '6691c413-110e-42f3-bbd4-94ab4f8f1f20', '23eccec7-d93c-469d-b8e8-1b650d0f557a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('34ef3672-bb12-45be-917c-60351cde4024', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '694a83c6-d00c-44af-9e4c-308b7bbe9d43', 'ce2f3f49-e3df-4df7-9f06-086637492d4c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('645ed5f5-0a55-4bee-8dfa-472683fbee6f', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '694a83c6-d00c-44af-9e4c-308b7bbe9d43', 'e5d46cf0-c840-4a87-bf83-37177d25882a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f3902362-c132-4559-8d67-23abedbd4766', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '694a83c6-d00c-44af-9e4c-308b7bbe9d43', '12081dff-61ac-42ba-abff-d66f0a111587');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cfa06965-7b56-41f2-8f10-f1c320e9c65b', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '694a83c6-d00c-44af-9e4c-308b7bbe9d43', '2e933cf2-7bbf-4aa6-9630-73dbd3df982e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('58676501-bc6f-4854-bab1-e9a424f81e6b', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '82044708-a55c-420d-b798-15eb8565d83d', '669b9850-df47-4701-bee1-4b2f7ec30dfe');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('30b85a09-c8db-4e32-8329-cd7dedde1aba', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '82044708-a55c-420d-b798-15eb8565d83d', 'fb22e55a-8f64-4fed-a15d-8597e8c655ff');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e251bd01-84bb-4777-a288-b46acd9bc73b', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '82044708-a55c-420d-b798-15eb8565d83d', '66934399-7399-46bb-9029-471a25834ade');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('48aacbef-0822-40db-bc19-22991811ff90', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '82044708-a55c-420d-b798-15eb8565d83d', '023b68e5-327c-45a8-8fe9-8ff82124356e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a6b71747-5528-4a93-a9c5-dc90629beedc', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '8d822084-55df-4bd7-a3c4-2764ca1c9339', '9ebe9ef5-e2a7-44bc-ab54-70f9cb23347f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d3156863-babf-4ba8-89ab-819f166512b7', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '8d822084-55df-4bd7-a3c4-2764ca1c9339', '744894e0-96eb-4e2b-bb11-2ee131a32ada');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8df1ec68-2681-4ad5-91ed-37533b0195a8', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '8d822084-55df-4bd7-a3c4-2764ca1c9339', '22f1951e-080a-4020-a2a7-07b041b943ad');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('93419488-89ac-4dc0-955b-ce0dbd923ccd', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '8d822084-55df-4bd7-a3c4-2764ca1c9339', 'c917e8c7-611d-46a9-ae75-dfdd30f9cdfc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5f7dbad8-027a-40f9-a41b-960c6b979fbc', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '24f579d3-7f9f-4891-9cb3-ab005aca7f88', 'd0f373fd-b7d9-4a02-80e0-fd62ca468381');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('821a116b-e8a2-4542-baf0-72efaacd48f9', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '24f579d3-7f9f-4891-9cb3-ab005aca7f88', 'da51ac03-4780-44d6-8f96-80df33e38016');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9856c658-b8a5-45b5-9cef-39fa0cdc6ae8', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '24f579d3-7f9f-4891-9cb3-ab005aca7f88', 'ab0d62fd-544e-458b-804c-dcd746e9b1f0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('07b1422a-845c-4ab0-be94-f9d6cb1e57bf', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '24f579d3-7f9f-4891-9cb3-ab005aca7f88', 'c7d92421-77c9-4bef-889b-c4232e25a1bf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dd173c64-56e4-481a-97f5-b6664fa31506', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '95bd1358-4702-4443-a75e-39f3d90b4237', '95c63ca7-cdec-49d4-9986-45d7def21791');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b8fd596f-9988-44e6-8322-add354d3a96b', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '95bd1358-4702-4443-a75e-39f3d90b4237', '18e02cc0-9252-4a13-be12-d10b133af521');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4fb03972-0af6-4cd8-8a60-6c3131872951', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '95bd1358-4702-4443-a75e-39f3d90b4237', '4bae3950-d24d-40c3-9c7a-f6915e10339a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('367b38ef-f768-4115-ac4c-02414ff33578', 'd1276d7c-0d11-4d5c-8f7b-2c956f4e3c1a', '95bd1358-4702-4443-a75e-39f3d90b4237', '59b434fe-6e3f-4a2a-b535-1ee3f75e2aca');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('71d7447e-bae9-4437-bfb2-aad084ea6391', '5db92043-3c35-450d-a127-79c317e13709', '79cf6165-0ed1-4e64-bbb3-e9823504c3b9', '422f8c35-599d-44b3-8d93-4cf57b07738c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f2a31107-552e-4a87-9dd9-9dc93187a305', '5db92043-3c35-450d-a127-79c317e13709', '79cf6165-0ed1-4e64-bbb3-e9823504c3b9', 'c30a1dd6-7e50-4607-96e2-a95700edef72');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('adb7551c-f995-4ffa-b91f-89cebe9759a7', '5db92043-3c35-450d-a127-79c317e13709', '79cf6165-0ed1-4e64-bbb3-e9823504c3b9', '33b9b0d3-7ca0-4c4e-89d7-178e3ed481fd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('072d3280-a177-4d28-84dc-eed2d91e85eb', '5db92043-3c35-450d-a127-79c317e13709', '79cf6165-0ed1-4e64-bbb3-e9823504c3b9', '5cb58a0b-b51b-43fb-8130-808715073a6c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ff2c2a7a-cf2e-4d14-84cd-124ab42823cd', '5db92043-3c35-450d-a127-79c317e13709', 'ae0b8613-1d0e-4898-b40e-c57ac086efb0', 'cf011621-1e58-4728-a26f-e3e5575d0b8e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('91cade1f-18d3-47d7-aa82-95862a016612', '5db92043-3c35-450d-a127-79c317e13709', 'ae0b8613-1d0e-4898-b40e-c57ac086efb0', '7cc68487-d4c0-454d-9f07-1d563d402426');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('15ee09e3-2bde-49db-bef8-7c00b19562f9', '5db92043-3c35-450d-a127-79c317e13709', 'ae0b8613-1d0e-4898-b40e-c57ac086efb0', 'a8e759e3-c74c-4ac8-8917-c6bdc0deb2ac');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f11e46d0-aad8-41e0-bda3-09f002ac9b64', '5db92043-3c35-450d-a127-79c317e13709', 'ae0b8613-1d0e-4898-b40e-c57ac086efb0', '9252b295-eb4c-4a58-a837-ad2225f6c6bb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8c39d59e-0a80-4966-b6dc-2448529cc559', '5db92043-3c35-450d-a127-79c317e13709', 'c03c5f28-2963-4d01-9451-67d6fc14a854', '061e49d1-63c1-46ad-8fc6-dca8e542031a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a30ded40-995f-4e1e-acf0-fe4c092731b9', '5db92043-3c35-450d-a127-79c317e13709', 'c03c5f28-2963-4d01-9451-67d6fc14a854', 'd4ca2354-d070-4124-972e-f3eb6c94b555');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('66510479-f8b4-44d5-ba51-85708635a8f9', '5db92043-3c35-450d-a127-79c317e13709', 'c03c5f28-2963-4d01-9451-67d6fc14a854', 'c62c7b29-5dc6-48c6-8563-83892883b002');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2d3cb49e-c999-4387-963a-a0a9b6337229', '5db92043-3c35-450d-a127-79c317e13709', 'c03c5f28-2963-4d01-9451-67d6fc14a854', 'a2645551-9ec8-4bd7-bf8a-e26252c81661');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ef4c7373-7fb8-452d-83f2-99e881f08ed8', '5db92043-3c35-450d-a127-79c317e13709', '119dad8e-acbf-4926-8982-78c359d68201', '7f80849e-ca75-4673-80d2-4495b7a3c9d6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6a20d881-ba2b-402e-bece-78f5e3ec171b', '5db92043-3c35-450d-a127-79c317e13709', '119dad8e-acbf-4926-8982-78c359d68201', 'feaff97e-dfa4-4d12-9ebd-204d4221ce40');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b5f7dd29-9e91-4d10-92d4-75aa381ef6a8', '5db92043-3c35-450d-a127-79c317e13709', '119dad8e-acbf-4926-8982-78c359d68201', '6eae861d-e11a-4bbe-8173-8386b6cacc44');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('39384a10-fb41-48bd-9afc-5efb3c65e903', '5db92043-3c35-450d-a127-79c317e13709', '119dad8e-acbf-4926-8982-78c359d68201', '28ad98f7-0270-4e56-a441-b7baf06e7324');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5485b775-7ada-42b5-81f4-e0a2bcefe527', '5db92043-3c35-450d-a127-79c317e13709', '501b795e-e205-4eb9-afea-9d0d1f66d395', 'db821efa-09b8-45ed-8a36-8c5be90d96d7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('00bbf17d-e54e-4c6e-a946-f4b3f3fd3147', '5db92043-3c35-450d-a127-79c317e13709', '501b795e-e205-4eb9-afea-9d0d1f66d395', 'a671d058-9723-4e02-a946-a7f0f15ed6ab');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9c4bdda8-27ef-4fe2-afa1-3d98a3f78e73', '5db92043-3c35-450d-a127-79c317e13709', '501b795e-e205-4eb9-afea-9d0d1f66d395', '599733cd-f5d4-4b33-a2ac-f9010341633c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ea3cea06-128e-448e-ba52-7c07ebca8b4b', '5db92043-3c35-450d-a127-79c317e13709', '501b795e-e205-4eb9-afea-9d0d1f66d395', '84e4ef8e-47f7-4737-b431-4bb8fc25f766');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('445169b1-e44a-480d-8de6-ed756d2db2d7', '6ac32b42-6015-47f1-a920-c20b5aac583c', 'aa903322-a7b5-424c-bc89-6b17ba53f260', 'a50a5c3f-a155-4385-a22a-d78884ca088b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f3ad4eb8-c6e9-4513-bdfa-8452d2303ca2', '6ac32b42-6015-47f1-a920-c20b5aac583c', 'aa903322-a7b5-424c-bc89-6b17ba53f260', '083245e3-cfa6-4581-afe3-f197250c4a1f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('672abe45-7682-403c-a835-d5477f6beae3', '6ac32b42-6015-47f1-a920-c20b5aac583c', 'aa903322-a7b5-424c-bc89-6b17ba53f260', 'b86ba01c-475c-48f8-937b-673670c74767');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4d8794f8-b2f2-467f-a7e6-48319708edb5', '6ac32b42-6015-47f1-a920-c20b5aac583c', 'aa903322-a7b5-424c-bc89-6b17ba53f260', 'f06e7e35-c16f-46f3-9309-6939c1bd18a1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('818c86b2-adfe-4f65-9853-8affe3a3cbc0', '6ac32b42-6015-47f1-a920-c20b5aac583c', '885fc623-9cf3-406f-aa46-0b2fec7bb021', '18d58cd6-2599-49f1-bfe0-17ff795e3646');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('18f387e9-95b9-4774-a4ea-b2793e71c9a7', '6ac32b42-6015-47f1-a920-c20b5aac583c', '885fc623-9cf3-406f-aa46-0b2fec7bb021', '1ff4a1e5-c222-47fa-860f-60ae37739d50');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2d6c1bf2-f3b2-46f8-808c-87551c95bc35', '6ac32b42-6015-47f1-a920-c20b5aac583c', '885fc623-9cf3-406f-aa46-0b2fec7bb021', '0c42aba0-f7d8-4630-9306-3e31f8a0af25');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2ad06769-b30f-4d68-a3fa-5b7851a78529', '6ac32b42-6015-47f1-a920-c20b5aac583c', '885fc623-9cf3-406f-aa46-0b2fec7bb021', '9d0915ab-660b-46c1-b42a-74acbda7a483');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('be01b16e-6cb9-4b6b-9d4c-d60dbb4731c3', '6ac32b42-6015-47f1-a920-c20b5aac583c', '0093b3ac-9742-4ac0-bc30-2bc27f55b599', '43f4d46e-f30a-4607-b597-4420d298cc74');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a425eaba-3f4f-4a30-a92d-cf01e8a46bc1', '6ac32b42-6015-47f1-a920-c20b5aac583c', '0093b3ac-9742-4ac0-bc30-2bc27f55b599', 'f2c88c25-8084-41e1-8414-7f2722ee71b8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2eed168b-6e7d-4070-8ade-f7717da0524b', '6ac32b42-6015-47f1-a920-c20b5aac583c', '0093b3ac-9742-4ac0-bc30-2bc27f55b599', '53bd6e6e-6caa-4ab5-82e0-210222ed1431');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b44334b3-e6dd-4556-ac3a-246f96d5edba', '6ac32b42-6015-47f1-a920-c20b5aac583c', '0093b3ac-9742-4ac0-bc30-2bc27f55b599', '1fd6af8e-110a-45c9-8e36-4b2df4238d1d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('df8828f3-5cbf-4e55-91f8-86edafb4b737', '6ac32b42-6015-47f1-a920-c20b5aac583c', '30a73384-6213-4b86-9fe6-fffa6c40af74', '447aaaaf-f1dd-45c6-a686-11564139eae4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('02f2fb14-187b-41ca-a720-4b9773215bbb', '6ac32b42-6015-47f1-a920-c20b5aac583c', '30a73384-6213-4b86-9fe6-fffa6c40af74', 'bb5c732a-6919-49ce-9531-a94897b0eee9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('160dc5fb-bf65-4fa6-b1d9-0c885663c612', '6ac32b42-6015-47f1-a920-c20b5aac583c', '30a73384-6213-4b86-9fe6-fffa6c40af74', 'c9542031-8219-49ba-bbad-eefab2650a52');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('40ed9977-7f56-4e89-9de5-f7a355d635a5', '6ac32b42-6015-47f1-a920-c20b5aac583c', '30a73384-6213-4b86-9fe6-fffa6c40af74', 'd4d38f5e-3517-4034-a81c-f72996c4e602');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('22232bc1-181e-400a-942f-ba0e1141f6d0', '6ac32b42-6015-47f1-a920-c20b5aac583c', 'fbca9852-ad68-4b08-bbe2-c185ab1cbc9c', 'be222764-058f-4102-984d-73a1348eaa72');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ab4e5e92-2058-4fe6-89fe-0f637ff328cb', '6ac32b42-6015-47f1-a920-c20b5aac583c', 'fbca9852-ad68-4b08-bbe2-c185ab1cbc9c', '3510a710-5e67-412e-8ce9-feda5e702d6c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8eee85ed-1d39-4e77-b3c7-9de9643fc54b', '6ac32b42-6015-47f1-a920-c20b5aac583c', 'fbca9852-ad68-4b08-bbe2-c185ab1cbc9c', 'ee4bd9c2-5328-40af-8c38-a2fefe0690fb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('450da2af-677c-4f22-91a8-95695e2bf145', '6ac32b42-6015-47f1-a920-c20b5aac583c', 'fbca9852-ad68-4b08-bbe2-c185ab1cbc9c', '06a209fb-e639-43a6-91cb-0f0bd96a6e43');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4bc0a340-da6f-4f1c-8104-952454e0c52f', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', 'c17ccc4a-1886-4e27-bd4d-545028bf8d20', '865c957d-c48a-4799-902d-aec5480ea5f8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('34f8595a-c690-4207-b8ab-680b5d1348d5', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', 'c17ccc4a-1886-4e27-bd4d-545028bf8d20', 'cfd54bfb-8174-4b73-97ff-80f5fec05951');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fc528a3a-c843-47a2-9824-78ae28aaf3cc', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', 'c17ccc4a-1886-4e27-bd4d-545028bf8d20', '27b8f939-32cf-4790-9a45-4b94172a056e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('49f71a00-2cef-423c-9606-84e978eff462', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', 'c17ccc4a-1886-4e27-bd4d-545028bf8d20', '3fe41758-0ee2-447a-9f27-26a48b4add84');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7015f1f4-4fdc-496c-a081-c7e7f33c9144', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '49127095-7b2e-46d3-a5e0-c8d0d6a20466', 'd83f56f2-fae9-43c1-bbcf-c258a88335a5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('71ebff55-85f9-4f18-8e26-b7093d587296', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '49127095-7b2e-46d3-a5e0-c8d0d6a20466', '1e4e17ed-bc6f-4bf7-9068-28314a183f08');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('28a2d638-b6ad-48ae-8023-d9859e789564', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '49127095-7b2e-46d3-a5e0-c8d0d6a20466', '3bec3c05-fff4-43b9-bc88-0b7479492b76');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6a36b5f0-2e0a-45d9-a9dc-5d9cf81ecfc0', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '49127095-7b2e-46d3-a5e0-c8d0d6a20466', 'e26283f7-df40-4f1b-8876-fc370ab8097d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('84757d27-474d-4881-b935-92d647b7dc8e', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '516d3fea-fac3-461d-b65c-0094030b35ec', 'bbf3b13b-109b-427e-9c2d-7c569551a250');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1926b39c-e549-4115-b962-b1a7b7205f61', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '516d3fea-fac3-461d-b65c-0094030b35ec', '97060a12-49b6-4cf5-a292-771dac2d0f15');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5c3ffde6-ec45-44b2-ad3c-7c19617b6370', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '516d3fea-fac3-461d-b65c-0094030b35ec', 'e3c6897c-60c2-43da-9c4d-ce4882abe502');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c92bbb42-eb88-4b10-a749-f609aaa2af85', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '516d3fea-fac3-461d-b65c-0094030b35ec', 'ecaa0cbf-4d4e-4a8c-9251-fc1caed93311');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2dff05c9-bcba-4b78-9df9-6bfd453f8112', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '61eee443-bbd1-4566-ab42-9b034180bb17', '51648c3d-5b3b-4785-94a5-372085307703');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('47a8443e-43f5-4c07-9e27-c1ef89abadcb', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '61eee443-bbd1-4566-ab42-9b034180bb17', '9958fab7-23c1-4189-b23a-d5888fb3759d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('93b63f08-6244-43a6-b29b-49c5f306656b', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '61eee443-bbd1-4566-ab42-9b034180bb17', '2a61a164-024c-4cc6-bd9b-c6ea4c8d5d2e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('902eee5c-50a2-45e8-92a9-0a9d266d1b83', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '61eee443-bbd1-4566-ab42-9b034180bb17', '15553cd7-2564-464c-b2c4-540d36e50fbf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2b9fd9b3-dd25-47c6-80fc-c67ed85a14a0', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '7e2e7791-fcb0-4605-9a7d-51c118d1730b', '2e48ffb5-14e7-4590-b93a-ac8f13ce35e8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0739d8cd-227c-42ad-9d96-2437cff8f4d9', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '7e2e7791-fcb0-4605-9a7d-51c118d1730b', '272c1444-06cb-4ce0-8070-7960de20609c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f38ac260-4701-4569-89e0-91eee5abb4db', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '7e2e7791-fcb0-4605-9a7d-51c118d1730b', '202a3777-a2b8-43f6-b91b-368b1d231b97');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2fe6085b-b0db-43e1-9957-67d4d263a974', '5722d46c-23e6-4a80-a7be-1a9a1c2ccb0c', '7e2e7791-fcb0-4605-9a7d-51c118d1730b', '620421d8-d89b-4c7d-bf03-c9df738fe90e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ae58b2cf-c837-466e-a928-e408be6facfa', '07fa3356-a6ba-406b-ad89-851762b48896', '3a18e30a-3612-494d-aa70-5cbed675da7c', 'e4c34598-1d3f-4f8a-b955-52c84cfa4836');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('71d8f8a5-4187-44c4-a4a2-92c831cdeb69', '07fa3356-a6ba-406b-ad89-851762b48896', '3a18e30a-3612-494d-aa70-5cbed675da7c', '425f7ed6-1d07-47c1-8309-13fe2b8aefed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1bbad748-0c4e-4de1-972e-e068bf774751', '07fa3356-a6ba-406b-ad89-851762b48896', '3a18e30a-3612-494d-aa70-5cbed675da7c', '8caf9f98-9b05-4d97-a194-891491bc9ea8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bb462141-d285-4705-898b-9a3a14a6d955', '07fa3356-a6ba-406b-ad89-851762b48896', '3a18e30a-3612-494d-aa70-5cbed675da7c', '3a9eb128-1257-4f59-83ed-f18e67893c97');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('45b75450-d1d4-451a-93ae-55711fc9908a', '07fa3356-a6ba-406b-ad89-851762b48896', '86ac4ac4-22de-4e70-ac44-27c3e69b5803', '3244cc5a-94f4-4c70-b7a4-c66f9e5853cb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2fa301e4-b2ad-4c36-a51a-8a0ccd64ccff', '07fa3356-a6ba-406b-ad89-851762b48896', '86ac4ac4-22de-4e70-ac44-27c3e69b5803', '2486d1e5-eba7-458e-b1eb-dcb1958e63c7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2bf2b109-275b-4ec6-ab31-96f2e8f2cb1e', '07fa3356-a6ba-406b-ad89-851762b48896', '86ac4ac4-22de-4e70-ac44-27c3e69b5803', '8a6653bd-1b56-4135-a795-59900956b6fd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1dabd119-63b4-4e36-b830-4dcdffc2f37e', '07fa3356-a6ba-406b-ad89-851762b48896', '86ac4ac4-22de-4e70-ac44-27c3e69b5803', '4b7a814a-6499-4e0d-bb31-de75dd145f7a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('65bb0ac3-6a19-40f3-895b-4b33850e7a67', '07fa3356-a6ba-406b-ad89-851762b48896', 'c783a112-a280-48ae-8ef9-66a3cef6637e', '2b9b688a-5e1a-4852-9417-d4b3905d59f1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('26ada650-1235-4917-8b2c-4eaf67f6a9ae', '07fa3356-a6ba-406b-ad89-851762b48896', 'c783a112-a280-48ae-8ef9-66a3cef6637e', 'b404f7fe-2839-46d1-b484-5a82b84b42bb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('95d40071-dcc2-4b5e-ab59-d9f09cd4b676', '07fa3356-a6ba-406b-ad89-851762b48896', 'c783a112-a280-48ae-8ef9-66a3cef6637e', '73bd3389-33b5-4446-9564-dcf9da13c323');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('981389af-5bd0-4184-80fb-64de71cdbdaa', '07fa3356-a6ba-406b-ad89-851762b48896', 'c783a112-a280-48ae-8ef9-66a3cef6637e', '9130a6d2-bcb6-481a-99c4-11c28d4560ac');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('965e7d35-477a-4440-bc94-101356a43e99', '07fa3356-a6ba-406b-ad89-851762b48896', 'b32506af-256b-4325-8a1b-a412ae9a8c92', 'e0e37047-0fb0-4c88-94b5-2163a659eb05');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('52f1e1dc-ce73-4b0e-b038-0b703306c375', '07fa3356-a6ba-406b-ad89-851762b48896', 'b32506af-256b-4325-8a1b-a412ae9a8c92', '45183138-e617-49f9-aac9-1958e52a5fcb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9ced559f-81bf-4f6c-91c6-a470e966e9a9', '07fa3356-a6ba-406b-ad89-851762b48896', 'b32506af-256b-4325-8a1b-a412ae9a8c92', '82216952-9c4c-46d0-a6fc-f2d8d880c351');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e7cc11bc-a04a-484b-886a-63fefdc9c6a0', '07fa3356-a6ba-406b-ad89-851762b48896', 'b32506af-256b-4325-8a1b-a412ae9a8c92', 'a9f823e7-37c5-469b-aae1-e28c1ce6d6db');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('438f7cae-7cd5-4c57-82ac-159ce1727b36', '07fa3356-a6ba-406b-ad89-851762b48896', '47424693-0e60-454b-8e57-c39677d4ddb0', 'df23f7fc-75da-4161-ac15-a3ac39ed9769');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5095ff66-0ddc-4656-b8c0-90d9b782133c', '07fa3356-a6ba-406b-ad89-851762b48896', '47424693-0e60-454b-8e57-c39677d4ddb0', '1f333b57-79e5-4d31-aa6c-d0bf41c5059f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0aa929ef-72df-4cb5-a74f-dbb14e2659e6', '07fa3356-a6ba-406b-ad89-851762b48896', '47424693-0e60-454b-8e57-c39677d4ddb0', '2f324c95-8f00-4d6d-889e-d0a53e9823a3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d903bd2c-9393-478d-b808-230f49b2a382', '07fa3356-a6ba-406b-ad89-851762b48896', '47424693-0e60-454b-8e57-c39677d4ddb0', 'a23cb834-9992-4428-89fe-9161a3ffd450');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4f9d6ac0-9172-4bac-9a38-78788657f46a', '7177c953-484a-4c03-84ce-985b56c359f6', '0db54b58-fe0b-4d52-9a5c-c1ea63420739', '8a65bc07-1160-47fd-b69f-7d5103fe276f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0b1f7386-d4fc-4b7e-9160-bc545a0cfbcf', '7177c953-484a-4c03-84ce-985b56c359f6', '0db54b58-fe0b-4d52-9a5c-c1ea63420739', '15ecc5a6-34db-40b6-827c-eecd3bc8b7cc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('78f8a508-1904-44d8-8ad4-bc5ff922af7f', '7177c953-484a-4c03-84ce-985b56c359f6', '0db54b58-fe0b-4d52-9a5c-c1ea63420739', '56f49055-831b-4894-af65-8a5da9f53340');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f0a77807-2c54-4e2d-add7-20e26668bfa5', '7177c953-484a-4c03-84ce-985b56c359f6', '0db54b58-fe0b-4d52-9a5c-c1ea63420739', 'ddb44194-4302-4950-aaf6-12b8138c50ce');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('55fbb05e-d25c-435a-820f-a46e80e7672b', '7177c953-484a-4c03-84ce-985b56c359f6', 'a2cd31fa-47e1-4758-9d03-a1024c16d4d9', 'c1498000-c5f8-4a63-91cc-b47330d9af04');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a68d6672-46e5-4b3d-9712-c4db59e5bc9f', '7177c953-484a-4c03-84ce-985b56c359f6', 'a2cd31fa-47e1-4758-9d03-a1024c16d4d9', '1029ab1c-e8a8-4170-887e-eaa9147cf268');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('166a859c-d0fa-411a-90c4-d1af09a7e24b', '7177c953-484a-4c03-84ce-985b56c359f6', 'a2cd31fa-47e1-4758-9d03-a1024c16d4d9', '07855391-ae33-438b-947c-d16fe6301421');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('98717075-a35c-473d-8dab-a3be0927b6c7', '7177c953-484a-4c03-84ce-985b56c359f6', 'a2cd31fa-47e1-4758-9d03-a1024c16d4d9', '5df2328d-a9ab-44c9-8691-892a4c9ad3a0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8fc0e0c7-602d-44a3-8fbe-f5b8a2a76495', '7177c953-484a-4c03-84ce-985b56c359f6', '679ee1dc-8fab-44f5-a790-f7d433940d32', '8ec2ddac-fe6e-4e17-a48c-0c5af2bf70a1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e23c06c2-51f4-4ece-bc0a-db80ff858b92', '7177c953-484a-4c03-84ce-985b56c359f6', '679ee1dc-8fab-44f5-a790-f7d433940d32', 'a216eb8f-3b14-4499-a628-943ba45dab70');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('797c8da0-40c3-4e7b-89bd-d2904c870e67', '7177c953-484a-4c03-84ce-985b56c359f6', '679ee1dc-8fab-44f5-a790-f7d433940d32', '096de928-8c61-4b4c-94a1-1669e7b7a137');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ce66ad55-6be8-47c2-b4fc-dc1ecd4ca632', '7177c953-484a-4c03-84ce-985b56c359f6', '679ee1dc-8fab-44f5-a790-f7d433940d32', '56bec1f9-526f-4b3a-b9f9-ffe0feb68049');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a6bcb436-da36-4a24-8e46-4b162a42283f', '7177c953-484a-4c03-84ce-985b56c359f6', '666e3dfe-60cc-423a-90e5-55d20cc5527e', '0825b088-584f-42d3-9619-3777893451f8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1aee4055-9112-42ca-8db1-e7a8f074ba17', '7177c953-484a-4c03-84ce-985b56c359f6', '666e3dfe-60cc-423a-90e5-55d20cc5527e', '795613ac-0cfd-4faf-a4f9-2637efaa9a95');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bdc70e2a-9b42-4ad9-a700-38400a95897e', '7177c953-484a-4c03-84ce-985b56c359f6', '666e3dfe-60cc-423a-90e5-55d20cc5527e', 'f57f3bce-785f-48a1-97cc-6b6de6b20f4d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5bc77d32-8497-49ec-9eaa-c3f0c0e8d09d', '7177c953-484a-4c03-84ce-985b56c359f6', '666e3dfe-60cc-423a-90e5-55d20cc5527e', '84b18242-db7f-4c39-8a32-3ec456799fff');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ae1db17f-54e2-422d-96ff-60ddf0443722', '7177c953-484a-4c03-84ce-985b56c359f6', 'c02787a2-2692-4c1a-8a3e-d3c11e0806c1', '68ed94f0-0303-4976-8c5f-031750de7f51');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fa7b82a9-4675-473d-87fc-d9b6af5fb624', '7177c953-484a-4c03-84ce-985b56c359f6', 'c02787a2-2692-4c1a-8a3e-d3c11e0806c1', '71346490-4673-44bb-bb27-daf6a0af744d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f6213549-4268-4c53-8313-23976e99f11f', '7177c953-484a-4c03-84ce-985b56c359f6', 'c02787a2-2692-4c1a-8a3e-d3c11e0806c1', 'c81974b4-a288-432b-bfe8-7a449e4f6fa3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c5122881-d9d8-421a-b10a-2bb86168d354', '7177c953-484a-4c03-84ce-985b56c359f6', 'c02787a2-2692-4c1a-8a3e-d3c11e0806c1', 'd0ba5eee-bfc3-4ef9-a2af-3f3d369e7f1c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('70bc8d11-7dfa-4918-93c5-0924608c0b5a', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '64b9fb4b-b391-4466-91e6-d5acafe8f9a7', '4a8b8482-2ffd-42b8-ba95-e24580a12086');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d310ada7-b45c-4d15-a315-533776d37d03', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '64b9fb4b-b391-4466-91e6-d5acafe8f9a7', '8ade531c-8306-42bc-a318-c29a1d95037f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d7123513-0e02-4e6b-9745-1c93ef3a938e', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '64b9fb4b-b391-4466-91e6-d5acafe8f9a7', 'c8d1d3c0-e51a-4b86-ac05-3f100026aace');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cc926106-e09d-4358-b066-c4e37d7c3701', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '64b9fb4b-b391-4466-91e6-d5acafe8f9a7', '4d9be735-fd77-44d1-a598-0e2179e7e6be');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a93b3c42-bd6a-4c74-b170-74c7967d4b1b', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '92f11aee-ea5e-4c87-a2fd-880a6055894d', '1fb7c221-d05a-4f51-9815-753464ca5d36');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('db70e942-6819-4c9f-910a-ddaf43e2d80b', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '92f11aee-ea5e-4c87-a2fd-880a6055894d', '9171c8b1-779b-4bc2-bee8-a29be43be852');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cae7cde6-ac8b-4d2a-b092-24762ebfc947', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '92f11aee-ea5e-4c87-a2fd-880a6055894d', '2eca8e53-98da-4899-9ab5-c3a8316038ad');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e4e99c2b-36d4-4e56-8239-6da2fcb09224', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '92f11aee-ea5e-4c87-a2fd-880a6055894d', '4ed2e00d-5a47-4064-b496-f6f2d8c9f3fb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d1649eea-e344-4702-90b7-4d5527aff013', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '02dbd0c8-d628-47d6-93f3-4d5e58dad0ed', '78d09292-f409-4341-bc98-2ea801c2e72e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c093c42e-f477-4389-a3d7-074e945756f0', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '02dbd0c8-d628-47d6-93f3-4d5e58dad0ed', '9fee036e-466a-49fb-9692-9bf4ed490a05');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6033a228-68ef-44bc-a05b-985f4aa5e0b0', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '02dbd0c8-d628-47d6-93f3-4d5e58dad0ed', '544514b9-6ea5-4828-9403-249fbda2d62c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4fbeb8a4-6ba6-40ee-8d94-0d56aa033fed', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '02dbd0c8-d628-47d6-93f3-4d5e58dad0ed', '75162f0d-e83b-4c83-bcec-0e9849cee566');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b2953c35-eb8f-4694-b8f1-6465a75026a4', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', 'c44db85d-e94b-41b3-a636-8c700210efc9', '94cee474-52fe-48ab-9163-f21ccb60cfe0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5c662f21-0e96-47ee-a9b1-3ccf0874a77b', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', 'c44db85d-e94b-41b3-a636-8c700210efc9', '393eb783-1918-4d83-949a-edfcfd510cb0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9449be02-1673-4941-8cf5-b24c58af9b68', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', 'c44db85d-e94b-41b3-a636-8c700210efc9', '864d17ed-fe2b-4d23-8867-64b7cf52300d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d836af3a-6b68-4591-b861-2e660614f615', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', 'c44db85d-e94b-41b3-a636-8c700210efc9', '429269ef-be03-4cfc-a5d8-b8cdf5a54010');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('eaef1ca5-49d2-44ba-a6ac-b2e0928f757d', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '6108b976-cf76-4c97-af51-227cc5152072', 'fe7edb5a-4276-4f6b-88df-9477a93a0792');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6a875999-a3ba-454f-b42c-d75fde8f5e07', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '6108b976-cf76-4c97-af51-227cc5152072', '0b9e47ca-7eb5-4dcb-8e96-fc0aa7968e62');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('787251e2-ad6a-4de1-b69b-772ae023c2d7', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '6108b976-cf76-4c97-af51-227cc5152072', 'd631723a-1bdf-4ca4-a79d-7fa99a464fb0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('58a892d6-fde7-4a44-926c-0ef0bcecd277', 'bb2f8660-1199-4d93-99c4-d39e0ce41171', '6108b976-cf76-4c97-af51-227cc5152072', 'e646fa7f-2164-485f-bccd-d353a88c0524');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b84f77db-eb1a-4d74-b1ee-dc66ad4a497f', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', '6ed0be33-119b-43ac-a0e2-86468354faf8', '8fd2e2db-34da-4717-8acc-78f497db412f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('11b9c671-1d76-47ac-904a-3e90c774d7d2', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', '6ed0be33-119b-43ac-a0e2-86468354faf8', 'ca449abf-88f1-451c-8e05-1679baa2814b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c6176be2-3770-405f-af3a-86054d87c8d4', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', '6ed0be33-119b-43ac-a0e2-86468354faf8', '5307c3d8-a3c0-40c1-87f0-c24b71b06413');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('806a15d7-04b5-48ea-8103-4a3b98d538f6', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', '6ed0be33-119b-43ac-a0e2-86468354faf8', '1f7543f8-d7bf-4f8c-ad7a-e00eb4bfd239');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e4a3928a-661e-41ff-94ef-c51ce8a723a6', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', '87f63748-d413-45c1-b407-d5eef9a40517', '30418471-3459-48cb-9d7c-99c78d10c42f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('73f8d982-9cae-430b-9f8a-ede351cba32e', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', '87f63748-d413-45c1-b407-d5eef9a40517', '1f48227c-0155-40cd-86c4-e4ef39e66249');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4602d9dc-99c6-483c-861f-8cd60d5954f6', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', '87f63748-d413-45c1-b407-d5eef9a40517', '9d8b5ff5-b421-4b5e-810a-4e94806230b1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('385aa9ba-ff4d-4c60-aa34-60ac403e0c91', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', '87f63748-d413-45c1-b407-d5eef9a40517', '4531d301-b081-4ce9-af73-13db4ba234f4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('48a4306a-3236-44ff-82cc-c07221798e2d', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'b9a947c2-6c0f-4175-8d94-6d54ab6129c2', '95a30d0d-c579-487b-a5b9-f891e8060613');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('94835858-70fd-4578-b7d0-f2fe61bf58d4', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'b9a947c2-6c0f-4175-8d94-6d54ab6129c2', 'e4433144-c8df-43cc-bb3b-62b7c1035e0b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5e0b282a-b680-42a5-8b02-0785fe58dc81', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'b9a947c2-6c0f-4175-8d94-6d54ab6129c2', '879ad75b-ba1b-4b35-9817-c941642dce2a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('98356659-bf3a-4246-9ccd-7c2e3f264d91', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'b9a947c2-6c0f-4175-8d94-6d54ab6129c2', '726caba3-8313-40c3-9731-39553e0c3674');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cc0a6dc1-2a1b-4c67-b80b-2b2b8aa2391b', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'ae90f9f6-7c27-4b45-b487-2efa003bfbfc', '2725c9b4-8ca5-4a78-a75c-fb301c4e4f9a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('26c70e9c-96be-48fc-9493-3f7ffa760be4', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'ae90f9f6-7c27-4b45-b487-2efa003bfbfc', '4517fd45-ffcd-4a74-9d1d-8a2becf7d440');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b2e01624-09cb-44b1-9001-a56b74d3b5a9', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'ae90f9f6-7c27-4b45-b487-2efa003bfbfc', 'c726ad4b-81a0-421a-aa93-7aa044987da8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4cc57dec-4f41-43a2-b06d-028555724834', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'ae90f9f6-7c27-4b45-b487-2efa003bfbfc', '406d2f31-649f-4681-ba14-80b371b88349');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('05bf0618-f673-41d1-90ae-2826e466c3dc', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'b8a2609a-6484-402a-a1ca-87ae22d20fcb', '7f1ab5db-f4df-4fff-92dc-044735b40ffa');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e5b4149a-eb7a-47c9-af35-b65fa2ac07b6', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'b8a2609a-6484-402a-a1ca-87ae22d20fcb', '9b4b39ab-1b44-4fc5-957d-2c6429460074');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('18b7decf-84a5-4200-bc92-80b5845a4756', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'b8a2609a-6484-402a-a1ca-87ae22d20fcb', 'cc913e44-0e33-49bb-8cd7-3429379af0be');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f5e6390f-29f4-4f81-9a88-fb61b8f79a94', 'cf7cf9e4-0457-4dae-903d-40fb1fbe75ee', 'b8a2609a-6484-402a-a1ca-87ae22d20fcb', '60406c42-2d39-4d4e-b539-6fe9ee7b3ff3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bb16e646-c476-4756-94c8-bb84e100b29f', 'fec638d5-5b35-4ba0-a460-79825cdb4390', 'd7f5ae8c-9216-4170-8be8-64b82ebaae1d', '4a514979-45e5-47f1-b336-22c2929dc086');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c1bb350f-2843-4677-bcac-6d9bc1da5548', 'fec638d5-5b35-4ba0-a460-79825cdb4390', 'd7f5ae8c-9216-4170-8be8-64b82ebaae1d', '687fa03c-7217-43ac-96f5-cb8e36688aaf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('598e5e96-076e-4d6f-8591-7608040d5f7c', 'fec638d5-5b35-4ba0-a460-79825cdb4390', 'd7f5ae8c-9216-4170-8be8-64b82ebaae1d', '63652e4b-fc7b-47fa-b677-4b2b4319bd86');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4d9b56c9-f641-4b1e-897f-16a490cb0077', 'fec638d5-5b35-4ba0-a460-79825cdb4390', 'd7f5ae8c-9216-4170-8be8-64b82ebaae1d', '9044691d-b7a3-429c-8ecd-98961dffde9b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0b4a3f01-5539-4b2c-8334-a13c8b95ed26', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '02d7b563-33f8-4ece-85f4-ab9b5ec21a68', '284b2510-aa3c-4abb-9188-4e1848db4a2b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9c65c778-1026-4e84-8a54-e6d50b07804d', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '02d7b563-33f8-4ece-85f4-ab9b5ec21a68', 'e327628d-c46a-420a-9a61-f0ddae7bf6d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('37576979-3a99-4cff-a454-f0c23cbb8d04', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '02d7b563-33f8-4ece-85f4-ab9b5ec21a68', 'cf83b315-dc58-4072-803c-2d77ccf27194');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('de464c1f-0084-497c-bf06-cd09cec2e30a', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '02d7b563-33f8-4ece-85f4-ab9b5ec21a68', 'a6791ee9-1d94-4dea-a3c6-7251c1c9732a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7dec7524-5e92-4c5f-b34b-426ecca2c09f', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '23695e67-c707-41ba-b965-be3945950a2f', '39aa79c2-c36b-47ef-a95d-5b2fdb04fdd8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ada32692-86f0-4c73-86c3-bcbca6249c13', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '23695e67-c707-41ba-b965-be3945950a2f', 'b1d1eaff-3a97-41e4-bfa2-c2b589a8d82f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('85b8cc45-0a65-472c-9b3b-10226fddd1c4', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '23695e67-c707-41ba-b965-be3945950a2f', '32c1e491-747d-404d-965a-c2f699a19aa4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1f8c384f-0cfd-43c2-af77-30ee990259a0', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '23695e67-c707-41ba-b965-be3945950a2f', '86c6a7c5-6bf6-4c6b-9a54-ec8d15417c38');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a956a217-0d1f-4a74-8c6b-b98c07023cb2', 'fec638d5-5b35-4ba0-a460-79825cdb4390', 'ffaa19c1-b3fe-4683-b897-8417c0a46dd0', '38d1462b-cc31-4aaf-b83d-64bd6567ed13');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7a989eb4-371d-4863-a33b-be0874cf6b79', 'fec638d5-5b35-4ba0-a460-79825cdb4390', 'ffaa19c1-b3fe-4683-b897-8417c0a46dd0', 'c182a411-7c15-4f17-943f-b3eae468c073');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8026e060-fa5f-4496-9bf2-af0a25d6afc1', 'fec638d5-5b35-4ba0-a460-79825cdb4390', 'ffaa19c1-b3fe-4683-b897-8417c0a46dd0', 'a92ecece-ce13-453d-a377-aa0c3ce27ed4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2100552a-5980-4588-b297-001a16344513', 'fec638d5-5b35-4ba0-a460-79825cdb4390', 'ffaa19c1-b3fe-4683-b897-8417c0a46dd0', '1e729b7f-d481-49fe-9cfd-84b4378bc61e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0458d365-bee5-4468-9a47-c3f8fe71e156', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '3d5b3a43-de2d-4119-8154-f0fc57de5df9', '8f5c18e4-b71e-48e4-90e2-8a3331020bed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f6e8bb72-b7a8-44ef-bad3-648d86237615', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '3d5b3a43-de2d-4119-8154-f0fc57de5df9', '6b0a6e8a-f712-4d3a-840e-a14f2044f507');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('85d22348-c472-4ab3-9fd1-67c63bea4674', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '3d5b3a43-de2d-4119-8154-f0fc57de5df9', '76b41d1a-cf03-40a4-9e52-3057987814f2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b7e16665-9292-405b-9ec9-1d50107b2ea0', 'fec638d5-5b35-4ba0-a460-79825cdb4390', '3d5b3a43-de2d-4119-8154-f0fc57de5df9', 'ef2a5f60-9124-4f89-b61a-e51e07537571');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0ad1ef12-cab0-4f4b-bef6-2fb0da9bbbfb', '2a0dbeb3-49be-4b7c-b846-43b21168248c', 'cb062645-eb7c-41de-809b-d507d2b7e561', '1ae86d25-586f-4e42-9e63-50d7beee8c4d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7e1d340d-9f57-42d7-805a-f767121f3c8a', '2a0dbeb3-49be-4b7c-b846-43b21168248c', 'cb062645-eb7c-41de-809b-d507d2b7e561', '2c32b41f-fead-48d3-bbbe-0b1d4112097d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a1ed0c14-a400-48b2-8d4b-46e293c8bc83', '2a0dbeb3-49be-4b7c-b846-43b21168248c', 'cb062645-eb7c-41de-809b-d507d2b7e561', '10836733-4333-4d1a-8888-5eae023525e0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d49e4400-2141-4bcf-a037-61eac8a56eb6', '2a0dbeb3-49be-4b7c-b846-43b21168248c', 'cb062645-eb7c-41de-809b-d507d2b7e561', '1b3ee89b-ca7a-4999-a164-16b15a985682');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c1fd65fe-739b-4f5d-b79f-c65ab5c2991c', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '959b8a1f-3a6c-4177-a186-dc3eca9f676d', 'ee3c433d-46fd-4644-9c45-1e4665ea7a9b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('30b26306-20c8-49d0-b480-a2fac888e72f', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '959b8a1f-3a6c-4177-a186-dc3eca9f676d', 'd936891a-7215-4522-8799-8e2da16cbf7b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b7a13b53-6f5a-4dc8-9720-93b6a450c1de', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '959b8a1f-3a6c-4177-a186-dc3eca9f676d', '592d4994-4975-43ff-8a7e-a5ddef048a1a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2ffea29f-9dfb-4385-befc-17aecedb12df', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '959b8a1f-3a6c-4177-a186-dc3eca9f676d', '17442f16-3502-4320-b037-fbc6e264d320');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a1f7bcc9-7412-4603-acb1-47d19b9aff8d', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '26643992-bc81-4436-bbd1-489d27b78bd4', '5eecb86f-9816-43df-be6f-354d6468629b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ab0539bf-99e5-4182-a3ce-f058cf88cdea', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '26643992-bc81-4436-bbd1-489d27b78bd4', '9be92511-abd4-486f-bf23-14626dbb5e9b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e8afc1ae-10af-48ae-b6e0-d9d313648e26', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '26643992-bc81-4436-bbd1-489d27b78bd4', '86961a62-387b-4c00-b57e-a435ed5cba5d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('92255142-a110-42f2-ac4a-ba1d40180b26', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '26643992-bc81-4436-bbd1-489d27b78bd4', 'dc08a72f-4d1d-4fa6-a3a0-1efcc5cbc463');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('225c4e23-9676-41cc-9e84-f53239324178', '2a0dbeb3-49be-4b7c-b846-43b21168248c', 'f9d4159f-806f-44be-b703-86c5644dd162', 'd8bea50a-aa35-48fa-b2c9-934b1387af21');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3ba9bcf5-c12b-4012-9c0c-893a6fa2f766', '2a0dbeb3-49be-4b7c-b846-43b21168248c', 'f9d4159f-806f-44be-b703-86c5644dd162', '2e7429db-5f8b-4c31-b6a8-b34a96038e45');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('61a30d0f-34ef-4dbd-9b09-8881fbab433f', '2a0dbeb3-49be-4b7c-b846-43b21168248c', 'f9d4159f-806f-44be-b703-86c5644dd162', '629ef78b-0577-4257-a9a0-422acd329c89');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('99e88ed9-54c5-4c08-af1b-e860aabdedb4', '2a0dbeb3-49be-4b7c-b846-43b21168248c', 'f9d4159f-806f-44be-b703-86c5644dd162', '44d6de0e-bcb5-45f9-976f-f276f0fcbe90');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b7ee2187-ecc4-4752-990f-1ce149b7739c', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '9ba46192-65d0-40eb-8a8e-815a56cbbac7', '48c3160c-5074-4686-b9a6-d572cfc36359');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a5c61b20-079a-4f41-82a4-26fa7be73d48', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '9ba46192-65d0-40eb-8a8e-815a56cbbac7', '85df7f06-9659-4712-84a8-01110ea6b20e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2ba6b0cc-4f56-40f3-b220-87f8d4a69691', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '9ba46192-65d0-40eb-8a8e-815a56cbbac7', 'deab1428-a893-4cb0-823f-768faa212c7e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('309bab56-062d-4ef7-967b-472fef94a709', '2a0dbeb3-49be-4b7c-b846-43b21168248c', '9ba46192-65d0-40eb-8a8e-815a56cbbac7', 'bb502fcd-0629-4f50-924a-398e9acf8634');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3a82e207-0055-409b-8cc8-d6890ff7127d', '65be735b-0836-42e7-9c7c-4c82c7000c87', '6d67c297-c3f2-4ef0-b3c6-fa952f329e40', '76d20fea-2b3c-4712-a639-94282e30c6cd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('155ffa2f-8fd3-41f7-97bb-0915b211cd17', '65be735b-0836-42e7-9c7c-4c82c7000c87', '6d67c297-c3f2-4ef0-b3c6-fa952f329e40', '2c1a4648-34e1-4110-988a-9c7336a845a5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dd048f8f-d0b9-434f-a512-fce7833d26d4', '65be735b-0836-42e7-9c7c-4c82c7000c87', '6d67c297-c3f2-4ef0-b3c6-fa952f329e40', '36fc3aac-0783-4b78-a26b-d55c1b270161');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f52768cc-6b73-4165-830c-ee1cd0c1601e', '65be735b-0836-42e7-9c7c-4c82c7000c87', '6d67c297-c3f2-4ef0-b3c6-fa952f329e40', '32e8bb8d-3e79-47bd-a751-20fae86b5d96');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('35aa6231-6af2-48ad-8fd9-6794d6cb5837', '65be735b-0836-42e7-9c7c-4c82c7000c87', 'e6ec0e92-024a-4643-b14b-034f7d9bcb4b', '483c66a2-c918-49ca-9a65-2f9f08a8bc6a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ee47e6bc-5ebd-4042-9e19-e479a55bea12', '65be735b-0836-42e7-9c7c-4c82c7000c87', 'e6ec0e92-024a-4643-b14b-034f7d9bcb4b', '6bd26355-52b2-4494-9222-a0ae4a9f28d6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f41facbe-f8b7-419d-868a-59095375e0db', '65be735b-0836-42e7-9c7c-4c82c7000c87', 'e6ec0e92-024a-4643-b14b-034f7d9bcb4b', 'ae61401b-1c2a-4c8f-b470-114f0c06b004');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0922ee41-70c9-4900-9a2e-3707a9204903', '65be735b-0836-42e7-9c7c-4c82c7000c87', 'e6ec0e92-024a-4643-b14b-034f7d9bcb4b', '09e52deb-62cd-412b-8139-236317b5b89e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6f3da98b-6ede-43dd-b749-25f121064c8e', '65be735b-0836-42e7-9c7c-4c82c7000c87', '8dea3b4c-5315-4a0b-a68e-6b17a31eb572', '98654147-8aa5-4fcb-a00d-d84330015d2e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4c982211-f3ba-4184-a200-e5a97a27fe27', '65be735b-0836-42e7-9c7c-4c82c7000c87', '8dea3b4c-5315-4a0b-a68e-6b17a31eb572', '17dd2f15-0ba3-489a-aaf4-e4619d4ecb36');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e42f7f52-eed8-4779-bdab-674c7cec38ef', '65be735b-0836-42e7-9c7c-4c82c7000c87', '8dea3b4c-5315-4a0b-a68e-6b17a31eb572', '35eaadfc-e52a-4335-9bb0-deb880ce9360');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1b215a4f-8b60-4ed5-824d-9d33554421f9', '65be735b-0836-42e7-9c7c-4c82c7000c87', '8dea3b4c-5315-4a0b-a68e-6b17a31eb572', '3e8c5013-348e-4d81-86e7-3304c2fdb39c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f5ff9130-580f-4a7d-8452-193f0307e862', '65be735b-0836-42e7-9c7c-4c82c7000c87', '1854596a-b0ab-4506-90f7-6cb31d23e163', '25ed0f2b-2319-4040-8705-64240978c41f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b0cab224-f857-4790-9c3b-d3654b0a425b', '65be735b-0836-42e7-9c7c-4c82c7000c87', '1854596a-b0ab-4506-90f7-6cb31d23e163', '2dae209f-bdf4-4950-8595-5c02bbdba8c9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6fa464c5-df84-493e-b565-9be81d5c55c2', '65be735b-0836-42e7-9c7c-4c82c7000c87', '1854596a-b0ab-4506-90f7-6cb31d23e163', 'bc6d579d-c037-40e3-8fd9-7e2e3b285650');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('52afbd5d-4c5a-4525-bdf9-19df0998e1f0', '65be735b-0836-42e7-9c7c-4c82c7000c87', '1854596a-b0ab-4506-90f7-6cb31d23e163', '4ff62bde-6eee-4df8-ab13-05dc741fc94c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8d4d6d7a-55c4-4e33-bca0-4e3d27cb1c5a', '65be735b-0836-42e7-9c7c-4c82c7000c87', 'eeb67cd7-92f6-4589-9b2c-c584c71d76d3', '841ba64f-356a-435e-b94e-675cd26c7859');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b05e77c9-8cf3-4a39-a7d2-5464036e1dc0', '65be735b-0836-42e7-9c7c-4c82c7000c87', 'eeb67cd7-92f6-4589-9b2c-c584c71d76d3', '7940d47e-2d38-4d7e-8b19-845d0a5595d7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7f645631-b6da-4e23-8b7e-a2157b4329af', '65be735b-0836-42e7-9c7c-4c82c7000c87', 'eeb67cd7-92f6-4589-9b2c-c584c71d76d3', 'fe1c06f1-b4cc-4109-950f-2120915454b3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('738b1dfc-4101-4e4d-9ce5-e2f674896e85', '65be735b-0836-42e7-9c7c-4c82c7000c87', 'eeb67cd7-92f6-4589-9b2c-c584c71d76d3', '45eaf571-53fe-48cf-8355-f63efa7eeaf8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c7713e84-73be-4544-8503-a7ee6b22fb5f', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'e091fcd4-b22c-49b0-b065-c19d71148c07', 'd07911bb-1161-4326-9a10-3195e8c0590f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('510bc27a-711e-494b-a855-642884ab36cd', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'e091fcd4-b22c-49b0-b065-c19d71148c07', 'c1c57a0a-cb40-4fc8-820c-ae679f72a59d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7c645627-88a0-4c35-96df-915aef80640f', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'e091fcd4-b22c-49b0-b065-c19d71148c07', '7159b1fc-6652-46c0-82d0-a6e52f9c7eaf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('38341fb3-5b45-4318-a1d9-2692e59c651f', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'e091fcd4-b22c-49b0-b065-c19d71148c07', 'bd3372ba-5365-48e3-883c-85a2cb0bfd28');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('92d628c0-51dd-4088-b371-684108ef36f6', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'a7fe2383-4686-4dda-9774-cc90451bccfa', '7b532d15-0b73-43cb-b84b-998e424f554d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2cd3e7f6-b53d-4f5f-b6d1-6e35a31ab6eb', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'a7fe2383-4686-4dda-9774-cc90451bccfa', 'ecd0fb46-0350-4e65-aa28-4f895bf0362b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('067238df-e9ac-4798-bd58-7dfdb355f0b7', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'a7fe2383-4686-4dda-9774-cc90451bccfa', 'f8cd8bc2-8dac-4747-bd20-ff9f9d53ca7b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('58a7f292-b502-4be2-9398-00774935c508', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'a7fe2383-4686-4dda-9774-cc90451bccfa', '6e10049b-e2c1-4b37-be6c-e7e7b1f21d74');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('aa33db66-7cf8-47b9-a0cf-914d278bfa4b', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', '659a6770-c836-448c-a840-973854bb15b5', 'c0c7d012-01e6-4bb2-be22-0c16e72a86b0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dca4526e-de84-4074-a7bb-c4076ac2bdae', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', '659a6770-c836-448c-a840-973854bb15b5', 'f13f5860-16ee-4fcd-bede-0b01da666437');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d90e3593-b912-4e45-906d-f8c3ea2deed3', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', '659a6770-c836-448c-a840-973854bb15b5', '9e5be7c8-5763-4ecb-8fed-85f6110bcb92');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d13efd31-b370-4dc4-8f4f-9ae4c2db996d', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', '659a6770-c836-448c-a840-973854bb15b5', 'c0efc484-289e-4a9b-af6f-628c856cf014');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b44dc11c-761b-41d6-8938-d01743b37d1e', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'a59989fd-7e34-4330-a7b4-938d9d5bf5ff', 'e6821044-5790-43a2-a8de-d8d56a00d0ca');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5bed64f5-ba71-41f1-b1d0-5cf7c4ec6e84', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'a59989fd-7e34-4330-a7b4-938d9d5bf5ff', 'b05560a9-a0fd-4d88-bdf9-8767fb6ddd30');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a9335e3a-8fef-4ff6-b06a-9135728efb4f', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'a59989fd-7e34-4330-a7b4-938d9d5bf5ff', 'e6d40352-57dc-49ff-9a5a-4e4de4229e1c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3b9bf54d-8782-431f-b916-bdd4f3dc3a5b', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', 'a59989fd-7e34-4330-a7b4-938d9d5bf5ff', '02b152a4-445b-4f82-8746-b01c1cd07bd8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('83331558-073d-427c-bd62-c49e76669ce5', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', '77a61a0c-5229-4af5-961f-a7354953aba4', '19ea4768-f3e2-4aed-bdbf-b6668e3bae9e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c722a1e1-936f-4511-958e-5987bc349b55', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', '77a61a0c-5229-4af5-961f-a7354953aba4', '233dbfb5-fddf-411d-8c1d-e99b675c1b50');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('11cdaa37-ac34-4955-a0f5-ff7e9c2bd8f4', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', '77a61a0c-5229-4af5-961f-a7354953aba4', '5437e0f3-9d0a-4a78-8d2b-23290a07b662');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('95020579-1698-4cf9-b6cb-7b605f46266e', '4ab08401-43f2-4276-ab7f-3e029b2b53a1', '77a61a0c-5229-4af5-961f-a7354953aba4', '43597a05-6860-404d-b065-6feb35595c2b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f1503e51-43c2-4a8f-89ba-6e03b03c3e2e', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'fd52448a-7ec1-4a67-ae44-11a20284008c', 'cc16091d-57f5-4170-b732-85add97f82a3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b157070e-7345-4a1f-a91a-6df20e0e2f66', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'fd52448a-7ec1-4a67-ae44-11a20284008c', '373c5f15-d6cb-4fc1-86d9-db0ba739b5c6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('504f0d85-4ea5-49df-8905-a3ac250e1eaf', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'fd52448a-7ec1-4a67-ae44-11a20284008c', '6af73158-a2b4-4a8e-8aca-c231c5438213');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('311d5acf-a78e-408d-858a-5c56f26a1a56', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'fd52448a-7ec1-4a67-ae44-11a20284008c', 'd5beeb0e-f665-4333-852b-56c2b77dc149');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1d2612d0-8697-4f85-9564-0d7b5398b78e', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'e495902c-f009-473a-be68-8be784895935', '3914b4ea-3264-401f-a3f7-ce9a5a7ca672');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c4961a61-8450-49bd-a6e5-7557c3326c28', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'e495902c-f009-473a-be68-8be784895935', '0b7309ef-aab2-4f2d-aaa5-548d5b6856e8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5cbe0d4a-7d5d-4e01-b3c8-25fd68f9043c', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'e495902c-f009-473a-be68-8be784895935', '9aecb934-2fc0-49f7-950b-51487eb466fe');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('072d9780-7902-402f-bb90-d3b1208a7c0d', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'e495902c-f009-473a-be68-8be784895935', 'ff9d4633-a1a6-45e8-b45f-44a9f1c0a8d7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('472587f1-a540-4a0a-9d9e-0b768346a0e3', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'a6d6ac64-6898-4f2e-8dba-a024321274fe', '35fc0668-9878-49ad-91bb-4caae0d47d4f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9b93421b-69f5-4ee9-8347-4e62bb7678f6', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'a6d6ac64-6898-4f2e-8dba-a024321274fe', 'bddcc7e4-b16d-46f1-9946-d0d237799ae1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0b0d9f58-4396-4940-ba33-89fd3bfb7321', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'a6d6ac64-6898-4f2e-8dba-a024321274fe', 'e8ce172c-035c-4801-a911-4339d5440945');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bb0f0054-21f4-47cb-be78-2900d505d12e', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', 'a6d6ac64-6898-4f2e-8dba-a024321274fe', '452092f3-5dd6-4d6f-b895-45f24bbd515e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ef5bd018-10f9-4a53-96a9-c5f451a886ab', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', '2b50a6dd-4d96-4d85-a447-aac86f669c81', 'e5821e6c-cfcb-4245-83f0-8721dbbff569');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('18b2fac7-6d69-40b4-9064-0fa2ecd9f3cd', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', '2b50a6dd-4d96-4d85-a447-aac86f669c81', 'f41db876-97e8-4291-8426-35272b219eec');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b663c13f-f60e-46c6-8c27-83106874b468', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', '2b50a6dd-4d96-4d85-a447-aac86f669c81', '90c7b3ee-7d0d-40d8-b2cd-01f7ed498488');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9318ed57-6148-46a6-b0aa-0495d0e64b11', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', '2b50a6dd-4d96-4d85-a447-aac86f669c81', '5109f9ea-5bec-4107-a0f7-34a6fba6cdaf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d826d3f4-6c26-476f-bda0-13e0a09dc9db', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', '9906522c-6bc9-4370-9534-68c10cc50858', '4c0d9fbd-bd04-4cc9-aef0-848fb1f72df1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('405473d9-6965-48a3-830e-7310b2c5136a', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', '9906522c-6bc9-4370-9534-68c10cc50858', 'eecbdb85-45c2-4d37-8e9d-f0170f0d923d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c7a25443-d3a4-4fb6-b107-071fe4ea57dc', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', '9906522c-6bc9-4370-9534-68c10cc50858', '180eb800-be0c-4b8c-abfb-0a00f892d54e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('04bc1722-5b9f-4c0d-8829-a26aa50a21b4', 'ea7f1eb8-3170-4e4d-8ec2-bf26b26e03eb', '9906522c-6bc9-4370-9534-68c10cc50858', '3f7b691f-94bc-47f0-9b38-5afd77e1e037');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('aa37e483-ef5b-4fa9-a9ca-2cd476e5c138', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'b1ec16a7-2792-497a-bbfb-6a59b0cb4b99', '7b35ac78-c7ae-466b-9703-527c2f211703');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ae48cac3-8f53-41e5-aa86-134b3cdaf2a2', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'b1ec16a7-2792-497a-bbfb-6a59b0cb4b99', '4afac4de-68fa-48e0-9cbf-df60d4b18dae');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('86ddaf78-9661-48d0-9545-98a6b4264d6b', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'b1ec16a7-2792-497a-bbfb-6a59b0cb4b99', '3193e0bb-dd94-44e5-aab5-d1e0605b254a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4471a9ab-2c4c-46e7-bbf3-cad916138d9c', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'b1ec16a7-2792-497a-bbfb-6a59b0cb4b99', '61957e4d-08fa-418b-96ea-c04839a16b79');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6862937c-f276-4629-b274-1ee6a4f6b180', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'f4467bdb-2cb9-4a27-905f-093bc748200c', '9cf8bb14-c026-477b-995e-951a812ea570');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0842a9a9-a3e2-47c9-9b7e-8ec6a4af5492', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'f4467bdb-2cb9-4a27-905f-093bc748200c', 'e33489ec-c5c0-4ab2-8e3d-c2431464f686');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1cbdb500-4fb4-4bdd-8902-f5b305e59a88', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'f4467bdb-2cb9-4a27-905f-093bc748200c', 'bb4c6c14-97f7-4938-95f0-701fe4855b88');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('72abf100-f8ab-48f4-9e9c-cbaa953eb2cc', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'f4467bdb-2cb9-4a27-905f-093bc748200c', '32939ff0-2c78-47d1-b872-a26c8ead37e7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d694e2d4-1758-4abf-add2-c4732f5eeaa4', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'b49222ec-cc96-4076-8fe4-b7edc4042857', 'b10c8177-0155-4397-9462-82665f8a94af');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1a86182e-ffec-4ff5-8292-7fb2cf161658', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'b49222ec-cc96-4076-8fe4-b7edc4042857', '03ae1cbf-a1bd-449b-a0fb-bc6f695839b2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('42f97a1f-7e58-4dd0-b3ec-713a12cb3373', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'b49222ec-cc96-4076-8fe4-b7edc4042857', '41aab1b3-4333-40d7-80b9-b619fce29c40');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('30d9e42b-26d7-4046-b4d2-c796678bce24', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'b49222ec-cc96-4076-8fe4-b7edc4042857', '958fe60a-5fc8-4fd0-8a55-cf3b4b343273');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f3565033-1a31-466c-8fe8-7532e3631022', '4ff93b31-93f8-4bd8-a763-cb092700e456', '40c4da66-1107-49e9-8c52-1abc4d81cfdc', '45725ca1-f2be-4474-8131-3b0a018d8966');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1c94625c-8718-452a-87fe-b9b0aba9fa5a', '4ff93b31-93f8-4bd8-a763-cb092700e456', '40c4da66-1107-49e9-8c52-1abc4d81cfdc', 'bffb74f2-8d51-4ca2-bf1e-6ae22f045112');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bee56ea0-827c-4147-855d-514b4cbc17c8', '4ff93b31-93f8-4bd8-a763-cb092700e456', '40c4da66-1107-49e9-8c52-1abc4d81cfdc', 'a02edab2-85f7-41a3-8314-a3701a8b7122');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('73f893bc-ee21-4627-8a89-341d015f893d', '4ff93b31-93f8-4bd8-a763-cb092700e456', '40c4da66-1107-49e9-8c52-1abc4d81cfdc', '8ba75845-a5ef-4256-ab28-bc6a110de5d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4f3a78ba-4ed5-41c6-b7cd-f6fa04b2c7c5', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'daf09629-d2a6-4417-a67e-884a10c453eb', 'e857222d-2ade-4559-a4bc-25079ec09412');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('98d96082-bd6c-4a58-b64d-5e424f2b9484', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'daf09629-d2a6-4417-a67e-884a10c453eb', 'c2565461-fdf9-4dcd-9f5f-ccaaa9a01ced');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5b6f3cb7-84d1-4264-8af6-f14429470701', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'daf09629-d2a6-4417-a67e-884a10c453eb', 'ff35ded4-3c2c-4263-95c2-280287ddd337');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('13d65fe7-7fdb-4905-991a-18cd102a8ac0', '4ff93b31-93f8-4bd8-a763-cb092700e456', 'daf09629-d2a6-4417-a67e-884a10c453eb', '9cc5d704-bcc0-4024-9641-365563290e52');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0ec3acfd-0fd1-4144-a406-cd4c0e7cef8c', '67eabe11-d1fe-4f09-a37c-29b242254d1b', 'a3f359d2-43dc-48e5-95bc-4605cf804ed1', '1fe05de8-4010-4251-bfcf-b76bca446bd9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2f0a668e-94d6-4baa-8cbc-1fc01ae37258', '67eabe11-d1fe-4f09-a37c-29b242254d1b', 'a3f359d2-43dc-48e5-95bc-4605cf804ed1', 'b3455902-5720-4bf4-9eef-da2f9e0f617a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8e695ffc-4d3c-4945-bffb-a773fc559369', '67eabe11-d1fe-4f09-a37c-29b242254d1b', 'a3f359d2-43dc-48e5-95bc-4605cf804ed1', '521f7599-1bcc-4e05-945d-61a94ae41ddd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('db56b897-39f4-42c7-acd0-116e4add362e', '67eabe11-d1fe-4f09-a37c-29b242254d1b', 'a3f359d2-43dc-48e5-95bc-4605cf804ed1', '0fa0f0fe-f3ef-4ab3-a8fd-1a689437de27');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('091eb2fb-d1a9-4a9d-9320-6118b7881043', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '22ba80ee-9df4-4a69-9f0a-d675c18f366c', '6da977e4-c1fa-4c62-b6f5-33ff263b31aa');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('896212a0-381b-47c4-945d-d0f91bcb7cde', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '22ba80ee-9df4-4a69-9f0a-d675c18f366c', 'da1a5568-21a1-45d9-b67c-4694cf72dc58');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cefd8cc2-a26a-4461-b99f-4e0bc5001511', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '22ba80ee-9df4-4a69-9f0a-d675c18f366c', '12cfde88-4482-42e0-bde8-a9f319f53d9b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b431e488-b988-4b8b-83ff-684b38e23b89', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '22ba80ee-9df4-4a69-9f0a-d675c18f366c', '9183fd1b-eec1-4051-915c-3017036d79c6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0a9f0d6b-b7c2-45b8-bd8f-20721d580015', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '0c5e3bf7-030d-4477-ba44-2c2b087ce99a', 'a9b32cc8-f5f3-433c-8215-50af50ffc800');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8ea3ee26-6e83-42f5-b461-8b74963d2e19', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '0c5e3bf7-030d-4477-ba44-2c2b087ce99a', 'a18853fa-8fe7-4de6-b6df-339347045d08');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e0aaa1b3-7c99-4c0d-9126-2b5efe6f10b2', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '0c5e3bf7-030d-4477-ba44-2c2b087ce99a', 'da84918e-9e44-4375-ad5f-b994a2410c11');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('341c01fa-a71a-446b-bcf4-5b568515aff1', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '0c5e3bf7-030d-4477-ba44-2c2b087ce99a', '7fd6fd48-507e-4b2b-8ef6-ac5af627a83b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b3bc3920-b4a6-4350-ba99-4ec55dc24258', '67eabe11-d1fe-4f09-a37c-29b242254d1b', 'e9c42e79-d130-47be-813e-abaa371fffd1', '1f1deeaa-c9f4-46f3-8b0e-dbfce720e270');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('40b6d49a-0070-4520-92ef-973ed0f44b68', '67eabe11-d1fe-4f09-a37c-29b242254d1b', 'e9c42e79-d130-47be-813e-abaa371fffd1', '2709d293-df64-449c-b7af-67e804c73078');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9bf73348-9341-473d-9aa2-25669ac65ef7', '67eabe11-d1fe-4f09-a37c-29b242254d1b', 'e9c42e79-d130-47be-813e-abaa371fffd1', '6897e5ab-1ebe-42f3-bdc0-9008f14efed9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a9ce04a1-1bb7-4544-a9d8-fc7bebeb68fa', '67eabe11-d1fe-4f09-a37c-29b242254d1b', 'e9c42e79-d130-47be-813e-abaa371fffd1', '40083f0d-c76c-43a2-94a1-ae61db8de1d9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3dad6085-c92e-489f-ad05-25cea48808dd', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '2b4e6275-1154-4a7d-ae0a-49468fa4e7ad', '823497b1-adb3-4d7a-a085-336422dc65bd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('25f7e2f9-3036-4b65-91ce-035d3ac17c0d', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '2b4e6275-1154-4a7d-ae0a-49468fa4e7ad', 'd3e250b2-7de2-47b4-8986-d7cc7ff81d8d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f6d7e647-0cfa-4ade-83e5-4489a8322a29', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '2b4e6275-1154-4a7d-ae0a-49468fa4e7ad', '098fff32-341b-46b9-92d5-62da1c2f2a5e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f4fc3afa-c35e-4424-8e9e-dc5300ac4f3f', '67eabe11-d1fe-4f09-a37c-29b242254d1b', '2b4e6275-1154-4a7d-ae0a-49468fa4e7ad', '5e59fe9c-032a-4173-aaeb-4e97629db7ca');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1b25d31b-f94b-46b6-aa5a-b21794f61741', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '125700cf-9de5-43a4-8b65-1e93745b50f5', '5e3adfb8-ae3a-4f3f-a736-1d60ced3e876');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6fa0673e-c7e6-472d-8b7c-6d99f7c3aca9', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '125700cf-9de5-43a4-8b65-1e93745b50f5', 'a6a5ed6e-8212-49a0-944f-46b598eb502f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('06950db9-6f41-437f-af44-a19225d64270', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '125700cf-9de5-43a4-8b65-1e93745b50f5', 'c1de4155-53c2-4920-96df-af64a69c9083');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d8e1b836-d63e-4bc2-830c-0d05039ac909', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '125700cf-9de5-43a4-8b65-1e93745b50f5', 'a1d69e5d-c82d-4de4-a7d7-c434753c9f28');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0963f921-677d-42bb-b056-c63c60769c17', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '4b57aeb3-f1d7-489e-b95b-f66b3625336d', '8de96d8e-4552-483b-8287-eff9c37517fe');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('151764ff-1023-4520-abbe-92b1bfe96406', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '4b57aeb3-f1d7-489e-b95b-f66b3625336d', 'e93ffd63-277a-4587-92e7-0167da5eda5c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c6d0f4fe-5e4a-4a84-9065-a3324746b07e', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '4b57aeb3-f1d7-489e-b95b-f66b3625336d', 'f686b906-9426-4832-8f62-13e1f4bf6111');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('54c97e78-9b72-4b6a-85ff-03309042f102', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '4b57aeb3-f1d7-489e-b95b-f66b3625336d', '4910a5da-29ac-46d3-9ea7-aa52af8bae8f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('83e5457a-30ee-41cd-acf8-d4f42d09e9fe', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '022c981f-e186-42b1-9825-4c6796855b50', '3bbb113a-45bf-4eff-b0cd-483b84a8980a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('afef428e-1498-449c-9618-6284958bbc83', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '022c981f-e186-42b1-9825-4c6796855b50', '618500b6-a0e4-43b6-a07e-928942109fd1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7bfc195d-e73c-45c5-a345-50b234f59565', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '022c981f-e186-42b1-9825-4c6796855b50', '2b23c17f-221f-4a89-be96-781d5c382c45');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9571d5f3-a3a3-43f6-bc86-88ddfacd83c5', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '022c981f-e186-42b1-9825-4c6796855b50', 'f78f1061-35c2-4612-ba50-f88d988dd742');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3bed3cab-ecf3-4d02-b72b-45812771a485', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '1a520983-099f-4e03-b836-157acae35497', 'de3d9d38-5772-4c6b-a1e2-3736c11e1ed8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4d3d91dc-481d-40e0-85e8-5a48ac685ac0', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '1a520983-099f-4e03-b836-157acae35497', 'd7184f02-f98a-4c41-92f9-15c3b22d370a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e08cd3b2-5c90-4aa3-806e-5344b1479341', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '1a520983-099f-4e03-b836-157acae35497', 'ab46729e-1677-4be0-b0a9-1421fae0244b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('41a8290d-3563-48f9-9d08-4dd344bfbabe', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '1a520983-099f-4e03-b836-157acae35497', '4a497f0c-3ecb-45c4-8460-b3c3ae521437');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b33d2816-6f18-441d-9618-3d0f777aae81', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '2f03f836-7d04-438d-b5d9-d54169d98e3a', '6547c41e-77a7-467f-b147-328a6633c6f8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('880189d5-37a0-41ac-bb6e-cb23809097ab', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '2f03f836-7d04-438d-b5d9-d54169d98e3a', '95dc8972-e4d2-4db3-a0c1-653662bdab48');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('35951c62-7eee-4f13-9f1a-14e6d0f75a61', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '2f03f836-7d04-438d-b5d9-d54169d98e3a', '7b5780c8-a120-46b4-8c4d-64765cd63bbe');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('88c59ad8-48ec-4194-b933-41335779a6cb', '5bdbec64-9f89-4b7c-acbc-aed904c95e68', '2f03f836-7d04-438d-b5d9-d54169d98e3a', '2236b24e-c5fb-4356-a976-f29a97c0069d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b008bae3-3b70-487c-afa1-0052770892ed', '35cd1186-9217-4480-886b-c8c603490339', 'ce8aa915-07eb-4f6f-99aa-f3437636e6ac', '3dd6a54f-e2e8-474d-a6d8-73203fd4f42e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7137bc27-bdcc-4109-a74c-f499f9459faa', '35cd1186-9217-4480-886b-c8c603490339', 'ce8aa915-07eb-4f6f-99aa-f3437636e6ac', '752d11cc-1072-4659-94e0-9ee2cdb354b1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('17f1763b-0c69-482b-b8fe-3b82a2373972', '35cd1186-9217-4480-886b-c8c603490339', 'ce8aa915-07eb-4f6f-99aa-f3437636e6ac', '735359fb-5c57-474b-9459-a5c3fc484656');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('513eb38f-7c58-47ca-980b-5e72f9051d86', '35cd1186-9217-4480-886b-c8c603490339', 'ce8aa915-07eb-4f6f-99aa-f3437636e6ac', '708374a5-6d46-4520-80d8-54c58f5a18aa');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('557f9f69-0d3c-4caf-b8b2-8ca14f0d522c', '35cd1186-9217-4480-886b-c8c603490339', 'f9dfe0d2-49fd-4eb1-8b7a-b397bf41fdbe', '252396e3-84b2-4737-8acc-6b027d4359d8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('12e037af-a5e1-44da-b62b-3cf53c6047f4', '35cd1186-9217-4480-886b-c8c603490339', 'f9dfe0d2-49fd-4eb1-8b7a-b397bf41fdbe', 'd49d09a6-6eb8-4916-baf2-7198e50604c2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b42a2156-76c2-4f8e-b3f2-1d0cd1d9bee6', '35cd1186-9217-4480-886b-c8c603490339', 'f9dfe0d2-49fd-4eb1-8b7a-b397bf41fdbe', 'fb5cc73e-e8da-4df7-b64e-758b67d0c679');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cf336d37-f032-4723-a05c-34d7f35ad9b9', '35cd1186-9217-4480-886b-c8c603490339', 'f9dfe0d2-49fd-4eb1-8b7a-b397bf41fdbe', '1fd70e58-030d-4aa0-972a-7ebd2791ca33');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a6d2bff0-df66-44b1-b750-b9198ac98de7', '35cd1186-9217-4480-886b-c8c603490339', '1f448db3-145d-420e-afb5-174add0faebf', '530f6cc7-d055-465f-be39-ef0e33968146');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('28d5ce33-109d-4336-949e-f9d3a25cf034', '35cd1186-9217-4480-886b-c8c603490339', '1f448db3-145d-420e-afb5-174add0faebf', 'c99f3835-6ae0-4322-ae5b-da58def74692');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('75d52989-eccb-47e7-b351-60ad57beb764', '35cd1186-9217-4480-886b-c8c603490339', '1f448db3-145d-420e-afb5-174add0faebf', '86f1fea4-6503-43ce-bfca-b779977be4c4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e77e0265-cb23-4fb8-9323-034fa2a80ac4', '35cd1186-9217-4480-886b-c8c603490339', '1f448db3-145d-420e-afb5-174add0faebf', '4e92bfe6-a8c0-4dc9-81f7-db7e25430bbd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4de7e1d6-d722-43ec-999e-dccfc022b42c', '35cd1186-9217-4480-886b-c8c603490339', '9dbda7dc-0c28-4601-ad52-4cf3ec7d62bf', 'dadd17ff-5f8b-47a1-8232-047454d577c2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6657bdda-2f60-4d0c-bb99-9feaf2573200', '35cd1186-9217-4480-886b-c8c603490339', '9dbda7dc-0c28-4601-ad52-4cf3ec7d62bf', '89e02f18-fd49-4107-af7d-a4fcfd5081da');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1caf55d0-6835-48b2-b3e4-66dca24abd1f', '35cd1186-9217-4480-886b-c8c603490339', '9dbda7dc-0c28-4601-ad52-4cf3ec7d62bf', '97d3eb87-e067-4c52-a046-9e1ca557d746');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a215ce54-e5a6-4373-b586-0baa9a7cb6fe', '35cd1186-9217-4480-886b-c8c603490339', '9dbda7dc-0c28-4601-ad52-4cf3ec7d62bf', '442f5fce-5c32-46e0-9ce8-e23bbee6291e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5deac5fa-1d01-4e46-8001-b2c8c4870ee5', '35cd1186-9217-4480-886b-c8c603490339', '90e3d98a-04f1-4f72-be59-3a45aabbb482', '75ead8e8-2b99-4f69-8021-5a152df43e92');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fe04a226-22af-41f3-904c-6d71a91962c2', '35cd1186-9217-4480-886b-c8c603490339', '90e3d98a-04f1-4f72-be59-3a45aabbb482', 'a4f530a7-1543-40a1-863d-59ce30dbc8ff');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('85f6dca7-3db0-4b61-9c07-6acda96dc90b', '35cd1186-9217-4480-886b-c8c603490339', '90e3d98a-04f1-4f72-be59-3a45aabbb482', '95dc9cb7-12ab-4c50-aebe-d40e5841f2ae');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('56377b2a-7f66-43be-81e8-6b2b4e43526f', '35cd1186-9217-4480-886b-c8c603490339', '90e3d98a-04f1-4f72-be59-3a45aabbb482', '1b260c40-7462-4252-8408-56274b34b337');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f1a5cfac-a6e7-484a-8d3d-aed7a80eb872', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '2a7fc5ea-0d4c-4c2c-b868-81840c3ef36f', 'fa00bb4f-c606-4961-aadd-5a52f32b99d9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bd3b861b-d85c-4210-91b7-5e7ebb0f9459', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '2a7fc5ea-0d4c-4c2c-b868-81840c3ef36f', '4484e9e9-49fa-436f-8c42-39c4a8c06f0d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8c10979d-53b6-4fa5-a7c5-35a32b4742e8', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '2a7fc5ea-0d4c-4c2c-b868-81840c3ef36f', '17dd01ad-a9d8-44ef-bf9c-2428a054fdef');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7bcdb8aa-334b-4030-aca5-4f636b789cbf', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '2a7fc5ea-0d4c-4c2c-b868-81840c3ef36f', 'e99c7df3-724b-4561-9a65-a7d672a4e58b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6d2c22c3-98d0-4f8c-96c9-0c3981269687', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', 'f6965b6f-c9c4-4e80-9b4a-17dbab560d38', '878bc3bf-c24f-4457-b669-d09365682bf0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2838d105-0fef-496e-aa52-87b84f1e6d52', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', 'f6965b6f-c9c4-4e80-9b4a-17dbab560d38', 'acf8a64a-dba7-4acc-8727-a4529659a9bc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('85545661-39e4-4349-9083-addf308c4b60', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', 'f6965b6f-c9c4-4e80-9b4a-17dbab560d38', '65f7741e-b9a7-4977-bb93-727ee21fa39d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('50e28b87-3fc1-47c1-8b17-74d293a209b6', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', 'f6965b6f-c9c4-4e80-9b4a-17dbab560d38', '0c0b315d-3efc-4705-999f-13d8891f156f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d0c7f38d-acf5-4734-b32c-c3b4dd4b6929', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '0fa19e50-8129-4899-870b-5d39963bfb63', '2ef89acf-6bd0-4b1c-b029-9d85e5914f5e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c2077784-6085-4015-9062-5fb770b6ecd0', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '0fa19e50-8129-4899-870b-5d39963bfb63', '7054977b-770a-4986-b255-056493adcf7d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9d76cd80-98e1-41ee-a204-ce7d7c3f4d4a', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '0fa19e50-8129-4899-870b-5d39963bfb63', '02f7c347-33d7-45d3-bfed-12b4a3796350');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c264b095-db7d-4af5-b8f1-18006b26d595', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '0fa19e50-8129-4899-870b-5d39963bfb63', '631d13ba-aa6c-4ca7-8999-05a8caf0bc8c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9ca4f046-7541-40f4-a30d-7bda3cb5ca36', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '03d1aac6-1b80-423d-a962-973f0a8938ac', '2fc6cc18-2fc4-4321-90b3-a42bc662ee44');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('80281361-7556-4d47-8432-00b35c51291d', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '03d1aac6-1b80-423d-a962-973f0a8938ac', 'ab136743-f0a7-4799-a9b8-8700f8cdda29');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('21506099-f9fa-4c7a-9fef-81f9fe48f378', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '03d1aac6-1b80-423d-a962-973f0a8938ac', 'c44890ca-b2da-4fe5-b525-b0832111a812');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c6322462-eadb-4214-ad24-44f3db94aae5', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '03d1aac6-1b80-423d-a962-973f0a8938ac', '589d04fe-2c7f-40c7-aa23-1dbf556df122');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('628e414b-47f7-47ac-a975-2eacd7572942', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '3100c5cd-0a62-4ad7-ba10-b6b5c9e28175', '1ea9c97a-9452-4405-853d-f8dbf23023c0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('09f20b5e-d5b4-49c8-886e-a3fc9b183115', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '3100c5cd-0a62-4ad7-ba10-b6b5c9e28175', '8bb0bcfd-fa58-4fa7-ac72-77c83669f36b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1c4e6714-ac7c-44e3-8d46-d1b48bd803b4', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '3100c5cd-0a62-4ad7-ba10-b6b5c9e28175', 'f9fb3ef1-47a3-4862-85e5-baf62d7d28bd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('941ecee7-50f4-4ede-84e0-92834bda01a9', 'ab7663d9-7a2c-48f2-a7ac-199dd4665088', '3100c5cd-0a62-4ad7-ba10-b6b5c9e28175', '2770d610-8211-4fa7-b5d6-481121dcc921');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0fdad7d7-ef18-4153-99b5-5f0cdee5819a', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '1e689502-6917-4ef2-b7e7-4cbd5946d06c', 'c225aa50-5dec-48e6-975c-7189eb7a3c18');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5b3bbf71-209e-4438-9ca4-1df91668390a', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '1e689502-6917-4ef2-b7e7-4cbd5946d06c', '07d18047-9361-4371-bd12-eb6b0a863f31');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e838fa08-5e69-4828-81ad-0fa8a29ba344', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '1e689502-6917-4ef2-b7e7-4cbd5946d06c', 'fcc175b3-e2bc-45e3-9827-fdaf37c768ba');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bdcaee2a-7298-44e1-a985-18adabfdcb82', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '1e689502-6917-4ef2-b7e7-4cbd5946d06c', '0c21dad7-51c6-4f7c-99e8-ca0025cc126a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f7a4a1cc-0a91-4649-b44a-9bcab9ce4ebe', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '1f93696f-c745-4e16-94ba-85383b0b6f0d', '8f1d0344-8849-43af-890f-c582abe06dea');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('563a7e4c-9058-4b49-99aa-fe46e1259e36', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '1f93696f-c745-4e16-94ba-85383b0b6f0d', '2f322013-bd9f-4a10-b270-f41e5361a2bc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f18ffc9d-8868-4ccd-a9c8-e6515d758a5f', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '1f93696f-c745-4e16-94ba-85383b0b6f0d', 'a4e88839-753b-4a07-abf3-e3133e66d566');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('02539d76-45ef-4486-9d64-ee3fff6bb567', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '1f93696f-c745-4e16-94ba-85383b0b6f0d', '044fd2a7-0cce-4b49-a8a1-92efca723590');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f362f30f-eafd-428f-9b34-1e5ef585e286', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '6a7891af-91c7-4cf2-aabb-4a780a5f2c8a', '74e53e90-a6f7-4d7b-8431-aad6094875e0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a98f2544-def4-4798-832e-723d8955a86e', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '6a7891af-91c7-4cf2-aabb-4a780a5f2c8a', 'b641b4a7-1142-4d06-b2ca-85216196d270');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8f28910a-77b5-4383-a729-7ca13847184f', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '6a7891af-91c7-4cf2-aabb-4a780a5f2c8a', 'ef8c8bcd-bb16-4e09-8516-b83f1a957da4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('18366f8a-a5bc-44c2-bc3e-8eca4f3c7dd7', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '6a7891af-91c7-4cf2-aabb-4a780a5f2c8a', 'bdd85258-9115-4b61-beb4-93a02f547bf4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('deeea03d-9ef4-4634-8180-56bbca4559d4', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '2bd0fd73-e6b4-4bef-997a-6ffb12f667d1', '6882759c-6db8-4939-a6c3-9b02b2e5887e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4dbcaa5c-6621-4871-afef-5f85335d87be', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '2bd0fd73-e6b4-4bef-997a-6ffb12f667d1', '5565b253-bb54-4390-a45d-cb101078f31e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0c69ef3b-4c05-4526-b26f-d09a6f28623f', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '2bd0fd73-e6b4-4bef-997a-6ffb12f667d1', '9d733632-0f7d-4fd0-9240-626f215adee7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b655031f-31bf-45e3-be5e-670b306281db', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', '2bd0fd73-e6b4-4bef-997a-6ffb12f667d1', 'be20a39b-c7a2-414e-a09c-a093a020cbe3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4a7e43a1-06c0-49da-8faf-f78b5ef19a26', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', 'c6b6abb5-eeae-4128-bdd9-f76f2c1be437', '7616d8b1-f39d-494b-a393-cb7c5cc8462f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8b6e1e7f-7103-481d-a5b7-c0a938e87d0f', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', 'c6b6abb5-eeae-4128-bdd9-f76f2c1be437', '4b0fcb1b-d8c1-4581-b5d7-b115414a0a9e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('55b48661-0ed0-47e7-ad40-61ea09fe63c0', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', 'c6b6abb5-eeae-4128-bdd9-f76f2c1be437', '7f984c28-921f-4565-ad0e-206c332ec090');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e7d03487-f53e-43b6-9504-2feb132a0969', 'd2555415-da8d-47ec-8957-5ed330d2b5a8', 'c6b6abb5-eeae-4128-bdd9-f76f2c1be437', '2c532612-2a2b-4fc6-b2cb-4c0e659ea839');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8f3dc4e7-85da-4b95-ac05-56caaaa9f6a6', 'c4030b88-afde-4808-91d1-dd096de904ee', '8d6f4c00-1c80-40f8-835b-df51ca8d1f27', '19f94952-2450-4ed0-a668-d2b58d7e630b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5ad09576-3960-4284-b11e-e0149091d7fc', 'c4030b88-afde-4808-91d1-dd096de904ee', '8d6f4c00-1c80-40f8-835b-df51ca8d1f27', '0f3ea8a5-9f7f-48f1-a53f-31f2bca0ccf8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c2c90507-8de4-4a5e-8b75-2f4113fce810', 'c4030b88-afde-4808-91d1-dd096de904ee', '8d6f4c00-1c80-40f8-835b-df51ca8d1f27', 'efcf1e03-5b40-42bc-8264-27fcecfa71d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('92eec43b-c1f5-4df5-bf26-ab1cb064d683', 'c4030b88-afde-4808-91d1-dd096de904ee', '8d6f4c00-1c80-40f8-835b-df51ca8d1f27', '85ac609a-2c30-4088-a8c5-4dd12b29a5a5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0c86c09c-188a-40bb-b7a3-4f46ad1dd58c', 'c4030b88-afde-4808-91d1-dd096de904ee', '31aa400e-5d31-4049-b378-fee40109864e', 'de8e91fc-77cc-4615-b96c-fe5359b9402b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('26daba39-367e-4b93-9b41-95093697bc05', 'c4030b88-afde-4808-91d1-dd096de904ee', '31aa400e-5d31-4049-b378-fee40109864e', '64572837-7675-4fb0-9fb3-f0ea92155d60');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ca76580a-2661-49a2-9357-546417798efe', 'c4030b88-afde-4808-91d1-dd096de904ee', '31aa400e-5d31-4049-b378-fee40109864e', '261da507-b800-46e5-b59a-22ef2d702eb2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ec7f7639-394c-42bc-bcca-8d2f5b6d27b8', 'c4030b88-afde-4808-91d1-dd096de904ee', '31aa400e-5d31-4049-b378-fee40109864e', 'cc309908-d27b-4c2d-93c1-14ed4c61efec');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dadd3696-bd19-4df7-8774-c267974239bf', 'c4030b88-afde-4808-91d1-dd096de904ee', '696e4305-5ba7-4856-9c9f-376a83e41172', 'e70e8ce1-80cf-4a84-9710-dd8e617aa4b1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1eca08c8-bc0a-4e94-ab97-1bf298a576ed', 'c4030b88-afde-4808-91d1-dd096de904ee', '696e4305-5ba7-4856-9c9f-376a83e41172', '8a503e8c-b061-408a-9b44-11da1f7c6a1f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8224a441-170a-42a4-a4ed-935abc18ebfc', 'c4030b88-afde-4808-91d1-dd096de904ee', '696e4305-5ba7-4856-9c9f-376a83e41172', '4d62e754-6f93-47e3-975d-44bf986f07c2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('30d01211-3065-4bf4-8fae-127573192f2e', 'c4030b88-afde-4808-91d1-dd096de904ee', '696e4305-5ba7-4856-9c9f-376a83e41172', 'e1603878-38a7-47f1-b6e6-2772a784c1cb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('55b9b4c6-9d33-4e2b-a7c4-a7fbbd6bc71b', 'c4030b88-afde-4808-91d1-dd096de904ee', '48c1ce2a-f457-452a-9d1e-7b068235a259', 'd71354f3-f308-4aa3-948b-4662eba2b67d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('203c5b85-e31b-479d-91fb-aa59ad892427', 'c4030b88-afde-4808-91d1-dd096de904ee', '48c1ce2a-f457-452a-9d1e-7b068235a259', '0a81e927-fc63-43bc-9680-8a764ceed798');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('01882145-dc7d-4d64-a4cd-9e37ee017927', 'c4030b88-afde-4808-91d1-dd096de904ee', '48c1ce2a-f457-452a-9d1e-7b068235a259', 'c363b8b1-8b06-47ad-b923-c05ae7d5a817');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f6f7ad08-5113-49a0-9276-8201c9450a90', 'c4030b88-afde-4808-91d1-dd096de904ee', '48c1ce2a-f457-452a-9d1e-7b068235a259', '83bbaad0-fbb1-451c-abd8-7b0a4c7d068b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f6b2970d-d650-413f-8ce5-76f93e5a3d08', 'c4030b88-afde-4808-91d1-dd096de904ee', '7e467fcf-64d2-43a7-aa44-db000a424c63', 'a3718408-2367-40a5-beca-d0fcada6f984');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0bebb9d7-79b1-4c7c-bced-ee41fa272b58', 'c4030b88-afde-4808-91d1-dd096de904ee', '7e467fcf-64d2-43a7-aa44-db000a424c63', 'c7d8096a-37ba-4599-b86e-61fdf2707ba4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c15ecbc9-4957-4463-82a4-c49ef7df0366', 'c4030b88-afde-4808-91d1-dd096de904ee', '7e467fcf-64d2-43a7-aa44-db000a424c63', '03fe67f0-cf63-44ed-9820-f6f706674d17');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0d9e2022-7fe6-4599-8057-d7a7c3e3c8fe', 'c4030b88-afde-4808-91d1-dd096de904ee', '7e467fcf-64d2-43a7-aa44-db000a424c63', 'acccebe3-9dad-481e-bab2-689fe11ec40d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('49b29a1e-050e-474e-9072-a52c9f97891c', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '3782bb17-ad9b-4ce2-b3d4-e575d01c31a0', 'c2a6ca8b-fbcc-4e82-b474-2b295bcc9425');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('63a821d3-f8cf-44bc-9836-4348d5bd51ac', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '3782bb17-ad9b-4ce2-b3d4-e575d01c31a0', '8e8f7d88-8214-4ee9-9f67-1c23855f1ac0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('96cc1816-4848-447e-80b4-0abe5e251693', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '3782bb17-ad9b-4ce2-b3d4-e575d01c31a0', '5e30cf12-4b38-4694-bbf2-df0fe87cf621');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2ae3dfe0-bcde-40f7-b2d5-95ef814dcf6c', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '3782bb17-ad9b-4ce2-b3d4-e575d01c31a0', 'a54601e4-2c85-491a-b5fd-5f2877f9039c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a9890f7c-ef89-466d-8d0b-0f9af6b8d597', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '5cce90fd-26c0-40ff-8b70-15b0760d70a1', '60e7c7d2-7f1e-4ae6-9d14-d078cfbdff8c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('acc3be51-aa9d-4e9a-be82-23983bb0a37a', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '5cce90fd-26c0-40ff-8b70-15b0760d70a1', 'cac37000-5689-464f-9c16-90c8899a9836');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('62bfe525-a938-4a2b-9f4d-66ffdae4d11e', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '5cce90fd-26c0-40ff-8b70-15b0760d70a1', 'b894a1c6-26a1-4e71-82b4-2a4eecdba56a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1a13d8fd-75b0-45a7-901a-c1bcc025f899', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '5cce90fd-26c0-40ff-8b70-15b0760d70a1', 'e7e0985d-b869-4fe0-9328-ddf477b9506e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('41f1ad90-133d-4a9e-9f8a-2e6567a8eb14', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '82c802dc-1630-4568-84da-2ae5101a6734', 'a04eaf21-b96d-42b9-b737-63d9448ed1d5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('64314e21-763d-491f-87ef-68ba7f8096fc', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '82c802dc-1630-4568-84da-2ae5101a6734', '40b93bae-3bd8-4cda-b9a8-e2749d32de4f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4ca60c2f-8574-4720-b737-55e2d1e6ee80', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '82c802dc-1630-4568-84da-2ae5101a6734', 'a97d722a-79fd-4e59-9da2-568da66d5b7e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a71168b2-af97-404b-9974-bd10ccabb2e1', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '82c802dc-1630-4568-84da-2ae5101a6734', '38607192-4bd2-4db1-badc-8a04ac2df10a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('34d2c8cf-16f8-421d-b2f2-85c6f27c7218', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '9d36e22a-5b5a-4599-83b6-fa8685423471', 'bf1faffd-b54b-45a2-8ea6-fdf8bf96b0ab');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fc320fc5-a8dc-4fcb-9cdf-be31f67db27e', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '9d36e22a-5b5a-4599-83b6-fa8685423471', '325c7b9e-bf25-4316-ba32-f60c60900a9a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e439abbb-7e28-4667-90e9-b5d46e257a3c', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '9d36e22a-5b5a-4599-83b6-fa8685423471', '63a9738e-de08-4db5-bb92-6f1d4e5a458d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('50f33d0d-fb5f-46ad-b303-9071b7110600', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '9d36e22a-5b5a-4599-83b6-fa8685423471', 'caed2197-ba67-485e-8f3d-fe83247b525b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3bbef299-4795-4d6d-aa25-ab2cb6a13aff', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '23bf4f12-a8a9-4762-98e7-babbf4d67c04', 'df60d411-4350-49ad-9cb7-fe36491b37d5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d3dfb040-8d44-49c1-a379-1964aaef6320', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '23bf4f12-a8a9-4762-98e7-babbf4d67c04', '289abe6c-a31f-488d-a6c9-96fe06f13f29');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('36e48032-fd6f-4678-a087-e583481c3cf9', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '23bf4f12-a8a9-4762-98e7-babbf4d67c04', '00916f5f-d31d-4c92-92e9-9f35818f97d6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('18bdcc48-6bc5-4b67-8a60-335411c76973', '9d7a95e2-a04e-4ab9-b5f9-ed1c09782e76', '23bf4f12-a8a9-4762-98e7-babbf4d67c04', '45850bcd-752d-41ab-939e-a38bcae3fd26');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('38b7416b-1a7d-40c0-9a8f-2c86b3beef4c', '6573376b-050f-41e2-ba55-cf298abd09d7', '4f201f55-43c9-47d6-bcb6-58548c200669', '0aa46682-f308-431f-8957-1801a7ea3059');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('84e5507f-2fdc-473c-a9f8-02a7ab1711fc', '6573376b-050f-41e2-ba55-cf298abd09d7', '4f201f55-43c9-47d6-bcb6-58548c200669', '3ae559cf-cf8b-4f10-aa3c-15fa4504b8b6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('69fcb4af-f760-487c-bffc-e3c79b1f6498', '6573376b-050f-41e2-ba55-cf298abd09d7', '4f201f55-43c9-47d6-bcb6-58548c200669', 'c83bbd79-c93b-402c-b285-d174423afa48');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('824d7422-3189-4d8e-87be-79c72061258b', '6573376b-050f-41e2-ba55-cf298abd09d7', '4f201f55-43c9-47d6-bcb6-58548c200669', 'af63b874-be15-492b-ac20-af7390f310a0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a077896a-1da8-41c2-af61-b822e27f485d', '6573376b-050f-41e2-ba55-cf298abd09d7', '17c83789-b24e-41e1-923d-1ef3bfb12acb', 'b5507acb-6cc7-428a-a48e-d99074c3124e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ce4b7534-9db3-4131-8125-4b220255370a', '6573376b-050f-41e2-ba55-cf298abd09d7', '17c83789-b24e-41e1-923d-1ef3bfb12acb', 'ac802a56-aabf-4c3e-94ac-1acc32afcf13');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('87969388-91a4-417a-8738-47e2c71d965f', '6573376b-050f-41e2-ba55-cf298abd09d7', '17c83789-b24e-41e1-923d-1ef3bfb12acb', '620fdf2c-5a7c-490f-9530-e493dc6520f2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('42e5446a-232e-4242-8a59-a9aed45fa8d6', '6573376b-050f-41e2-ba55-cf298abd09d7', '17c83789-b24e-41e1-923d-1ef3bfb12acb', '0df57c6f-44ac-4b66-940b-92af2b7346c1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ed7a3de7-2f99-4303-95de-660c756c9221', '6573376b-050f-41e2-ba55-cf298abd09d7', '13373e03-d18c-49bf-9c6c-b048fa769eb4', 'c870f37f-794f-434b-8562-689fc27391ac');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('95002a44-ea3d-42c4-a737-b94acd54fb96', '6573376b-050f-41e2-ba55-cf298abd09d7', '13373e03-d18c-49bf-9c6c-b048fa769eb4', '7e5b4ef3-e646-4c4d-a361-79483e7bb21e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('739657b9-6951-40a7-9b49-6dd793713e9f', '6573376b-050f-41e2-ba55-cf298abd09d7', '13373e03-d18c-49bf-9c6c-b048fa769eb4', '4b709170-c241-4b65-8d9d-4284333ac725');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6148a360-ca28-40f9-a760-c93c3dd405f4', '6573376b-050f-41e2-ba55-cf298abd09d7', '13373e03-d18c-49bf-9c6c-b048fa769eb4', 'a7bba28d-2449-4f92-bbfb-e918f1edac9e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d7f8cc7b-bd43-44f5-bb3f-a6778867ead3', '6573376b-050f-41e2-ba55-cf298abd09d7', 'a273b937-d0d6-4be3-bb02-660c2e2a9ada', '3784d9c8-cc35-4096-bd37-2ac60d90dbcc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4d763f0e-0e0a-4dad-8e53-d7519ddeb4bb', '6573376b-050f-41e2-ba55-cf298abd09d7', 'a273b937-d0d6-4be3-bb02-660c2e2a9ada', '5e5b118c-e6a6-4e52-8a61-55aa3b00e5c9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bf022e9f-ed34-4c54-823b-05ada7ff0333', '6573376b-050f-41e2-ba55-cf298abd09d7', 'a273b937-d0d6-4be3-bb02-660c2e2a9ada', '09860e03-3aae-4973-b1bd-25d783b92742');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f58bfbb5-cdfb-485c-80a7-9edc2e13ce9a', '6573376b-050f-41e2-ba55-cf298abd09d7', 'a273b937-d0d6-4be3-bb02-660c2e2a9ada', '6028c78c-2b55-4ebf-a25b-06f7495a1d74');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7c3030fa-e89c-4f2d-8daa-ea947bcb64e7', '6573376b-050f-41e2-ba55-cf298abd09d7', '9afd444a-11e3-4f75-9196-9fd66e3dee51', '21800c2a-0ae5-48ba-87d9-3a2e3d9c4b02');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('29eb0c97-8613-4bb4-a75d-3ce780397af1', '6573376b-050f-41e2-ba55-cf298abd09d7', '9afd444a-11e3-4f75-9196-9fd66e3dee51', '8c6ec0b6-ee87-48ae-ab16-52b3d3fc903a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7f8d4f08-4085-411a-a1ac-949e584c34bb', '6573376b-050f-41e2-ba55-cf298abd09d7', '9afd444a-11e3-4f75-9196-9fd66e3dee51', 'c378edbd-427a-42bd-a10e-0ef920a62654');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('591cf7c7-9df1-4261-b423-70828cbc0409', '6573376b-050f-41e2-ba55-cf298abd09d7', '9afd444a-11e3-4f75-9196-9fd66e3dee51', 'ea04a736-bc88-4cd8-938b-a3cf8ff4bbe3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('46943d8a-e59a-4f62-b825-177028c39b41', '525d7e27-330d-498e-b151-5cc97785dc6f', '9515fe60-8a46-4171-834d-0948497aedb0', 'af18866d-7d64-46bd-b2fc-d5e2e653e460');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('45270b7d-ab4a-453c-975d-8044dcf441cb', '525d7e27-330d-498e-b151-5cc97785dc6f', '9515fe60-8a46-4171-834d-0948497aedb0', 'a4e8c918-03bc-4a2c-b19d-7f88d9206df5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bd107090-e4ea-4f5f-ae8b-99f143e6a71f', '525d7e27-330d-498e-b151-5cc97785dc6f', '9515fe60-8a46-4171-834d-0948497aedb0', '788a653d-d51f-4925-821a-9e96983e8e4f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1b94bb5e-0c24-44c3-aec2-3b0e0b04ad2b', '525d7e27-330d-498e-b151-5cc97785dc6f', '9515fe60-8a46-4171-834d-0948497aedb0', '014526b7-d6dc-4b74-bfcf-90a112c8e111');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9848a849-d21a-4572-ac44-8cc71432f26a', '525d7e27-330d-498e-b151-5cc97785dc6f', '9b1be0db-76f4-4c47-a815-810ea27839c3', 'fc4a865b-4fd5-4f71-a87a-dcf7fee05bb4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1a09a36c-f7ab-433b-a126-bfcc8c640255', '525d7e27-330d-498e-b151-5cc97785dc6f', '9b1be0db-76f4-4c47-a815-810ea27839c3', 'a447da44-ffe3-499d-aee0-0391cc0d6ad3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ac7184d1-8255-4699-bb28-21d56f7a13ec', '525d7e27-330d-498e-b151-5cc97785dc6f', '9b1be0db-76f4-4c47-a815-810ea27839c3', 'f6750b2e-fdc0-45be-8c30-868e52439863');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b9292b33-6407-4633-9e66-761308ef54a0', '525d7e27-330d-498e-b151-5cc97785dc6f', '9b1be0db-76f4-4c47-a815-810ea27839c3', '34615ad9-29f7-44ae-8710-72594f812d44');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4b774f39-3ca1-4d6a-a675-8fae680e949a', '525d7e27-330d-498e-b151-5cc97785dc6f', '7452fccd-3d01-4d7a-9551-db04e18066bd', 'd5d53139-9acf-47ca-b8ae-cd18c3c7f79d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8d46fbc1-b4c3-4f2e-af7d-45468674ccc0', '525d7e27-330d-498e-b151-5cc97785dc6f', '7452fccd-3d01-4d7a-9551-db04e18066bd', 'd85414b7-1797-4034-85f7-6853b0061ace');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2646649d-3a5f-4dcf-80bc-ae05760c65d7', '525d7e27-330d-498e-b151-5cc97785dc6f', '7452fccd-3d01-4d7a-9551-db04e18066bd', 'cae8e7ca-4225-41fb-bf38-833bbc2c4f19');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c3c13d0b-7716-40ac-9c9e-eee667921756', '525d7e27-330d-498e-b151-5cc97785dc6f', '7452fccd-3d01-4d7a-9551-db04e18066bd', '2df31c80-6f27-45c5-96b1-942fafef5936');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d4908902-a87a-4db4-a4b7-f9208c091d95', '525d7e27-330d-498e-b151-5cc97785dc6f', 'af6f8196-79d2-4573-a8b1-2d5dff2df228', '5082c814-06db-4b6a-b9ef-0e42ef2499ef');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('56992b62-3498-47e9-9aff-6515d7df6348', '525d7e27-330d-498e-b151-5cc97785dc6f', 'af6f8196-79d2-4573-a8b1-2d5dff2df228', '8a491fbe-c0ed-4c88-9866-5933b2fccf68');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e3c18c82-72c4-4c46-b403-d0f4bdcc3476', '525d7e27-330d-498e-b151-5cc97785dc6f', 'af6f8196-79d2-4573-a8b1-2d5dff2df228', '4ff427dd-26ed-4547-bc0c-dd0065f6964d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bad66884-b1e5-4d14-8b04-6a10aaa08212', '525d7e27-330d-498e-b151-5cc97785dc6f', 'af6f8196-79d2-4573-a8b1-2d5dff2df228', '236971ab-b2a6-446a-83d3-ffcb9b938a6e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f12bcff1-e0f8-4e2f-a963-8a0ee11df8bb', '525d7e27-330d-498e-b151-5cc97785dc6f', '4c6a6d54-2051-4e3c-8b96-01d612e25c24', '0d978c3e-557d-4416-a94f-89fbbaa74c97');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f90ad1da-ab76-4463-9aff-a0d599de79e7', '525d7e27-330d-498e-b151-5cc97785dc6f', '4c6a6d54-2051-4e3c-8b96-01d612e25c24', '2886c384-a9c9-4197-a76d-7891712c9fae');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f93ecb1b-2d79-4679-bd8d-5c0b72d9c0ea', '525d7e27-330d-498e-b151-5cc97785dc6f', '4c6a6d54-2051-4e3c-8b96-01d612e25c24', 'b822b243-73e2-4f25-a967-022f752a0b80');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f0fb050c-ba43-498b-9790-f5001114a59f', '525d7e27-330d-498e-b151-5cc97785dc6f', '4c6a6d54-2051-4e3c-8b96-01d612e25c24', 'a61c1c55-35a4-4336-a69a-d44600de5a50');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d46adfc7-a981-43a6-a182-4fb9acb2b1a3', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '5ad3b60b-bcf9-4782-b83f-7c2d24afd5fb', 'c42a9f87-32fd-46d7-910b-fd8f4af7520d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b56964e4-ced2-48e6-ad37-3621ca95820a', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '5ad3b60b-bcf9-4782-b83f-7c2d24afd5fb', 'cd71df1e-f5eb-477f-9f5b-7e14b5e2835f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f594e4cc-8b9a-41ca-8f7e-4a8027bc83c3', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '5ad3b60b-bcf9-4782-b83f-7c2d24afd5fb', '996e0b0f-9195-4d65-99cd-35cc3dab110d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9aaac610-da28-432f-8aa6-7ab9ebd37ffd', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '5ad3b60b-bcf9-4782-b83f-7c2d24afd5fb', '0951a496-e6dc-423c-9adc-e20d0be54142');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c9bd714c-f365-420c-b106-a156bf4fe4d1', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '3e6c03fd-2ec5-4d05-8b74-a87e591e5362', '37f64e1e-85fd-4a4a-9c43-de57de053201');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('74e18ced-f7b6-443b-9de2-35a4ace081ba', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '3e6c03fd-2ec5-4d05-8b74-a87e591e5362', 'eceec16e-3780-486d-b809-1b8509879f28');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3ae10785-0eed-420f-b4bf-4749601a0a82', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '3e6c03fd-2ec5-4d05-8b74-a87e591e5362', 'ad6c13ff-5096-4d55-ada5-2bfe782c41a7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0b649512-999b-429b-b151-0572af87be92', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '3e6c03fd-2ec5-4d05-8b74-a87e591e5362', 'f48a664f-65a5-4198-bff6-0f8c110e3ab5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c6dd0621-b08f-4c12-bcb4-eb69043dffe3', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '2bcda11d-189b-49e0-b9b1-3d5268d78a41', '2ecb76f7-7eba-4bcf-9cba-eef37dfe19f4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('042f9eb1-50c6-4550-a801-4fd8caf9cff5', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '2bcda11d-189b-49e0-b9b1-3d5268d78a41', 'ee6be842-11d4-4dd9-b4cb-50b9cab410b7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8b36669a-afc9-43fd-8d3f-863ac134878b', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '2bcda11d-189b-49e0-b9b1-3d5268d78a41', 'c1d1a9ce-b5ed-4cd6-82a4-b39f1225955c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b6596300-c474-4197-875e-6099e249c762', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '2bcda11d-189b-49e0-b9b1-3d5268d78a41', '811b0687-4b6d-42e8-81dd-fa825e4806f9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('485de2f8-8bc0-4090-bfb2-3deb25d34b7f', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', 'b62e6e60-062f-4135-92ac-327899388945', '60816256-9b46-4f07-bb44-2e8f87ccb81e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4fe3a636-35e0-4599-9160-3f1f5057931a', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', 'b62e6e60-062f-4135-92ac-327899388945', '49174d28-dce3-4a69-a526-1e069afc6c40');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2f62770c-f190-4035-9365-fe66273be94a', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', 'b62e6e60-062f-4135-92ac-327899388945', 'c4e1dc2e-4d1d-4d17-a7dd-49f6e70d81fd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e8c436ee-839c-4983-9ba6-76943234b8c5', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', 'b62e6e60-062f-4135-92ac-327899388945', '86ee4ad2-9d11-4ae9-bd06-8f449072d003');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a8f4d34c-5c92-41bc-9780-09af16d855eb', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '91ae5ad2-3883-4844-b54b-401a62a1e166', '7e687177-c03d-4e34-955c-eb1510e5dd58');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bb500ca0-56b4-447c-84fa-d63ce14e3bb5', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '91ae5ad2-3883-4844-b54b-401a62a1e166', '70a954d7-d351-41c8-bac3-05153f91696a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('34d0d42e-b9bb-4129-a885-4fece0ee1290', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '91ae5ad2-3883-4844-b54b-401a62a1e166', '0d6b7e6a-e3ed-47bc-8323-fe277c6ca1ed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('87a606b2-1d8a-4efd-b7b1-5fedb1bab280', 'ee0f8e94-dc7b-4e90-afb9-00e52f98a0a0', '91ae5ad2-3883-4844-b54b-401a62a1e166', '2d95f483-55c2-4657-bb80-3192b5cbedf0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b15d40b9-1032-48c3-89ff-276e319f17f9', '1a104b87-de81-4743-880b-c5ae3508f22b', '0a8e9eb9-0247-48f6-aed2-d668d5576b11', '33415ddc-d669-4d3d-8a0a-9dfc931dc05b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('00ec670c-3d59-495d-bf2a-9691b0751b96', '1a104b87-de81-4743-880b-c5ae3508f22b', '0a8e9eb9-0247-48f6-aed2-d668d5576b11', '027636ca-4273-4381-95f2-aca0fbcfe35b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('42245ece-21d8-4780-8f2b-ae147c519d42', '1a104b87-de81-4743-880b-c5ae3508f22b', '0a8e9eb9-0247-48f6-aed2-d668d5576b11', 'a39a55a9-6d74-40ba-a9c3-b2d283caaed5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d6b6cefa-b4f9-4e8c-a40b-703902793e5c', '1a104b87-de81-4743-880b-c5ae3508f22b', '0a8e9eb9-0247-48f6-aed2-d668d5576b11', 'f2574198-6449-481d-ac32-b44d6c7a2790');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0880b6fc-5282-4ac7-b70a-01af6b1414c1', '1a104b87-de81-4743-880b-c5ae3508f22b', '96a8028b-785a-4b2d-a2d7-bf1e27b3931d', '78633114-c9e5-455f-ad98-7fc28b16b026');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e9d08425-bdae-4083-9d57-a87f0ad13d0f', '1a104b87-de81-4743-880b-c5ae3508f22b', '96a8028b-785a-4b2d-a2d7-bf1e27b3931d', 'a6777396-b194-47a9-a64e-c9976b4e5c38');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a066891e-d236-4a1d-a580-8b26263524b0', '1a104b87-de81-4743-880b-c5ae3508f22b', '96a8028b-785a-4b2d-a2d7-bf1e27b3931d', 'a3e7c41c-708c-4c85-81aa-434788019246');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f7d47d60-51a9-4243-a661-be7cbbed76f4', '1a104b87-de81-4743-880b-c5ae3508f22b', '96a8028b-785a-4b2d-a2d7-bf1e27b3931d', '58ecf180-21a5-4dce-8b13-3e0227bdc57b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d3963744-8d14-4e3a-a44a-db2eb6bce4e3', '1a104b87-de81-4743-880b-c5ae3508f22b', '860f5a5d-06ae-4548-bac4-d54ba544e1d2', '927a5f38-09ad-4b63-87ea-4ad2282eff51');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4c5dfe12-57e6-4a82-9625-93e4e4da87c3', '1a104b87-de81-4743-880b-c5ae3508f22b', '860f5a5d-06ae-4548-bac4-d54ba544e1d2', 'a0e614da-03ac-4c3d-94a7-65bf6ca1e4d1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2a6449e1-e06c-4f23-b6f4-2e1bd753a834', '1a104b87-de81-4743-880b-c5ae3508f22b', '860f5a5d-06ae-4548-bac4-d54ba544e1d2', 'be35f42c-1032-40da-8d48-e242374be323');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9eaae0d6-bf94-45d9-b74e-65c323ca3023', '1a104b87-de81-4743-880b-c5ae3508f22b', '860f5a5d-06ae-4548-bac4-d54ba544e1d2', '05158112-c138-4d1b-8b93-31b338c5e75f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('79d7c607-9765-42e2-b396-a1b1503978c7', '1a104b87-de81-4743-880b-c5ae3508f22b', '1e10cc79-c79a-483f-a2d4-b2f5f93e21f1', '12011b81-7a61-4969-b0e5-798b906f586c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('962f8b9a-350a-4b83-9197-088570da2801', '1a104b87-de81-4743-880b-c5ae3508f22b', '1e10cc79-c79a-483f-a2d4-b2f5f93e21f1', 'aa920c8c-871f-4999-8630-a8211ec2e37b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d0d350a2-65d6-48aa-bc69-7ac26d22912c', '1a104b87-de81-4743-880b-c5ae3508f22b', '1e10cc79-c79a-483f-a2d4-b2f5f93e21f1', '89c4b728-0d7b-4a79-a9b3-4e39a2042724');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('47ce1b8e-c8c3-4f8f-80d7-b3feb7678708', '1a104b87-de81-4743-880b-c5ae3508f22b', '1e10cc79-c79a-483f-a2d4-b2f5f93e21f1', 'cd48374e-bf91-4ada-a56c-9bdf6f3cc3b9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('81f6996c-f00b-4d63-a0f2-1c35e64fed4b', '1a104b87-de81-4743-880b-c5ae3508f22b', '5522acea-3ce2-48b2-83a4-9139188fdc2d', 'af8148f5-181f-47e5-9db1-ed6dfc96248d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('38719065-b6f5-44ba-a33f-292c1924302e', '1a104b87-de81-4743-880b-c5ae3508f22b', '5522acea-3ce2-48b2-83a4-9139188fdc2d', 'd5a0c70d-66cd-4169-aa1c-9aa3af0a8009');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8434bb5a-be86-41c7-a02a-b4a5f49641f4', '1a104b87-de81-4743-880b-c5ae3508f22b', '5522acea-3ce2-48b2-83a4-9139188fdc2d', 'd87231c8-9e78-41fd-a9aa-272c5dc237cc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d18debf7-e1db-4326-b936-f6927d8adf35', '1a104b87-de81-4743-880b-c5ae3508f22b', '5522acea-3ce2-48b2-83a4-9139188fdc2d', '9a61dbec-323b-4044-aaa0-d11a47db9f26');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('38c0ddf8-de93-4059-b61c-9b1c87500c13', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', 'aa48bd46-ea23-4e74-b192-d9b8219b7cf8', '1102cab0-c348-4b0c-ac83-9e06fa645e42');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b8c41e57-0d3d-45aa-b503-513918044b6c', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', 'aa48bd46-ea23-4e74-b192-d9b8219b7cf8', 'cd5996aa-07d0-47a1-b6e8-03dd89fca643');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1dad91c4-dabb-4b2d-aeeb-040ad8e1ea46', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', 'aa48bd46-ea23-4e74-b192-d9b8219b7cf8', '21aaa6b1-db7f-4c88-906d-e50d59ea8bec');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4e8b9e75-3b82-4482-9ea3-453c8a59fb03', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', 'aa48bd46-ea23-4e74-b192-d9b8219b7cf8', '14e22a42-9a36-4748-9760-5c24bb900370');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3fd555c9-01f2-4997-b6d8-360be7361348', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '4eafab0e-d1f2-4c49-b2c2-60abf8caae3e', '0df6fe8a-de3e-4f7c-9a25-28397e4f65ef');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ca82c7ee-e19b-4c88-998a-5b430d08a507', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '4eafab0e-d1f2-4c49-b2c2-60abf8caae3e', 'af7a9fae-a737-4d2e-9fd1-79889b7af4ac');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('942a9233-2432-4aa4-af0b-961f81f8ff15', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '4eafab0e-d1f2-4c49-b2c2-60abf8caae3e', '2832a27e-622a-46c1-88aa-06d5fab9cc64');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('221e29c7-c6d8-4a34-af7e-4e3873901e57', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '4eafab0e-d1f2-4c49-b2c2-60abf8caae3e', '6b5e0a18-d74a-42de-ba5d-43cf1dcf97a6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a0948517-b4e4-4b4e-95e2-6e2a95fa54cb', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '4383ea6a-aa35-4566-9ea1-89955999d718', '379a60fc-7e65-4815-9103-91a94d3fb4da');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b8deb380-7c10-44f7-a639-2eabded86f0f', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '4383ea6a-aa35-4566-9ea1-89955999d718', '04c59037-88f0-4033-b85e-e81abeb3d881');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('81ce1970-2ba2-45e4-9b1e-64abd7521567', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '4383ea6a-aa35-4566-9ea1-89955999d718', '184703a9-76c2-4f32-b5bd-c29b8dd2db2f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ed1e0df5-44f3-4a36-b429-1283544284be', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '4383ea6a-aa35-4566-9ea1-89955999d718', '264ec183-a38d-48e6-91d6-cfc98453a7ed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('17fa1947-1d1d-4b19-a4fe-b43775327a9e', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '3b972970-7309-45f5-b620-37b6f6f802a2', '1e6e63e1-27e2-4dfe-aa96-5963b47e771f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('15609f3a-342c-424c-a8df-bc482f8c3cdc', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '3b972970-7309-45f5-b620-37b6f6f802a2', 'd78c0f2f-3902-41ac-9196-6058a4f46573');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cd62be58-92db-437d-b9c7-6a5a474f39a4', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '3b972970-7309-45f5-b620-37b6f6f802a2', '97a52e31-8592-4291-a00a-ed2f2519ec9b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d9230596-3f07-4115-984a-bb3d58a2e70b', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', '3b972970-7309-45f5-b620-37b6f6f802a2', 'f89f83a1-7c9b-43c4-9098-5a74ae7a5019');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7b04fed4-01ad-41e6-b31b-dced2b9eb045', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', 'e4e99200-dcd9-475e-acc9-cc5eb75fdd72', '7d6ef37f-c954-484a-a8c6-ec29efc47ffe');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e62114b9-2339-4387-88bc-6eadfadf2b51', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', 'e4e99200-dcd9-475e-acc9-cc5eb75fdd72', 'cd946372-59e7-4c2d-83ea-80aa370129e9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ff4a3e92-31cf-49fa-ba1c-6e0e6a8d7817', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', 'e4e99200-dcd9-475e-acc9-cc5eb75fdd72', '7a458ebf-f271-478a-afc0-376235cf66ba');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7d10a4fc-59a7-4aab-890f-b6fdea29d659', '584b3003-be51-47a8-ae4b-a1bd000bc4d8', 'e4e99200-dcd9-475e-acc9-cc5eb75fdd72', '336c104d-a4ca-4cbd-821d-cad6041b73f0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('893ac007-a1fa-4349-8455-297c92ce031a', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'cca05aa9-b601-449c-8e32-923d667b21fb', 'd0f863fe-a860-43b8-be1c-5d91b18b71ed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1b346259-ab92-4fcb-a71f-b14ef8541bef', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'cca05aa9-b601-449c-8e32-923d667b21fb', '1a346b15-af8c-4d1c-82b2-8be08099c230');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c954c8d8-07ad-41d4-958e-12bb22b07c9a', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'cca05aa9-b601-449c-8e32-923d667b21fb', '6ed26218-7502-4b42-b232-8e86038ef37a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2d8769a8-b651-416a-94ec-e330de7a0e56', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'cca05aa9-b601-449c-8e32-923d667b21fb', '69e9fccc-a0c4-458b-8879-63818fc5c6a7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ae123b3f-a225-4656-9439-5a385d1949cc', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', '4038fdf2-ba50-44c1-b729-adba05ed6b78', '0514da28-7e1d-4270-a56c-e644beee482f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f4322593-4b59-4998-8403-f409eb02fcc5', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', '4038fdf2-ba50-44c1-b729-adba05ed6b78', '75fdc26a-ace3-4e9f-b20c-998045c56cd8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('39b8e585-3398-4d4c-9bc9-7a06cc24cb91', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', '4038fdf2-ba50-44c1-b729-adba05ed6b78', 'a7757688-d1e3-46f3-a554-d45003dc51e6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d4ddd61f-3c1d-40ad-9af6-1d391b8c2bb4', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', '4038fdf2-ba50-44c1-b729-adba05ed6b78', '5c2cd7b4-4c54-4a7a-a319-ef049f6a0912');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ae79f470-ff1a-461a-9083-7657d531cc3f', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', '0cf44012-d8ba-4d22-97b7-db668facff24', '68fb327d-3611-40b7-8926-b51378f4e12f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1e3e2a95-771d-488c-bdb5-d6df5c2ecd00', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', '0cf44012-d8ba-4d22-97b7-db668facff24', 'a46c467e-8f90-4cc4-b6d3-32b6a0d6ea07');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5d8e9c81-b36f-4bb8-aca5-8fa262da5ed1', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', '0cf44012-d8ba-4d22-97b7-db668facff24', 'c3b15532-5145-439a-82ce-603cd0f0507c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('77e9c8ad-128d-4aa0-bffa-01e797f16b34', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', '0cf44012-d8ba-4d22-97b7-db668facff24', '0a96a60f-74b0-4be1-82c0-0470c2a3f865');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('078826db-df01-4e0b-80cb-f2a7d7b60f73', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'd152399f-ea5a-4284-815e-3fcf9f4fa8e2', 'fc862c96-ade6-4ea9-b094-ed060ea1e1ba');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('41077cd3-e997-4f19-941e-302ac3790fb5', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'd152399f-ea5a-4284-815e-3fcf9f4fa8e2', '53bd6e0e-caaa-4e28-bf51-19da0bc10a7c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ff2c8312-4902-4d34-b6bd-263e6a00202b', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'd152399f-ea5a-4284-815e-3fcf9f4fa8e2', 'e676a306-9ae1-4a99-9500-b7661dd66892');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('43331e52-f0d4-4662-8ef5-cbfea5eb5577', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'd152399f-ea5a-4284-815e-3fcf9f4fa8e2', 'fb4a2477-852e-498c-bcf7-7fd43a2cb1c2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a65a2d63-e6b8-4e5d-b17a-122895a158d3', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'b3df936b-6096-4134-ac10-8ccb43c4c126', '367b1cf2-a265-401f-bedd-f6751fe64b0d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8bceef3c-1dc9-4cd8-b53d-7e9c592aa95e', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'b3df936b-6096-4134-ac10-8ccb43c4c126', '33f9e682-97bd-4788-ac2b-518f14112779');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('51aab87f-b2ba-4cc2-a00e-7ddc340d18fd', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'b3df936b-6096-4134-ac10-8ccb43c4c126', '678c4a2d-32ba-4887-8f0e-b4b4c65c4f61');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b29d4e90-6eac-4589-885a-87c25d43cac1', 'e75951d9-3f76-41f7-86fa-3c1f58efff7d', 'b3df936b-6096-4134-ac10-8ccb43c4c126', '1691ef40-e49d-4823-81de-ae57ca6a932c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4ddb365e-e033-40cb-991b-039baabf1d87', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '24df8278-25b8-4a57-b101-e9ecd092065e', 'a43aa7a6-4817-4982-a88d-fa3421ec83f6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('94d7ea25-555e-4718-a3f9-58f689d7d2b6', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '24df8278-25b8-4a57-b101-e9ecd092065e', '4eb6d3ed-fc49-48b1-885f-44a038a3ae1e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('90c043bc-cd33-4dad-80a0-c4cdbeb17470', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '24df8278-25b8-4a57-b101-e9ecd092065e', '00e8886b-d344-4dea-b381-a483dded3d5a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f4cec0e6-fc6a-4a68-b7f3-912b08172cb7', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '24df8278-25b8-4a57-b101-e9ecd092065e', 'd05ca781-f6eb-48e4-bfe6-3b00e0250766');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7cca7b75-d7b7-4b9c-b2c0-d1404a11420d', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', 'ec50d760-2883-440d-92d4-90b500768c59', 'c4ab3865-5a5c-4a22-8dd3-2f1460d70c9a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6fa585b6-f763-4c8e-aeec-7bd5a0ce7a37', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', 'ec50d760-2883-440d-92d4-90b500768c59', '3bfeb58f-38be-400b-bbc7-ca052fe0b25f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bb9761a4-6566-4e0d-bc43-078bbc16fb33', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', 'ec50d760-2883-440d-92d4-90b500768c59', 'f5ff98fa-699e-4ef1-b6c1-a433205a4823');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b50583ea-2b63-40dd-ad50-189c3a6ec293', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', 'ec50d760-2883-440d-92d4-90b500768c59', '900ad733-3f1d-45da-b406-ac6af0749ff7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5fa62631-0011-4d1a-8d4b-141fae8601a8', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '16d13bd0-5b95-4777-acbb-989cff370c98', '936dee01-2bd6-4f23-bef1-e800904b3593');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('70941028-02e3-4129-a862-5bc007f7a6d0', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '16d13bd0-5b95-4777-acbb-989cff370c98', 'a5ce2e18-ab2f-41b4-a549-b11ce8b64d48');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('531d7897-b685-4da1-9064-6ac9856834d9', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '16d13bd0-5b95-4777-acbb-989cff370c98', 'c4778cac-499e-4d57-ad72-785fdcc4976b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('048fb540-2693-4ea0-b6dd-7b6b480a292c', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '16d13bd0-5b95-4777-acbb-989cff370c98', '79ec71b9-086c-4765-8434-ce92c8393142');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7f6f5d74-bac4-4e29-96a6-7427a1e1d590', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '8c6d41cb-afd7-4108-a001-1490b81930c9', '0384c59d-7e67-4fd6-83ce-06579af83fcb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d8622151-7216-4166-870b-7a990a20eb03', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '8c6d41cb-afd7-4108-a001-1490b81930c9', '365d293f-a2aa-4f39-b478-bb3e4327da0a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3e3c8cf8-f891-4581-86ba-be8f8202a703', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '8c6d41cb-afd7-4108-a001-1490b81930c9', 'f9a93051-7425-4b9f-96c2-c5c65696024a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f45285b6-4407-43e3-bb86-4f972c54076f', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', '8c6d41cb-afd7-4108-a001-1490b81930c9', '0258f11d-399b-4ff5-af7f-fc563991d091');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3a95c9ec-8dc5-4da1-b352-2dc8416fa823', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', 'e2aa2f0e-17ea-4586-acc2-7c229c6cea69', '9925c14f-f15e-45d4-8e97-9a7133302f9e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5c75bafa-5d1d-4d89-a2ba-8e5f1b912021', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', 'e2aa2f0e-17ea-4586-acc2-7c229c6cea69', 'f9b28a82-d956-41a9-94a7-feea90d0550a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bfdc162a-a571-463c-b34a-7920e1b8b2c9', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', 'e2aa2f0e-17ea-4586-acc2-7c229c6cea69', '12fa8e59-b7b8-469e-a21c-ba1c1ddda7a1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('71d7669f-c103-4835-8140-36da546673e5', '48abe5a1-9ab3-4b7e-bafb-6dfab7193e80', 'e2aa2f0e-17ea-4586-acc2-7c229c6cea69', '3eff2d20-9e70-4591-8b6d-70aeb870595c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('378139f0-2dd1-42e1-8a39-6674f878b27e', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', 'cbb8cebf-c42c-47f1-95c1-4c8d79c898d4', 'cff5a080-0b82-48a9-ac93-fa439c5280ed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a1707b50-19a2-40b0-9712-fa8604c8a358', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', 'cbb8cebf-c42c-47f1-95c1-4c8d79c898d4', '7e75fe11-9bb4-471d-89de-4f9cbae6018c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6b773c90-80e1-462b-8cfe-fdf99546a88a', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', 'cbb8cebf-c42c-47f1-95c1-4c8d79c898d4', '63d715a6-a495-4117-998a-3cfdce9b793c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ad1bffd9-3330-47ff-95fd-7b94a9da69c7', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', 'cbb8cebf-c42c-47f1-95c1-4c8d79c898d4', '4ede7317-a746-46c2-946d-52d3476a81fb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2bd1dc0f-c77c-4832-9a05-504ddbe539b5', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '344550e8-3220-4259-8156-7ad7defc66e8', '00e328a2-ac61-4e96-923f-7245ce183491');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9b065481-1cd3-4210-889d-37b151d47375', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '344550e8-3220-4259-8156-7ad7defc66e8', 'bb151e0d-dc8e-4e23-91c8-14437a219e37');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('da78c3e3-3779-421d-bb59-e787a3d4f8f7', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '344550e8-3220-4259-8156-7ad7defc66e8', 'eb79b719-75cf-4a1c-8a69-3f25c3afa747');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7bfd56de-4855-47c6-8904-ee7ac72aa7b0', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '344550e8-3220-4259-8156-7ad7defc66e8', 'be293d70-2a5f-477c-8731-c6db6b78d9cc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e3b48669-4341-4b0d-bab4-51132c12dfe7', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '3d55503a-05b7-4b48-a56f-db0d48eff161', 'a6058f6a-7149-493f-9aca-aeda76a15e50');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c9a05bda-d5e2-40db-9823-5d7b9f7d2fc6', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '3d55503a-05b7-4b48-a56f-db0d48eff161', 'e4d0cb86-0de1-4e19-ad35-ef861115d0ca');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('aa51af35-eac3-4041-b519-5ed5d8665cbd', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '3d55503a-05b7-4b48-a56f-db0d48eff161', '64cb8e96-8a8f-425f-88c8-96c3d0f1a0de');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e434dfc1-fdf3-4234-a643-c8f09aa9d488', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '3d55503a-05b7-4b48-a56f-db0d48eff161', '842f5a90-a3e8-4639-8158-3f3b20125e03');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('faddd8a7-30d8-4c36-b353-7e89d6b797f2', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', 'bd8e106b-f776-4d39-a2cb-646550721fa2', '733c9758-08dc-42da-a61e-fb4400875b8f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fe3d8377-91f4-4b48-907d-8d72c30aaafb', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', 'bd8e106b-f776-4d39-a2cb-646550721fa2', '83af5cc2-a462-42c2-ba9a-37527d029c6e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2bf656e0-31b8-4c74-9f13-e4567067e807', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', 'bd8e106b-f776-4d39-a2cb-646550721fa2', 'b3332b7a-6eba-4809-a3e3-90657982d21f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e4fbe904-18c6-42b0-ba28-73090155aca4', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', 'bd8e106b-f776-4d39-a2cb-646550721fa2', '35733810-6d2b-44a5-b2f5-a80f25facca0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('32ee69ad-fa7b-4767-9af1-bcf87f08255f', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '2798ac4a-7683-4970-8ea4-a62f4caf7a87', '8229e77e-7402-439a-904e-6b62f58d0c6b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c60e53bb-9041-4f68-b7a3-5882be4a1b51', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '2798ac4a-7683-4970-8ea4-a62f4caf7a87', 'd37f19a7-7cb9-4a4e-b309-b966f223b750');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8a01ac97-5862-4622-912d-57e91937ebf5', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '2798ac4a-7683-4970-8ea4-a62f4caf7a87', '22037a2e-93f4-4a6a-b157-bdb1fe30ffeb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('58a9a8e0-87fd-4da8-8ed1-f08585cc1b6f', 'c6f35a91-fc41-40c2-a5e8-2e704d82f5c3', '2798ac4a-7683-4970-8ea4-a62f4caf7a87', '3126ad7f-72c3-4af8-bfc7-8ad4dc8728f8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7e389277-d8f7-4dbd-927b-2ddfb511471c', '029885d8-eb71-47fa-89f0-508b94a6695e', '09d3b427-c956-4fad-a51e-b042e3e25217', 'b3b1fa1d-53ad-4b44-a7f2-20fe789f67bc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1910f757-bdb5-4e1d-a977-7f3791eac614', '029885d8-eb71-47fa-89f0-508b94a6695e', '09d3b427-c956-4fad-a51e-b042e3e25217', 'c0fc4a49-2e59-4963-b44f-b38d52c8588d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cd35e9ec-d771-4faa-bfe2-c3616017f688', '029885d8-eb71-47fa-89f0-508b94a6695e', '09d3b427-c956-4fad-a51e-b042e3e25217', 'bcdef530-963f-4437-b215-78bb90604440');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b3b56859-7a8d-4611-b274-9639b4336870', '029885d8-eb71-47fa-89f0-508b94a6695e', '09d3b427-c956-4fad-a51e-b042e3e25217', '5439f122-4628-4830-9658-ca86274b9b0e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d9300ee2-3167-421e-a2c0-9961476caf89', '029885d8-eb71-47fa-89f0-508b94a6695e', '87787278-f33b-4bc6-8717-7665808969ec', 'e111e787-ddaa-4665-bd42-3df26372a07f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0f524329-eb16-48da-8789-d3f74c256917', '029885d8-eb71-47fa-89f0-508b94a6695e', '87787278-f33b-4bc6-8717-7665808969ec', '36c3c9f6-24f7-4b41-834c-021a5d2425eb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('26cf88d1-fc1f-48dc-b375-0d056014b3be', '029885d8-eb71-47fa-89f0-508b94a6695e', '87787278-f33b-4bc6-8717-7665808969ec', 'be696215-f13d-4334-b367-66e3d496b3ed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('67729cb3-8ae1-4c38-9e24-ca2da941559e', '029885d8-eb71-47fa-89f0-508b94a6695e', '87787278-f33b-4bc6-8717-7665808969ec', 'a5dd7726-2849-43ac-b9d9-7ab4eeecf2d3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9ed8d050-8440-443d-8d50-202ead5eb2ca', '029885d8-eb71-47fa-89f0-508b94a6695e', '25cb72e6-dc2b-4448-8b97-ad8509758aa6', '2081403c-d7f0-4d53-bab9-8c1d2dd66ebd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('75154342-46fc-4db9-b97a-6406d66fec9b', '029885d8-eb71-47fa-89f0-508b94a6695e', '25cb72e6-dc2b-4448-8b97-ad8509758aa6', 'c8644c9a-4a59-4716-96a1-af43729d0ec9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ff1a386c-6725-49b0-8318-744f1c5ce4e3', '029885d8-eb71-47fa-89f0-508b94a6695e', '25cb72e6-dc2b-4448-8b97-ad8509758aa6', '5eb5260d-17f5-43c6-a12b-424831c56edb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('926b34a8-b785-4db6-8161-07a1478c650e', '029885d8-eb71-47fa-89f0-508b94a6695e', '25cb72e6-dc2b-4448-8b97-ad8509758aa6', '5528893f-242a-4d9c-a317-28f3acdb994e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('72e90972-e6f6-4240-bd16-52c112723e86', '029885d8-eb71-47fa-89f0-508b94a6695e', 'd8292778-1d05-484c-afb5-a372b3d13401', '3d2ec436-acc6-4863-a842-8c32a9172490');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a2b8ad7f-fc96-45fb-9089-9138c18b7189', '029885d8-eb71-47fa-89f0-508b94a6695e', 'd8292778-1d05-484c-afb5-a372b3d13401', '1f610af9-49d9-4018-986c-71c3efa1495b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('411b707f-6322-408d-ad92-363f6aff2416', '029885d8-eb71-47fa-89f0-508b94a6695e', 'd8292778-1d05-484c-afb5-a372b3d13401', '14d581c2-b254-4588-af61-b3f16b54e9b4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6982b54b-9034-438d-bf9f-b3d6b64edf17', '029885d8-eb71-47fa-89f0-508b94a6695e', 'd8292778-1d05-484c-afb5-a372b3d13401', 'fcea8442-2dae-4101-bd66-51de618af71f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('454bff57-4031-4df7-8924-162b8936a30d', '029885d8-eb71-47fa-89f0-508b94a6695e', 'e64dc87f-43d6-48dc-899d-a203a294d10c', '66480c6d-2acc-45f0-8a23-2437d64b0848');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bed57371-cff4-4f11-93b0-8d9ac113fafa', '029885d8-eb71-47fa-89f0-508b94a6695e', 'e64dc87f-43d6-48dc-899d-a203a294d10c', 'e469001a-7b56-4c16-83e3-aeff4bfbb384');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6c717c3e-2a6d-4ead-9585-be846bc0a036', '029885d8-eb71-47fa-89f0-508b94a6695e', 'e64dc87f-43d6-48dc-899d-a203a294d10c', '659ec55f-23ee-4db8-98d9-d293e6e1e32c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('84347d8d-121d-44c9-9120-4e6eb64ebd28', '029885d8-eb71-47fa-89f0-508b94a6695e', 'e64dc87f-43d6-48dc-899d-a203a294d10c', 'a73d9f67-0216-41a5-92b0-09c0f4403040');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cfe02db7-9c3a-4f4e-ba81-d6ac5e145790', '38bbb269-74d7-4401-a343-cde7e8da8987', '5c64e6e2-5dbe-4baf-8db2-f83ce260235b', '29c4adbc-23da-41ce-931c-160c750187e9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('912df785-9964-4c89-94d4-c98b1d755d0a', '38bbb269-74d7-4401-a343-cde7e8da8987', '5c64e6e2-5dbe-4baf-8db2-f83ce260235b', '4b45ad3e-712f-44f1-ab82-f7d9f86c113b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a08d75f7-889c-4873-bdae-f2ecb1b8fff7', '38bbb269-74d7-4401-a343-cde7e8da8987', '5c64e6e2-5dbe-4baf-8db2-f83ce260235b', 'f49f2f75-1582-4de7-a4ff-d99a3eda751b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e3f67c67-0d2e-494f-8a33-042bf2d776dd', '38bbb269-74d7-4401-a343-cde7e8da8987', '5c64e6e2-5dbe-4baf-8db2-f83ce260235b', '272613d3-e41d-41a7-a950-5dd7a8c61071');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e223e956-03b8-4b60-86a3-0ca00546b1fa', '38bbb269-74d7-4401-a343-cde7e8da8987', 'cf110e0a-966b-49b9-885b-41af369e93e4', '8848f2a4-082a-4a94-9c05-eb216ae8d76d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('02607baa-f29c-47db-9491-f1ecaa7f41cf', '38bbb269-74d7-4401-a343-cde7e8da8987', 'cf110e0a-966b-49b9-885b-41af369e93e4', 'faabe1bd-bdb8-4d14-854d-3e35001fbf4b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('02358c90-f952-4893-8b1d-6e45b3d095b2', '38bbb269-74d7-4401-a343-cde7e8da8987', 'cf110e0a-966b-49b9-885b-41af369e93e4', 'a9c5470e-8732-4f6f-b4df-e49fec68b30a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('daacacb7-8eb4-4481-822e-ba4e96934f9d', '38bbb269-74d7-4401-a343-cde7e8da8987', 'cf110e0a-966b-49b9-885b-41af369e93e4', 'fa7e2a92-ba8c-487d-ab2d-bea0c1030688');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('65b1b504-fe57-45c3-8f8e-97045e585bb7', '38bbb269-74d7-4401-a343-cde7e8da8987', '8e29226c-254f-4fa9-afb1-eeff50532d73', '7fc74686-c9e3-485c-bd9f-884465c936f0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5ab823a7-819b-465f-a51c-519fc91edde9', '38bbb269-74d7-4401-a343-cde7e8da8987', '8e29226c-254f-4fa9-afb1-eeff50532d73', 'b9f1dfa9-b21c-4ccd-8e2b-d3ee32c57c38');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f95903c7-cb0f-459a-84cb-5a2e5c1e8d61', '38bbb269-74d7-4401-a343-cde7e8da8987', '8e29226c-254f-4fa9-afb1-eeff50532d73', '49f609b8-e901-4418-bced-ec1ca69bfc3b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('54c7d5bc-44b6-4a07-9877-cf80ba749d57', '38bbb269-74d7-4401-a343-cde7e8da8987', '8e29226c-254f-4fa9-afb1-eeff50532d73', 'd077e859-6d1d-4fe8-a16a-8a8587670625');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('97ddb3ef-619d-4349-8412-90a26ed22452', '38bbb269-74d7-4401-a343-cde7e8da8987', '100cbd61-36da-439c-af9e-ffc99ed61339', 'c6a600d5-6277-47bb-9fe4-6980a05c8f7a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('17a79a35-5e11-4592-9ce4-98f80d302631', '38bbb269-74d7-4401-a343-cde7e8da8987', '100cbd61-36da-439c-af9e-ffc99ed61339', 'e4566035-963d-4929-a879-ee4e044c169e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4ac3e067-1bd8-439e-9e6c-06e7d046f0a9', '38bbb269-74d7-4401-a343-cde7e8da8987', '100cbd61-36da-439c-af9e-ffc99ed61339', '6b569d5c-3a86-496a-b0ed-80747373b628');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dc74a179-d0e2-49f4-81b9-fb57ae3ac80a', '38bbb269-74d7-4401-a343-cde7e8da8987', '100cbd61-36da-439c-af9e-ffc99ed61339', '8e4b573e-1142-4b67-aa2a-72f90d3ed4ce');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9dfb2faa-2c25-4907-9159-0397f3ed8039', '38bbb269-74d7-4401-a343-cde7e8da8987', '601e41ca-4dde-415d-b9d4-7a077c452cfd', 'fb1d5f92-3601-4393-a798-0fbb59742245');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8f4b7cf7-d45d-40ff-9287-3ff9881b1ea7', '38bbb269-74d7-4401-a343-cde7e8da8987', '601e41ca-4dde-415d-b9d4-7a077c452cfd', 'ccd7c64c-7d82-4c49-8816-4928c63d7c9d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fe9f116b-18c3-4fd9-beca-6fbbe621e1c5', '38bbb269-74d7-4401-a343-cde7e8da8987', '601e41ca-4dde-415d-b9d4-7a077c452cfd', 'fe1ef101-e865-4c6e-afb3-8295f8e5a868');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cf172a74-456f-417a-a1d6-d454785f802b', '38bbb269-74d7-4401-a343-cde7e8da8987', '601e41ca-4dde-415d-b9d4-7a077c452cfd', 'fc428931-f402-47df-9277-514b2f4321c1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('812ec2e4-c4bc-48ed-8cd2-4227841b33c6', '9db74db4-6b04-45f7-a187-3a941c75a015', 'a282d1e8-f420-4ab9-bb1e-b7f1d1be7902', '198c5cf8-d666-46a7-8fdc-024b700df23a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d581ab0b-e52e-4010-a125-b14314cb5e51', '9db74db4-6b04-45f7-a187-3a941c75a015', 'a282d1e8-f420-4ab9-bb1e-b7f1d1be7902', 'b685b894-1c79-4379-90d0-66c8172ed1b6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cce69750-5731-4894-abfd-2c6de9eba4a5', '9db74db4-6b04-45f7-a187-3a941c75a015', 'a282d1e8-f420-4ab9-bb1e-b7f1d1be7902', 'bde6e539-13e9-4d53-a59d-01f64cc42b0f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('415cc36d-f0ff-4726-b6b4-4e2bac350821', '9db74db4-6b04-45f7-a187-3a941c75a015', 'a282d1e8-f420-4ab9-bb1e-b7f1d1be7902', 'a3da32a3-dd57-4364-ae4c-eadc1a13cd35');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('61cdabab-bd3b-4929-8ecd-460a7dc14794', '9db74db4-6b04-45f7-a187-3a941c75a015', '1eb0b99f-5bf4-4a49-b688-63dad1556772', '30e81636-7392-4abf-851d-02fdfabf2efd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d983f772-1b40-4f33-8a56-733ac07c83cf', '9db74db4-6b04-45f7-a187-3a941c75a015', '1eb0b99f-5bf4-4a49-b688-63dad1556772', '24333ac6-9ca9-44fc-8514-c95e461be0d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('23df6c47-b1e0-43bb-8fb9-91d3501e708b', '9db74db4-6b04-45f7-a187-3a941c75a015', '1eb0b99f-5bf4-4a49-b688-63dad1556772', 'c0a3b4e5-0337-4635-9941-10e01c921ea4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('550e135d-3365-4075-a3a6-9eb23e5efa6b', '9db74db4-6b04-45f7-a187-3a941c75a015', '1eb0b99f-5bf4-4a49-b688-63dad1556772', 'd763883e-8b6c-422c-a7f1-5b536010e2a4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7b89a7c4-49d5-4a3c-a7fa-9c637f7f4623', '9db74db4-6b04-45f7-a187-3a941c75a015', '1d840fff-c961-4694-894d-ee6f16ed4ca3', 'd9721831-5dc0-4298-bca1-775334c50c8f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e1e8ec35-1efc-440c-a6ff-53fa40f833b3', '9db74db4-6b04-45f7-a187-3a941c75a015', '1d840fff-c961-4694-894d-ee6f16ed4ca3', '6720ee0c-fba2-4db5-8e1e-4be80b41644a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3c4fc5c6-ff3d-4256-8fb1-1fe00de32fcc', '9db74db4-6b04-45f7-a187-3a941c75a015', '1d840fff-c961-4694-894d-ee6f16ed4ca3', '42037c3a-8725-40e5-94fa-597a338ee514');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('095ae8f6-0f57-4389-bda5-a40df1ab4a91', '9db74db4-6b04-45f7-a187-3a941c75a015', '1d840fff-c961-4694-894d-ee6f16ed4ca3', '81c87014-c967-4abd-841d-ed0bf0a51168');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f9d9b646-fad4-4cb8-8559-4c343b864748', '9db74db4-6b04-45f7-a187-3a941c75a015', 'adc33152-5659-4d57-b10c-8b78e2e441a1', '772c85a2-35ba-440f-80bb-693c36613942');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('19f68f91-4366-45d9-8f0b-1af6a4c98227', '9db74db4-6b04-45f7-a187-3a941c75a015', 'adc33152-5659-4d57-b10c-8b78e2e441a1', '94135e12-fc06-4b73-ad53-2701801be646');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e6c897ec-d4be-4963-9423-3da27d33b7ae', '9db74db4-6b04-45f7-a187-3a941c75a015', 'adc33152-5659-4d57-b10c-8b78e2e441a1', 'eb4f9706-9757-410d-860b-bef2b8e5c36d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('24fc0069-b47b-4b1c-8f03-b7ca01deae59', '9db74db4-6b04-45f7-a187-3a941c75a015', 'adc33152-5659-4d57-b10c-8b78e2e441a1', '661f1ed6-e8c0-4dbe-a93f-234dabb5c304');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3c4ef517-3a61-415b-88d4-f1a3215c59b6', '9db74db4-6b04-45f7-a187-3a941c75a015', '7f5dbee7-43e7-44c1-ba70-6c994124f7f6', '8653bf43-8d19-4b96-b6fd-00447623552d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f5aaa4a1-8262-4a7f-a100-4742c308ccb0', '9db74db4-6b04-45f7-a187-3a941c75a015', '7f5dbee7-43e7-44c1-ba70-6c994124f7f6', '6928ba31-f1b9-4ce6-be59-f9856a05151c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b6b26eac-be22-4764-afdc-1ea555f91776', '9db74db4-6b04-45f7-a187-3a941c75a015', '7f5dbee7-43e7-44c1-ba70-6c994124f7f6', 'cdfdcae9-63e8-4f8e-8d24-a17d515e3470');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('282eeb2b-ac8f-4c6c-ba1d-5eda7cfc6ed2', '9db74db4-6b04-45f7-a187-3a941c75a015', '7f5dbee7-43e7-44c1-ba70-6c994124f7f6', '293753a4-4826-4fe7-8019-b606a5402b89');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('391e6982-177d-4134-bdf9-17818a34b18b', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', '9c979e4a-c7c3-4a88-8437-164795fe37ef', 'b58ef350-3503-4003-aead-7eb1bbfa8b0d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('25498feb-1e41-4fea-b5a8-251ce98b0522', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', '9c979e4a-c7c3-4a88-8437-164795fe37ef', 'ad03b0a3-8c76-492f-8c59-20c1296b0444');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d53644d7-bd5a-47a0-a215-d199a056d2b5', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', '9c979e4a-c7c3-4a88-8437-164795fe37ef', 'bf0adb27-1047-49ca-a1b7-9f075f6b5192');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('47c97c81-fa81-41d5-8a89-6d8937a432ab', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', '9c979e4a-c7c3-4a88-8437-164795fe37ef', '6c0844ba-f572-49f4-9560-0bc1e42f6bce');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4f965aaf-dd3c-4f20-a526-19a7a0b260c4', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'a62f352a-85c1-418a-a6a0-7ee31aed857f', '6a3017b2-430f-4d42-a930-0cfc9b376230');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('02f2df0a-6097-450b-8945-80e6865c2a46', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'a62f352a-85c1-418a-a6a0-7ee31aed857f', '822d0962-e805-45f7-9bbb-bb637ee27548');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1e7cc934-0c6b-40ed-a378-78c0508306d7', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'a62f352a-85c1-418a-a6a0-7ee31aed857f', '59e7ae8d-d79c-47c4-a7d4-c621d023adfc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('526ed445-0040-4ac5-956b-ff23c561160d', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'a62f352a-85c1-418a-a6a0-7ee31aed857f', '8da5cb49-c1ca-465d-b2fc-487697129639');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5e364c62-ca8d-4e85-bd63-7c328ba74745', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'd40c4959-9b68-4883-9072-db666be591b3', 'c3248fad-3148-4235-bb5a-dd3ada010f4e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3959d7bc-e7fc-4347-9728-17e5eeba340f', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'd40c4959-9b68-4883-9072-db666be591b3', '91cebeaa-7c85-4d00-a30e-1cfeccf4382c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('df2bcda1-d5bd-4df4-a993-e1d6ce2d4819', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'd40c4959-9b68-4883-9072-db666be591b3', '75e0ab62-6eb5-4415-946d-e9d684c4005f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('35f7eee9-65d0-4fc8-82c4-918528f6dfac', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'd40c4959-9b68-4883-9072-db666be591b3', '2df8f19c-e803-47f2-ad20-07f348de4fed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('12691b74-8406-407e-a786-3c83c2b9a823', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', '650ae48c-675a-4ff8-9504-df1498504efd', '36d298dd-5273-4670-927a-4635299a6076');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('33cbc7d3-2e85-4863-8ccd-8c69a20d6793', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', '650ae48c-675a-4ff8-9504-df1498504efd', '51d4ffee-8be4-4548-99a2-d65faf928ec6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0d09dfbb-5de6-48d6-a8a3-891e6dbbeed4', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', '650ae48c-675a-4ff8-9504-df1498504efd', 'c3901370-e4cb-4ef4-9c83-4038744a2280');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4ff1351d-1228-4d44-ab2a-2f71d6e009c6', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', '650ae48c-675a-4ff8-9504-df1498504efd', '3e4c83e5-781e-42d1-a78e-b5869de88aa1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('61bc879e-bcb1-4e3c-bc9a-17ca7a61b91a', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'fb8a286d-d448-41dc-932c-ec2d419d6e97', 'efd4d5de-d81d-4c02-ab71-555f1200b505');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('03507542-c566-46b9-a956-aea35466170c', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'fb8a286d-d448-41dc-932c-ec2d419d6e97', '02bb44c4-5d53-4f9d-81fb-075627cd675a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3b2b337d-ec66-457e-a656-1308c007ce89', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'fb8a286d-d448-41dc-932c-ec2d419d6e97', '91778e59-1a3b-4aba-9f10-2e62d676172d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f8031ed6-98b6-4724-bdef-3cd48fcdfbc8', 'ae328c84-5671-4e4b-b4ed-d3ca2bdff3a3', 'fb8a286d-d448-41dc-932c-ec2d419d6e97', '7785e539-e7a6-492b-904d-38f223652c77');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('093d94be-210a-48b4-abb2-6043219471b9', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '70b966af-93e3-44bc-a4ed-b1ba3bb89a2f', 'a46e8b93-11a0-409c-ae90-4624886d9ea4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f41a1eee-eaf7-485e-bbd8-8323fdf6e47c', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '70b966af-93e3-44bc-a4ed-b1ba3bb89a2f', '0a5c2c3a-5441-4e3d-b0d0-7f2c96de2530');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d36430ad-b522-4c54-b4ef-44754a5ae85f', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '70b966af-93e3-44bc-a4ed-b1ba3bb89a2f', 'ed8005db-9590-41e8-a5ff-f678140ce378');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d7c85792-52de-4246-8cc1-e265448941b1', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '70b966af-93e3-44bc-a4ed-b1ba3bb89a2f', 'acbfb151-33bd-4c2f-8d53-626a06d51db5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c472e80b-2365-4eb1-b835-86de7d302923', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '89dd3942-e09f-4ca1-993e-c79870fe3f25', '13657444-e866-47b3-8beb-c9c339c55824');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('10652f0f-51f7-406f-802c-e439ad596f1e', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '89dd3942-e09f-4ca1-993e-c79870fe3f25', 'b9cdc3f6-96f8-4a93-858c-af808661e371');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9ef38236-4497-4330-85ff-2b32be72290d', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '89dd3942-e09f-4ca1-993e-c79870fe3f25', '00541d0c-9a53-49b1-8ba5-9cb98880a743');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6e1daa40-b285-4a43-82b1-ac9ade0e0692', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '89dd3942-e09f-4ca1-993e-c79870fe3f25', '4620a459-a0ca-495b-a12e-c412774b54a8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4021c228-16f1-43d1-b6df-0173ccc5f755', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '9aa52597-c510-4c01-971f-dc262efd57ba', '6e304520-89c6-447d-8d6c-6da302b031dc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a8a6d8e1-2f99-48c6-bccd-2e39ce6018d7', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '9aa52597-c510-4c01-971f-dc262efd57ba', 'a56bf225-ebdb-4ce3-b897-3ac9dd55d972');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4d393586-b7df-4195-aff9-5b23361c177c', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '9aa52597-c510-4c01-971f-dc262efd57ba', 'f74dbc5b-fd2a-44a5-9759-ba6ee0ab5dab');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ba2b0aac-f421-4217-a66e-961f90f5e27b', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', '9aa52597-c510-4c01-971f-dc262efd57ba', '0830b893-1e58-4f23-8ee9-33e1f8cb25df');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ad0e5672-3b15-44fc-bacf-0c15511b1649', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', 'b1ca045e-5572-45e9-8e90-84774466e865', 'c7c4486f-3dd5-4a65-bcea-0a07d7360336');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('90769fa5-2723-4eeb-9aca-27dff493bb07', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', 'b1ca045e-5572-45e9-8e90-84774466e865', 'f6a77b3e-f840-41ae-b473-bd5181679a88');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('329c1cf8-4ca1-4d47-bd56-e578400fc161', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', 'b1ca045e-5572-45e9-8e90-84774466e865', '38fe81be-4da4-4450-943e-157ceb86395e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2c7afa9d-bcfd-42f5-ac8a-ae38efc4a647', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', 'b1ca045e-5572-45e9-8e90-84774466e865', 'b882fbef-212a-4eae-ad5d-8e1219d0332b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cb4b5119-894f-41e4-957a-ae6508ccec8e', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', 'e236bf16-9012-4481-9159-160935e7aaac', '8e8dd5af-2cff-4f36-95d9-b92a475cdd15');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9bd5c221-87f6-4d52-9dd3-3a1d99b04eb3', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', 'e236bf16-9012-4481-9159-160935e7aaac', 'cd052717-8676-4a81-8d47-a53dfa99709a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b4641b82-5447-4aae-a53f-a6b7dbdb6ffa', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', 'e236bf16-9012-4481-9159-160935e7aaac', 'a26ba1b2-9ed4-4b73-9dd1-f9c26a613e46');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e857ca0b-32ed-4796-a987-7cae90432dc4', 'fa41f596-cec8-44aa-b720-d0cb73ec35f4', 'e236bf16-9012-4481-9159-160935e7aaac', 'de782244-4fcd-4c14-96a4-97645241c3b3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('49e0e283-fa1d-40ab-8cf9-606c8007fd2b', '97e9a608-cfa0-470c-94b3-136c372bb5d2', 'd57a3b35-2cc9-49db-ae7e-895940131356', '5043350e-972c-4de7-94bd-c439f8e17795');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f737cfae-8a17-4d10-88f5-31311244236d', '97e9a608-cfa0-470c-94b3-136c372bb5d2', 'd57a3b35-2cc9-49db-ae7e-895940131356', '72359d7e-e416-4c09-bf01-a8abb41ddd0e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c69f4183-0b6d-403c-96b9-a3fc1f13d5a5', '97e9a608-cfa0-470c-94b3-136c372bb5d2', 'd57a3b35-2cc9-49db-ae7e-895940131356', 'bee4747f-b99c-4186-afe9-b400e4527407');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fb04a4ee-caad-46b1-bf1b-7b86ea4849b4', '97e9a608-cfa0-470c-94b3-136c372bb5d2', 'd57a3b35-2cc9-49db-ae7e-895940131356', '9bed46fc-3484-4933-849a-8c9e3812dc93');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('141f73fe-b9d7-4fca-97f2-48320a863c36', '97e9a608-cfa0-470c-94b3-136c372bb5d2', 'e0de8062-6b78-425d-8fe2-287a5437cc2c', 'e0921425-9ade-4335-b970-9ee443d0bbc7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('41004d80-4bac-40cd-94ae-582d94bdd330', '97e9a608-cfa0-470c-94b3-136c372bb5d2', 'e0de8062-6b78-425d-8fe2-287a5437cc2c', '5d748415-16ab-4879-936a-f50d15daa897');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b82e40f9-6ea2-47d9-8ef7-2a202a034627', '97e9a608-cfa0-470c-94b3-136c372bb5d2', 'e0de8062-6b78-425d-8fe2-287a5437cc2c', 'f0887d15-0ca9-4b2f-91e7-5c358d1beb03');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('782a1c13-9ff1-4484-aca0-d446262f35e6', '97e9a608-cfa0-470c-94b3-136c372bb5d2', 'e0de8062-6b78-425d-8fe2-287a5437cc2c', 'df1a4fa7-b284-4751-b249-bcef322a4dcc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d6d11705-6dba-4692-8f91-44d025c1d2c9', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '9d46aca5-0bc0-4b8d-8d08-0c0aace9ba46', 'd00c4c7b-3121-4325-8ece-691271da3cff');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fa945ba1-65d3-4a85-8491-9cef1c15182b', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '9d46aca5-0bc0-4b8d-8d08-0c0aace9ba46', 'fd3d6100-1b8d-440b-b073-1e3cadd94177');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('17fdc4b5-8660-4168-9eac-335d4869cbb4', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '9d46aca5-0bc0-4b8d-8d08-0c0aace9ba46', '6b4280b2-dce1-4332-a8cf-ff37f292df89');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cbc783e2-a685-443d-b300-f1e129744d81', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '9d46aca5-0bc0-4b8d-8d08-0c0aace9ba46', 'ce8a784a-3d69-4ffd-9f88-bab2445f38dc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e031a897-794f-40d9-ac59-cd34893e92b6', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '03862d1b-2ba7-4ae7-872e-2e4880d82bc1', 'c2e8699a-e32e-412e-ab10-775bb193e648');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('649d28ba-aaf9-464a-89e1-855290ea6d8f', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '03862d1b-2ba7-4ae7-872e-2e4880d82bc1', '850f1825-86ca-469b-86e1-af1ea102d404');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fefe0a70-b05c-47a6-93db-a9d962d4ccdd', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '03862d1b-2ba7-4ae7-872e-2e4880d82bc1', '949f600f-3706-4d4f-b795-7e8f46d5e1fe');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2a69a763-25fb-4448-8724-bedb87ce74c7', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '03862d1b-2ba7-4ae7-872e-2e4880d82bc1', 'd256eea7-ffaa-411a-9b18-4d3066590024');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('334c1776-106a-4372-895e-e1c9ecff09f6', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '3d34d826-8664-4fec-8641-37535f324c3c', 'bc6feaeb-0232-4664-959c-67413547fbe7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('07856756-6d51-4bf9-858d-deb329b85e36', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '3d34d826-8664-4fec-8641-37535f324c3c', 'c385beb0-30a4-43b4-8775-e3793fa465e0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c3e92017-a55f-4331-be37-23b15f46e776', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '3d34d826-8664-4fec-8641-37535f324c3c', 'cc696141-cbb3-429a-b8a7-262f69324335');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8b51c848-be8a-4b04-a02a-4bf414ed0a94', '97e9a608-cfa0-470c-94b3-136c372bb5d2', '3d34d826-8664-4fec-8641-37535f324c3c', '70a94820-89f6-4163-9cdf-33645ad65e04');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6f48ca55-a92a-4e86-b734-ee92eed9295a', '435185fd-a819-4769-92f7-39e59157ec93', '74109fec-75b6-4f45-8e19-d187f6188dba', '16a3e42f-6bb0-43e7-a6df-1c1a747b89d5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('12910cef-c4cd-4730-9ac4-22932d2eae3d', '435185fd-a819-4769-92f7-39e59157ec93', '74109fec-75b6-4f45-8e19-d187f6188dba', '4dd81137-b773-47af-9d7b-fc84dea2f5a0');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('77ea7231-90aa-4d4b-9d44-404d3f79da22', '435185fd-a819-4769-92f7-39e59157ec93', '74109fec-75b6-4f45-8e19-d187f6188dba', 'd7e45160-8a53-4106-896c-16ddc234957b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2439a67f-c26f-4cea-b10a-466f80cfaa3e', '435185fd-a819-4769-92f7-39e59157ec93', '74109fec-75b6-4f45-8e19-d187f6188dba', '9c0b4103-2b06-4691-afb7-5353e13f0f5c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('23e65ba8-ccf3-44c6-bc13-b5c66b60357f', '435185fd-a819-4769-92f7-39e59157ec93', '26a300df-4198-4225-88b0-e19cbfbf17b8', '63ec3d38-52b7-4852-82f7-e2d8d4e97636');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('71df234c-27a7-485d-8ecd-a63406264354', '435185fd-a819-4769-92f7-39e59157ec93', '26a300df-4198-4225-88b0-e19cbfbf17b8', 'e88dd642-c781-4a7f-a39b-41b879e322fd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bd65ee1c-9a0f-4187-af91-a94e660c8488', '435185fd-a819-4769-92f7-39e59157ec93', '26a300df-4198-4225-88b0-e19cbfbf17b8', 'c3a81de5-8167-43e3-afd1-e5022127102e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7cd743c5-edd5-4ab6-ba88-f0a4ba7fb46d', '435185fd-a819-4769-92f7-39e59157ec93', '26a300df-4198-4225-88b0-e19cbfbf17b8', '7c8bb87e-b0f7-4c67-9984-77bca478b2b4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('91098a8b-9177-460c-901a-f695a278a968', '435185fd-a819-4769-92f7-39e59157ec93', 'ec5ee4eb-972b-4f79-8d76-ca735cd0d36f', '7a3fa06a-ba8a-4769-9b6f-5aac4fd6f4d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('df7dfed8-e4d7-47a6-b42f-081039dac2ca', '435185fd-a819-4769-92f7-39e59157ec93', 'ec5ee4eb-972b-4f79-8d76-ca735cd0d36f', 'e6b45df1-c3bc-4c4b-a1b7-ebc0685b3c8c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d707b92c-3fb0-4dbf-a76c-8900a16cdfc2', '435185fd-a819-4769-92f7-39e59157ec93', 'ec5ee4eb-972b-4f79-8d76-ca735cd0d36f', '9410c015-d1db-4f6e-b3fe-c1a7d7901e96');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e0dd87fa-b3b0-42e0-9210-f4e19fc5b526', '435185fd-a819-4769-92f7-39e59157ec93', 'ec5ee4eb-972b-4f79-8d76-ca735cd0d36f', '45e97027-6008-4c76-b4cd-5b4d78af917a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c521ffeb-c902-46da-b298-d9ce6fab6f5e', '435185fd-a819-4769-92f7-39e59157ec93', '9bd09f89-5f74-4019-a9e6-d77d834d629d', '935725bf-c158-4b2c-a04c-ce8494901199');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ea8e1a89-3397-4044-8881-04dd527478c5', '435185fd-a819-4769-92f7-39e59157ec93', '9bd09f89-5f74-4019-a9e6-d77d834d629d', '0176b0ab-fcb2-4054-8406-c2b790485800');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f780b890-a287-4412-b728-f3537466e6ca', '435185fd-a819-4769-92f7-39e59157ec93', '9bd09f89-5f74-4019-a9e6-d77d834d629d', 'dda7abd8-6133-43c0-acd8-10e172b251fd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fa871f91-4c95-40ce-a230-283e861174f1', '435185fd-a819-4769-92f7-39e59157ec93', '9bd09f89-5f74-4019-a9e6-d77d834d629d', 'b8aaea33-ff2b-4a36-a259-b5b6213b760a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('03bc88f4-feaf-48d3-af49-4ae3103c26d5', '435185fd-a819-4769-92f7-39e59157ec93', '4f6884b3-154f-48a8-b731-26604031a57e', '15f713cc-27ca-4547-b86d-1bd1f83a7f8f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('33018e47-6a05-4a58-b242-602a13434397', '435185fd-a819-4769-92f7-39e59157ec93', '4f6884b3-154f-48a8-b731-26604031a57e', 'acdf0f3b-c96d-4bb5-8b9d-cab90f5a0b25');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c084a939-ff09-4bd4-88f9-466aa0a31137', '435185fd-a819-4769-92f7-39e59157ec93', '4f6884b3-154f-48a8-b731-26604031a57e', 'c0c216c0-4ab8-4123-bb97-f73e3162a584');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0078685a-5e6a-40b6-97ee-08704900e927', '435185fd-a819-4769-92f7-39e59157ec93', '4f6884b3-154f-48a8-b731-26604031a57e', 'b30c331b-5630-4143-a598-65d1dccb3021');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('75e33909-04d4-45f1-b32c-8efb43aafcf2', '5824dacd-6128-44fe-a506-7355ee10bad5', '77ad722e-db56-4f75-8ee1-4e9c7aa4fddb', 'f3274bed-da13-4410-9c50-38edf816b38c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6670e8cb-4e61-40b5-96f0-a2ff325575b5', '5824dacd-6128-44fe-a506-7355ee10bad5', '77ad722e-db56-4f75-8ee1-4e9c7aa4fddb', '920629b2-6f29-4fe3-82d8-fbee22b536b3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3926b261-32f5-4ae8-9892-c7ef318efa32', '5824dacd-6128-44fe-a506-7355ee10bad5', '77ad722e-db56-4f75-8ee1-4e9c7aa4fddb', 'b9a5b526-74ac-4b4f-bc6f-99fb3ee28605');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a239d518-5d07-4ffe-b06d-9170457fe3f0', '5824dacd-6128-44fe-a506-7355ee10bad5', '77ad722e-db56-4f75-8ee1-4e9c7aa4fddb', '3373e0ee-e376-48b5-894b-861e32783e9b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('dc7d6a82-c59d-450b-acc1-b81d03625d2f', '5824dacd-6128-44fe-a506-7355ee10bad5', 'a12ea580-ffab-4f61-9146-d2c364e59fe5', '7badd90c-4410-4544-98ec-02e750a65be6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e5d4857d-f5fc-4b43-8168-b50901eff2c5', '5824dacd-6128-44fe-a506-7355ee10bad5', 'a12ea580-ffab-4f61-9146-d2c364e59fe5', 'f07a9616-cd4b-4d4b-828d-b6eea7d04b6e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b93a4439-e1f8-4247-ae35-a4d29cae70cd', '5824dacd-6128-44fe-a506-7355ee10bad5', 'a12ea580-ffab-4f61-9146-d2c364e59fe5', '6aa80880-5ee2-46ed-b855-9903429142c6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d6c02503-7c46-48b4-a698-a70746e5b405', '5824dacd-6128-44fe-a506-7355ee10bad5', 'a12ea580-ffab-4f61-9146-d2c364e59fe5', 'd06f1d95-4eec-4ccb-b11c-5447730c2adc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a19de848-ea7f-40cd-b395-574da7e7e203', '5824dacd-6128-44fe-a506-7355ee10bad5', '9571f981-7cc5-4514-b46d-e45f22316777', '1eabfea3-e621-4842-adea-3b7b3efafaee');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('18f3d230-ca4b-4661-89af-e7dccaf3e679', '5824dacd-6128-44fe-a506-7355ee10bad5', '9571f981-7cc5-4514-b46d-e45f22316777', '9b347422-84e4-46fa-a5a5-a39a4448d15d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2c2c164e-872f-4adb-821a-059f5fdc8020', '5824dacd-6128-44fe-a506-7355ee10bad5', '9571f981-7cc5-4514-b46d-e45f22316777', '6227ee92-ff8d-48ea-b8b5-003095f15d89');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('08c5f34b-399c-4381-a41b-135ec1693666', '5824dacd-6128-44fe-a506-7355ee10bad5', '9571f981-7cc5-4514-b46d-e45f22316777', 'c37c509e-b635-4cc9-a8a3-3488a7e475f9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0f833b73-57a9-4db3-985e-ced691651e9e', '5824dacd-6128-44fe-a506-7355ee10bad5', '33f5f30e-3238-45f0-8d54-8d627404cd2a', '1df597c2-d5db-475a-8f10-9df32dc588b2');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('84b03658-a2fe-4a46-966d-94c40a673987', '5824dacd-6128-44fe-a506-7355ee10bad5', '33f5f30e-3238-45f0-8d54-8d627404cd2a', '7dac8ea6-0c9d-4308-b36c-1a959f165f9e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('95f46cfd-358f-43f4-8398-c775a0e0e064', '5824dacd-6128-44fe-a506-7355ee10bad5', '33f5f30e-3238-45f0-8d54-8d627404cd2a', 'c93017dc-3b62-4041-96db-1f8eac2b2a02');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('16050f26-2b1e-4f5b-98e9-4ee7a1955ded', '5824dacd-6128-44fe-a506-7355ee10bad5', '33f5f30e-3238-45f0-8d54-8d627404cd2a', '56fc96a6-6d33-45fe-8e4a-5be4e3cbb56f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9791755a-0d4b-422c-87d0-7960661589c5', '5824dacd-6128-44fe-a506-7355ee10bad5', '17e823ce-eb7d-4186-bcbc-c49b4afd44ee', '57bc1365-d237-4b52-850c-b65659be7e72');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d9ea2780-6174-45e9-b1d4-56ded521b62b', '5824dacd-6128-44fe-a506-7355ee10bad5', '17e823ce-eb7d-4186-bcbc-c49b4afd44ee', 'a0a65c05-cb2a-4bcc-a49f-2bb66dcaf9f9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('76213848-9f70-470c-81d3-a20ba323d926', '5824dacd-6128-44fe-a506-7355ee10bad5', '17e823ce-eb7d-4186-bcbc-c49b4afd44ee', '12dd7612-46da-4794-9e87-a96a6950c022');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('eb196f69-02c4-449c-8e47-32335bef8f68', '5824dacd-6128-44fe-a506-7355ee10bad5', '17e823ce-eb7d-4186-bcbc-c49b4afd44ee', 'c97e783d-60e5-4c02-bcf6-7110861b4379');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8cef2728-1e8a-498e-947e-a867d21c3e45', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'cce1189c-6a35-43e2-903a-ade74761cd55', '263106e2-971c-44a6-9a12-00388e042370');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e6be8fa9-b87d-4741-ac46-81ac829aa083', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'cce1189c-6a35-43e2-903a-ade74761cd55', '523e67af-fcb1-413d-aad4-2595ea9050d9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('41e5bc52-fc35-4379-b7f1-52f17deceea8', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'cce1189c-6a35-43e2-903a-ade74761cd55', '16eb2237-d733-4e3d-ac66-61c492af328f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4f3e567d-88ff-4b7d-85b6-187fa51ecd2f', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'cce1189c-6a35-43e2-903a-ade74761cd55', '29d1a052-5cf0-4a62-9b4b-8e22e668900d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bf0a4ee0-cbb1-4155-b173-09d9bfee83cd', '6c807594-9333-43aa-a44f-48ef1f0fecea', '62d8b868-a070-4dc0-827f-6d86bfe085f2', '2a2e6c33-d889-4cc6-a899-d9a1c1fc07ea');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('53b57795-a9b9-4f5b-bef3-e256202d16a6', '6c807594-9333-43aa-a44f-48ef1f0fecea', '62d8b868-a070-4dc0-827f-6d86bfe085f2', '00e5e484-c529-4b33-9ae8-5bb12c78c460');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('74f5091b-ae9f-44de-8feb-a4fa3bc53ecf', '6c807594-9333-43aa-a44f-48ef1f0fecea', '62d8b868-a070-4dc0-827f-6d86bfe085f2', '2beb21be-1635-4ad4-a91d-34c760d0c9fe');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('78000ccd-36fd-4ebb-8f4a-b9e51e5cb249', '6c807594-9333-43aa-a44f-48ef1f0fecea', '62d8b868-a070-4dc0-827f-6d86bfe085f2', 'b01fa347-726f-4e1f-ab3b-7234a9b8c4b9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f884a394-3b3c-405a-a2ca-53f61372718a', '6c807594-9333-43aa-a44f-48ef1f0fecea', '4bd9d659-700c-4118-91bf-ea0a1b89e042', '80cf51d0-148b-4844-8b41-ae5dfbd99e9b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('31d53dce-7966-4d2b-bd1f-22960d4fa77f', '6c807594-9333-43aa-a44f-48ef1f0fecea', '4bd9d659-700c-4118-91bf-ea0a1b89e042', 'b05a246f-373a-4a64-a055-413dd33790ef');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('86c4dea1-be61-455a-896e-7ff47d0cf978', '6c807594-9333-43aa-a44f-48ef1f0fecea', '4bd9d659-700c-4118-91bf-ea0a1b89e042', '7070d336-ee92-4199-9ce5-02c0f15fb852');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f00eaa92-693b-4ce8-91a0-27f38dbb072c', '6c807594-9333-43aa-a44f-48ef1f0fecea', '4bd9d659-700c-4118-91bf-ea0a1b89e042', '74e3e76e-593e-4ae5-a504-896ac7aa1b90');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6a3304b9-32ec-4942-a047-c14c22e50196', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'c1d49822-53df-4b0e-92e7-407b597186da', '671ab0a3-bcc7-4b2d-81da-c02479e6113e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7d6b92dc-118d-4d5d-960f-61c32f830952', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'c1d49822-53df-4b0e-92e7-407b597186da', 'bfc4ca45-3f22-45f0-9b6c-ad1f09d2e2d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2e967b37-e9ab-44ce-9eef-557f7185a881', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'c1d49822-53df-4b0e-92e7-407b597186da', 'b55b7634-42f7-4c0f-af8f-9cb83b7d5a25');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('bffd539d-cbee-467b-b68b-33bd88aa5552', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'c1d49822-53df-4b0e-92e7-407b597186da', '6b842e3d-09e3-433c-8774-58d018c83d77');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('efe02392-a267-4088-ac2b-227a6ade7e16', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'be0feb7d-4ff1-468e-82a3-82d9cb4403fe', '4f1fbf48-9de9-49a7-a971-2cbac3c128de');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('946f65e1-9778-4eb6-bd24-d6170852e780', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'be0feb7d-4ff1-468e-82a3-82d9cb4403fe', 'ddb58805-c9a7-49b8-becb-19487296f42a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('315ab4b6-2b7d-4786-917a-91ced3ae438f', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'be0feb7d-4ff1-468e-82a3-82d9cb4403fe', '1bcc11bf-dcdb-4e46-8cf4-19633bba57b7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('44cb1a51-2276-437a-bba1-ef8d5edcccbf', '6c807594-9333-43aa-a44f-48ef1f0fecea', 'be0feb7d-4ff1-468e-82a3-82d9cb4403fe', '9102b693-0ee0-4227-88be-37e7c3eb1b26');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fd9e2ba7-0a27-4b18-9dd7-ae41e0457bd3', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'bd84ea00-647c-4ed6-8b55-1671b378b8f8', '3bb3c5f9-f69e-474f-a563-47161d25a854');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('55e6f38f-342b-42b2-b13c-9c4165b61dfe', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'bd84ea00-647c-4ed6-8b55-1671b378b8f8', 'ab50d595-f4d7-44ad-a8b9-94b825ad15b7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('581ec865-8eb5-4c40-b88c-abf5e4b4b8e3', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'bd84ea00-647c-4ed6-8b55-1671b378b8f8', '18dd3e2a-e49f-4538-8d3d-9eec5c6a7c20');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5dad42c5-9fe4-47d8-98ee-d3bb663b05ee', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'bd84ea00-647c-4ed6-8b55-1671b378b8f8', 'c30bd180-2e42-4bf1-921b-53450ad4db7f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6299c09b-fb2a-41e6-977e-a2870cfaaccd', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'bc1556c4-0ded-4783-a9ec-bc7c5d4f25f4', '0686188c-8bff-45bf-8ff8-12303112308b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('62290460-b705-41b1-b88b-9c83d301f23b', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'bc1556c4-0ded-4783-a9ec-bc7c5d4f25f4', '43364198-2856-4927-84ce-137fe7216cb9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3bf4a26d-7ce1-43f7-be26-27022d3d4f7b', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'bc1556c4-0ded-4783-a9ec-bc7c5d4f25f4', 'bf2417ec-6855-4446-bbe4-ea0f40a82e6e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('171a3224-2660-4866-8255-2ac80879d01e', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'bc1556c4-0ded-4783-a9ec-bc7c5d4f25f4', '45831241-bf89-4350-bd17-c5dec4108aa3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('daba0ffb-5a3b-4779-b3fd-1c0b6a8c0173', '7ff943ec-8d33-453d-bd11-461df5d581b3', '63cba72c-a23d-489a-802d-34963c5b0bfc', '242d1a8c-d1bd-4adf-b129-c5a4df3c65e4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('95a9c333-d4f0-4af2-8edd-2bb289b411f2', '7ff943ec-8d33-453d-bd11-461df5d581b3', '63cba72c-a23d-489a-802d-34963c5b0bfc', 'f8828db6-7a7c-45ea-bcf5-b5047a53b87f');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('94d37cbf-a19d-4a49-84f7-aafbce8af754', '7ff943ec-8d33-453d-bd11-461df5d581b3', '63cba72c-a23d-489a-802d-34963c5b0bfc', '852edd82-0238-4040-93cc-0b197893ebc5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d478de3d-7047-4428-a63f-1d7ddaccc1d3', '7ff943ec-8d33-453d-bd11-461df5d581b3', '63cba72c-a23d-489a-802d-34963c5b0bfc', '29e98c94-2cb7-4f5e-aa93-d8165079a3e5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7ec488bd-b1d0-4014-9b17-13ec0ad5bfbe', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'c1f82d3a-5908-4567-ac25-e175d7e49e16', '716aa352-a747-4008-a1b0-bdd3a4c6f4b3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f953a563-0b57-43be-b516-ca664e4c3cc9', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'c1f82d3a-5908-4567-ac25-e175d7e49e16', '83a8f5e1-6e44-4134-80c9-0c4dd5e8e1e3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('15ca253f-6a2f-454d-8b2b-78662c0bde27', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'c1f82d3a-5908-4567-ac25-e175d7e49e16', 'e4439e21-7147-4bec-b7f4-2a848d865fd6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0ef2cdd6-b507-465d-8d30-8f7eece2d60a', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'c1f82d3a-5908-4567-ac25-e175d7e49e16', '2d064e08-97ca-4b64-b878-abdc17b30447');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('52e2f7de-9d81-4c0b-9230-725071976134', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'b5d30b46-47bc-4252-853e-22344acb800e', '90f68c6f-894e-402e-9d21-693381ccc1ae');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a3b8d6e0-c7e7-47c0-b7c1-0903664a724b', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'b5d30b46-47bc-4252-853e-22344acb800e', '082a3d84-b9e5-4954-a9cb-d5a9a38b0536');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f46d68da-e318-492c-8106-048299a10900', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'b5d30b46-47bc-4252-853e-22344acb800e', '9c2405d5-cd1e-4438-82f7-0f07e4ccd15e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f24e76b8-84f5-4158-8d6c-2b457dfbc5d1', '7ff943ec-8d33-453d-bd11-461df5d581b3', 'b5d30b46-47bc-4252-853e-22344acb800e', '0ed9b97f-86ab-43a3-86f9-d9aeb3423e19');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a5aad6fb-aae7-4133-92af-800b2e9a2743', '38fcf542-83e8-4251-9078-bbb536d0b050', 'e7a61b74-3cac-421f-99aa-87597997eb36', '1630cfd8-7d11-4eaa-bfc4-c90ddbb70c6d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e35f9fff-3526-4b47-a4ba-685417ed0add', '38fcf542-83e8-4251-9078-bbb536d0b050', 'e7a61b74-3cac-421f-99aa-87597997eb36', 'c95c68e3-e5c5-4b10-94ae-a9269c36379e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9493d39a-7f94-49ae-8462-14900913ec6a', '38fcf542-83e8-4251-9078-bbb536d0b050', 'e7a61b74-3cac-421f-99aa-87597997eb36', 'c1cc8645-08c1-4d27-ad55-b91e6ea27222');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a2d945b7-4625-4780-9455-7b911cbc733d', '38fcf542-83e8-4251-9078-bbb536d0b050', 'e7a61b74-3cac-421f-99aa-87597997eb36', 'd49628b2-ecf6-41cb-a464-888ed9701fb6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d7370807-cff4-482f-9c1f-27665407f4bb', '38fcf542-83e8-4251-9078-bbb536d0b050', 'b708b570-4d8e-4745-b552-702c79db87ef', 'f91de6fb-c0b2-4720-9b42-e51b9931e0e6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('36556509-fdf4-4978-a838-5d3e656a7dbc', '38fcf542-83e8-4251-9078-bbb536d0b050', 'b708b570-4d8e-4745-b552-702c79db87ef', 'e319ed92-8b77-4cac-942a-8975685c952a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('619a426e-f50e-439f-bc3c-f4aed057b932', '38fcf542-83e8-4251-9078-bbb536d0b050', 'b708b570-4d8e-4745-b552-702c79db87ef', 'a39b9394-81c1-4cd8-97e6-6a3625b521b9');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0b20a2b6-6b3e-44c5-b35c-8e3f42e21f62', '38fcf542-83e8-4251-9078-bbb536d0b050', 'b708b570-4d8e-4745-b552-702c79db87ef', 'da4f5041-2a81-4ee2-9251-b02c02316c33');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('166da665-8bc9-4b09-a2d6-d14f77c79654', '38fcf542-83e8-4251-9078-bbb536d0b050', '4c50259b-d52e-46c1-8b42-c73e35b288df', '2c86c1a4-d1b9-43cd-bbaf-3fcc8c66629b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3631726f-a878-4c2a-986c-2279aca42739', '38fcf542-83e8-4251-9078-bbb536d0b050', '4c50259b-d52e-46c1-8b42-c73e35b288df', '6bc03be0-1588-4ed0-8ec5-a691c55c0b3b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1dd442c9-401a-4370-b2cb-eece84edab13', '38fcf542-83e8-4251-9078-bbb536d0b050', '4c50259b-d52e-46c1-8b42-c73e35b288df', '21271b63-f73a-4026-8f4b-9b3dd32937f8');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c941fe87-e9fe-4e27-9537-f62f9f554301', '38fcf542-83e8-4251-9078-bbb536d0b050', '4c50259b-d52e-46c1-8b42-c73e35b288df', '8e925be8-3600-42ef-b9ef-a5b8fa942b7a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a7900891-0f66-4ddd-8b6c-f7015eaa52d9', '38fcf542-83e8-4251-9078-bbb536d0b050', '17a0283b-398b-4356-82d0-4bf07b9cd7ec', '3fc16f13-43ad-4346-ac65-087a2afe7e6a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('25af5061-965e-4003-a754-9c56ea677298', '38fcf542-83e8-4251-9078-bbb536d0b050', '17a0283b-398b-4356-82d0-4bf07b9cd7ec', '8aee84c0-fca4-4cf9-8c26-2096e5db1466');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('3f9a1cfa-38b3-4d0c-9230-fa729c151350', '38fcf542-83e8-4251-9078-bbb536d0b050', '17a0283b-398b-4356-82d0-4bf07b9cd7ec', '371a4379-3999-4bad-ae98-bfcde0bef626');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('714e92b6-1674-4233-a6ea-324fd56c932d', '38fcf542-83e8-4251-9078-bbb536d0b050', '17a0283b-398b-4356-82d0-4bf07b9cd7ec', 'af63cb5f-9743-4d36-b4e3-fdafea21db6c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e6f8ef28-60c5-46f3-82b7-3a3367159f69', '38fcf542-83e8-4251-9078-bbb536d0b050', '790476c2-4569-4a1f-b00a-63f9e2085473', 'bd6bffdd-ea1f-4f6c-bb00-0897cc9b3d1c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4bf1762c-40f5-4272-9b9e-03eae456bd03', '38fcf542-83e8-4251-9078-bbb536d0b050', '790476c2-4569-4a1f-b00a-63f9e2085473', '40878750-b357-46b6-bba5-966ba349b441');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('235b7fcc-1095-4688-8a80-51bee776b881', '38fcf542-83e8-4251-9078-bbb536d0b050', '790476c2-4569-4a1f-b00a-63f9e2085473', '03289c14-65b2-4fc9-8152-a2bd57c1b5db');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('1670d078-42dc-4388-8df2-79db8dbdf69c', '38fcf542-83e8-4251-9078-bbb536d0b050', '790476c2-4569-4a1f-b00a-63f9e2085473', 'c563a81e-6060-4d5a-8869-61a346303036');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f74fdda3-e509-4d64-8c60-8e118c07d231', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'd5b54d7f-e1dc-4d81-9378-34f000ccdfdb', '36dbf709-22f6-4e8d-913a-ea0a79eb7427');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('758a945d-fc0e-44ab-ab9a-32e494f79161', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'd5b54d7f-e1dc-4d81-9378-34f000ccdfdb', '28e22fe9-d660-44e2-a19f-3f48d974ab23');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d1ecf781-0539-49b0-ae68-3901ad4bdf31', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'd5b54d7f-e1dc-4d81-9378-34f000ccdfdb', '84275d69-66c9-4deb-b7a8-fc4d8b359e0c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6b6d3747-ad0e-4237-9b71-a31ff04ea419', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'd5b54d7f-e1dc-4d81-9378-34f000ccdfdb', '278aed3e-5c30-450f-bb62-4b4886717ae5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('216aeb84-f88e-48b1-b0ed-b80667a0b611', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'c4159964-c5a2-4fa0-8578-b2283663b630', '5040594f-f98b-4c45-b225-042c50ba38ed');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a13c65ee-b3da-4b97-979a-3cf1c316004f', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'c4159964-c5a2-4fa0-8578-b2283663b630', '54fad715-ba75-4270-931b-44e1173c90f6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('fa85e3a8-e9bb-491c-88f0-f97ac5f05bd7', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'c4159964-c5a2-4fa0-8578-b2283663b630', 'bd0a38a4-6ed8-488b-a1ef-e022d368b1d6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a4324a97-5808-4a9c-a785-5011fd815a4e', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'c4159964-c5a2-4fa0-8578-b2283663b630', '13ed8348-39e2-4530-9bf7-f8c64698dcbf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7dbeb420-d154-4719-9e59-b4e6e0e11387', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'c9baaa37-921f-4945-b989-2d5249a13515', '4b35cbf0-9be6-45c1-807b-593cf45c7335');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f11abc20-3009-4ba1-bc7d-8b8a74a07f9b', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'c9baaa37-921f-4945-b989-2d5249a13515', 'f32f78c2-0d9b-42df-97e2-0d29c1eadd49');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('31b41de0-14fc-40c3-8e37-799809294bf3', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'c9baaa37-921f-4945-b989-2d5249a13515', 'b2d59c11-eca6-4e83-bffa-7d703c852adb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e60deb31-caa0-46fb-820c-4d96c9bac8ea', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', 'c9baaa37-921f-4945-b989-2d5249a13515', '8b85e6b2-164e-431e-972c-8913bfa412c7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('68821a9c-c818-4f38-8fcd-cbf3cbd2222f', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', '0737f8bf-4fb5-417b-aa74-6d37186738c9', 'bd50a17c-a41e-4571-b72d-a60588fd3fad');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('29459a24-3ae4-4c6c-961b-f3c1802cb704', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', '0737f8bf-4fb5-417b-aa74-6d37186738c9', '59fe0219-1ed0-4f47-9d50-a1c5a274930b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('970ce21f-15d1-4dd3-970e-2d96f26bfa96', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', '0737f8bf-4fb5-417b-aa74-6d37186738c9', '50dca375-6617-4116-b026-01c95b119b89');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d68a9094-7738-483d-b1b5-0ed446d4d3da', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', '0737f8bf-4fb5-417b-aa74-6d37186738c9', 'edd97a81-9225-4d82-9828-b0f181f84429');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('a635bd84-92cb-4772-b2e2-ccbcde5912d5', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', '761ab1e6-604e-4791-93ed-2a8d6cde1f5a', '2e1f8e7e-1471-4c0f-aab7-e0983f4242d4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9ac16e5e-135e-4e91-8b2f-36885ed4a7b1', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', '761ab1e6-604e-4791-93ed-2a8d6cde1f5a', '30fd084e-d66a-4f76-a031-bcfcd993eafc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b60af303-042c-4d44-81ec-3bee65918928', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', '761ab1e6-604e-4791-93ed-2a8d6cde1f5a', 'd39e34db-8bca-4af8-a4c0-74faf600a1af');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4d717fb3-53c6-4db1-be3e-f2eaa0bc80fd', 'e29a8da1-0e88-4ded-ad49-4beeceae9c3a', '761ab1e6-604e-4791-93ed-2a8d6cde1f5a', '7653eeab-be19-4006-8fb5-6f79044070e3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7aea22e7-031a-4f4b-ae21-1feb4dc38d31', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '9a08b89d-cdba-4975-bbb2-2ce051ea80eb', '81649116-4937-4269-83d3-cd7add349bda');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9161d3fd-059e-4d9d-84c5-dd36faf88f01', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '9a08b89d-cdba-4975-bbb2-2ce051ea80eb', '53c372d3-7cfc-4571-896e-6aecb225471e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('4b8af3df-3324-41fe-a7f1-f3a90e31fbc8', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '9a08b89d-cdba-4975-bbb2-2ce051ea80eb', 'c092eb13-14b6-4546-8348-3285504735a4');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7e4a482b-02c6-4f60-baeb-99a2c46bf7b8', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '9a08b89d-cdba-4975-bbb2-2ce051ea80eb', 'c423410e-5f25-4852-85b3-f4f3b416ee73');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b38c2704-fe5c-4f0c-a031-4f3fcd5669b5', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '8d089987-8cb3-45d2-b0b6-a8277c2dbec9', 'ed159d60-2d01-4f45-97d0-df0634421a33');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('5717423f-5709-4158-8e22-28e6e573b553', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '8d089987-8cb3-45d2-b0b6-a8277c2dbec9', '4b473d9f-b2f3-4a7d-ad8e-e901e4f76e1e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ff2b99cf-3b60-4022-9c17-26abd05f57fa', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '8d089987-8cb3-45d2-b0b6-a8277c2dbec9', '9a7c2b66-8304-4dbc-ba88-a580b61f00f3');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('0974465c-880d-4150-8752-111cb6a79557', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '8d089987-8cb3-45d2-b0b6-a8277c2dbec9', '1de5480e-5cbd-42c8-9317-ebb054d72ef1');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('48554c95-5a11-45ef-9cdd-6b359141d990', 'ab63c159-ea30-4c60-b040-ca7bb929343c', 'a400f0c9-f667-4c2b-adcc-d02ef2af1e66', '70b0a6f0-ee82-41ce-bdc5-a62b6675676c');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b0ab2fab-3645-4900-affc-23c9a2ed1fe0', 'ab63c159-ea30-4c60-b040-ca7bb929343c', 'a400f0c9-f667-4c2b-adcc-d02ef2af1e66', '3d99c064-e902-4ee4-aa79-ee7af6960932');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8da054c6-40b7-4253-9bf2-471d1cebc17a', 'ab63c159-ea30-4c60-b040-ca7bb929343c', 'a400f0c9-f667-4c2b-adcc-d02ef2af1e66', '13dacbe4-1354-4d2e-9f8a-8af555461611');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('582580ba-08f7-40c6-b1c1-0c5fb6503f44', 'ab63c159-ea30-4c60-b040-ca7bb929343c', 'a400f0c9-f667-4c2b-adcc-d02ef2af1e66', '60fd89c4-c488-471d-8605-bf7e3dc019cf');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('cef7e582-44b9-4eb4-bf11-492da553e6cb', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '4aa87feb-01df-49d3-9de6-b1f66b28bada', 'c53261fe-8f39-4988-8f86-33da1d2bfa53');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b2834996-b6df-4b01-b706-8472edcde710', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '4aa87feb-01df-49d3-9de6-b1f66b28bada', '7f094f71-87a8-4887-9300-0130e192e056');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('46736555-c9b0-4a91-afeb-425757b92d96', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '4aa87feb-01df-49d3-9de6-b1f66b28bada', 'e9b76d28-3d8e-41c1-ab92-0a572acb86e6');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('77ad3a47-48b4-4068-ae19-5b7a9ce3673b', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '4aa87feb-01df-49d3-9de6-b1f66b28bada', '32f01661-ea02-4376-bc1e-592806dac65d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('6a80cfda-5959-48d4-a980-fe8e9051adcf', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '62fbd124-2a67-464a-a4de-29855b0b039f', 'cf59a386-1252-4ccb-b9f3-006fa28c5bbb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7328b616-3816-4eee-b49f-b3d82bd0e567', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '62fbd124-2a67-464a-a4de-29855b0b039f', '3bbebd85-0dbf-4611-b9eb-c0ff17d1199d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('53d7d536-b6cb-45c6-a2a6-20539b969416', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '62fbd124-2a67-464a-a4de-29855b0b039f', 'f1e1cd5c-d399-4c98-9bc9-e6fe7218ba0b');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e7f8807f-4c37-4841-876d-fbedda42bff5', 'ab63c159-ea30-4c60-b040-ca7bb929343c', '62fbd124-2a67-464a-a4de-29855b0b039f', '3c14d78a-d7c7-4571-b468-bbbe56587f3e');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('563e554c-f3a4-4759-9694-abf6ee72334a', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'd19e5c44-fe00-4f46-954e-58c6e2c2202f', 'b8b7a777-468a-46e9-893a-37cd9e0cb560');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('d53380b8-e7d8-42be-8e40-35dbf7de8e8a', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'd19e5c44-fe00-4f46-954e-58c6e2c2202f', '0aace317-4a6d-4c08-99e4-b71e37c6b522');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('8072303a-7e9c-4258-b330-fe3e2811f9f4', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'd19e5c44-fe00-4f46-954e-58c6e2c2202f', '8fedfd35-5028-4ac5-8974-d62b5f63420a');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('14c4df24-af10-4677-91c3-cb091fd07f1c', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'd19e5c44-fe00-4f46-954e-58c6e2c2202f', '7c31cc60-12bc-4d1d-85e8-b9539dc12731');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('9b9518ad-2add-4afc-8a56-1b37d9a6b1ca', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'a9865414-b4c1-46fc-984c-1323d07cdafa', 'ef3f36b4-8195-4a31-af9e-dff22c883217');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('2cc656c3-a000-4c17-9db9-f2366701d89c', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'a9865414-b4c1-46fc-984c-1323d07cdafa', 'ee009b47-6fa0-43fd-9c5d-26be1d3dbf42');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('7fb20add-8bc3-4a43-bcea-34cd3f8d1eff', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'a9865414-b4c1-46fc-984c-1323d07cdafa', '730591db-bb47-45c7-95c5-f817b45b5e05');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('b7f8219e-0b39-43f3-bfb3-4b3371824a8d', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'a9865414-b4c1-46fc-984c-1323d07cdafa', '1b954ebc-53d9-4796-b194-a955ca61a8dc');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('76879e5c-d043-4e61-89bc-e4eae4c2adb4', 'a8b8abef-668e-42ba-b687-526d3ba77399', '8fcda1ef-cb8e-4685-8453-6fc6c6c674ae', '4cd6272a-c09b-4b91-a361-52143b47dbdb');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('14388a62-d50e-4d9f-83ec-0907174cf50d', 'a8b8abef-668e-42ba-b687-526d3ba77399', '8fcda1ef-cb8e-4685-8453-6fc6c6c674ae', 'ede36488-7fd4-415b-90db-4c471c3d2d08');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ee7174cd-351f-4401-9b29-4dc05e058716', 'a8b8abef-668e-42ba-b687-526d3ba77399', '8fcda1ef-cb8e-4685-8453-6fc6c6c674ae', '21fb8e0e-cc62-45b6-b3a6-5610b079f482');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('f997c539-4653-44ac-b7ac-ae5dc0bad62f', 'a8b8abef-668e-42ba-b687-526d3ba77399', '8fcda1ef-cb8e-4685-8453-6fc6c6c674ae', '4fff4986-8dcb-42a4-83e8-e19d0f7350e5');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('af2d4901-47dc-4e1f-9e1b-058d41cfe10a', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'bd7a1f0b-1aac-4ac5-8f30-9222e3615cba', 'd227916c-147d-4c21-a12a-e50059148e70');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('c70e0e03-70ec-4e46-b7c3-59dd36e2e42a', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'bd7a1f0b-1aac-4ac5-8f30-9222e3615cba', 'b85eaff1-6917-4bc4-9b0a-11d1d27a3524');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('151d1117-d147-4650-bfcc-04ee6cf9af74', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'bd7a1f0b-1aac-4ac5-8f30-9222e3615cba', '7c6ac645-8150-40ba-9018-b53aed0fb8ae');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('65e196c2-28d1-4d61-af1f-98fa6f26b17a', 'a8b8abef-668e-42ba-b687-526d3ba77399', 'bd7a1f0b-1aac-4ac5-8f30-9222e3615cba', '74c63775-d2b0-498e-966f-45f1092fea35');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('786a2f71-8455-4247-ba05-0a22dc684272', 'a8b8abef-668e-42ba-b687-526d3ba77399', '4f0489d4-c8cb-4ab9-a7c7-5df964b403bb', 'c7478082-c598-4f93-b9e7-5b6ef2f9e9cd');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e5b5edcc-5672-4d49-ae86-4a7765fc0812', 'a8b8abef-668e-42ba-b687-526d3ba77399', '4f0489d4-c8cb-4ab9-a7c7-5df964b403bb', '092ff31c-c46b-47ca-a790-ea29a343a0a7');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('12bb8c24-8db6-42d9-8986-e0b92fc27c8d', 'a8b8abef-668e-42ba-b687-526d3ba77399', '4f0489d4-c8cb-4ab9-a7c7-5df964b403bb', '6a5e9213-3818-4091-98b5-ff5f84d7aa7d');
+INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ef0e6193-713c-4b90-9894-651906b56ef1', 'a8b8abef-668e-42ba-b687-526d3ba77399', '4f0489d4-c8cb-4ab9-a7c7-5df964b403bb', '5ca60788-a22f-487f-9db7-1d4f70c0af6c');
