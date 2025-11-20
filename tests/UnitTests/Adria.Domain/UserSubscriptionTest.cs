@@ -18,7 +18,7 @@ public class UserSubscriptionTest
             true
         );
         _startDate = new DateTime(2024, 1, 1);
-        _endDate =  _startDate.AddDays(30);
+        _endDate = _startDate.AddDays(30);
     }
 
     [Fact]
