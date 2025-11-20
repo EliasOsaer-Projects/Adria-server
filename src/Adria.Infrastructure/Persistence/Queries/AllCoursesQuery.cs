@@ -57,14 +57,10 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
             var ordCourseCategory = reader.GetOrdinal("CourseCategory");
             var ordPointsOnCompletion = reader.GetOrdinal("PointsOnCompletion");
             var ordEstimatedDuration = reader.GetOrdinal("EstimatedDurationInHours");
+            var ordLearnList = reader.GetOrdinal("LearnList");
             var ordCoverImageId = reader.GetOrdinal("CoverImageID");
             var ordBannerImageId = reader.GetOrdinal("BannerImageID");
-
-            
-            List<string> tags =  reader.GetString(ordCourseTags)
-                .Split(',', StringSplitOptions.TrimEntries) // split by commas
-                .Select(tag => tag.Trim()) // remove extra spaces
-                .ToList();
+            var ordSubscriptionRequired = reader.GetOrdinal("SubscriptionRequired");
             
             courses.Add(new CourseData(
                 Id: reader.GetGuid(ordCourseId),
@@ -72,11 +68,11 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
                 Level: reader.GetInt16(ordCourseDifficulty),
                 Description: reader.GetString(ordCourseDescription),
                 Category: reader.GetString(ordCourseCategory),
-                Tags: tags,
+                Tags: reader.GetString(ordCourseTags).Split(',', StringSplitOptions.TrimEntries).ToList(),
                 PointsOnCompletion: reader.GetInt32(ordPointsOnCompletion),
                 Duration: reader.GetInt32(ordEstimatedDuration),
-                LearnList: null,
-                SubscriptionRequired: false
+                LearnList: reader.GetString(ordLearnList).Split(',', StringSplitOptions.TrimEntries).ToList(),
+                SubscriptionRequired: reader.GetBoolean(ordSubscriptionRequired)
             ));
         }
         
