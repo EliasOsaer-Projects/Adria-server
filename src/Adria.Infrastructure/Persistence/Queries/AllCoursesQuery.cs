@@ -58,8 +58,8 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
             var ordPointsOnCompletion = reader.GetOrdinal("PointsOnCompletion");
             var ordEstimatedDuration = reader.GetOrdinal("EstimatedDurationInHours");
             var ordLearnList = reader.GetOrdinal("LearnList");
-            var ordCoverImageId = reader.GetOrdinal("CoverImageID");
-            var ordBannerImageId = reader.GetOrdinal("BannerImageID");
+            // var ordCoverImageId = reader.GetOrdinal("CoverImageID");
+            // var ordBannerImageId = reader.GetOrdinal("BannerImageID");
             var ordSubscriptionRequired = reader.GetOrdinal("SubscriptionRequired");
             
             courses.Add(new CourseData(

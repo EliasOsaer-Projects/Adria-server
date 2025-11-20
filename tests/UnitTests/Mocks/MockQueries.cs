@@ -1,6 +1,7 @@
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
 using Adria.Application.Subscriptions;
+using Adria.Domain;
 
 namespace UnitTests.Mocks;
 
@@ -112,5 +113,37 @@ public class MockSearchUserCourseByUser : IUserCoursesByUserQuery
     public Task<IReadOnlyCollection<UserCourseData>> Fetch(Guid id)
     {
         return Task.FromResult<IReadOnlyCollection<UserCourseData>>(_users.AsReadOnly());
+    }
+}
+
+public class MockSearchCourseByIdQuery : ISearchCourseByIdQuery
+{
+    private readonly IList<CourseData> _courses = new List<CourseData>();
+    public Task<CourseData> Fetch(Guid id)
+    {
+        return Task.FromResult(_courses.First(c => c.Id == id));
+    }
+    
+    public void AddCourse(CourseData course) => _courses.Add(course);
+}
+
+public class MockEnrollUserInCourseQuery : IEnrollUserInCourseQuery
+{
+    private readonly IList<UserCourseData> _userCourses = new List<UserCourseData>();
+    
+    public void Enroll(Course course, Guid userId)
+    {
+        _userCourses.Add(
+            new UserCourseData(
+                course.Id,
+                course.Name,
+                course.Level,
+                false,
+                0
+            ));
+    }
+    public Task<UserCourseData> Fetch(Guid userId, Guid courseId)
+    {
+        return Task.FromResult(_userCourses.First(uc => uc.CourseId == courseId));
     }
 }

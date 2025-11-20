@@ -9,12 +9,23 @@ public class UserCourse
     public int ProgressPercentage { get; set; }
     public Boolean CompletionStatus { get; set; }
 
-    public UserCourse(Guid adriaId, Guid courseId, DateTime startDate, int progressPercentage, bool completionStatus)
+    public UserCourse(Guid adriaId, Guid courseId)
     {
         AdriaId = adriaId;
         CourseId = courseId;
         StartDate = DateTime.Now;
         ProgressPercentage = 0;
         CompletionStatus = false;
+    }
+    
+    public void UpdateProgress(int progressPercentage)
+    {
+        ProgressPercentage = progressPercentage;
+        if (ProgressPercentage >= 100)
+        {
+            CompletionStatus = true;
+            ProgressPercentage = 100;
+            EndDate = DateTime.Now;
+        }
     }
 }

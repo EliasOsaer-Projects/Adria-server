@@ -17,7 +17,8 @@ public class Course
     public Guid BannerImageId { get; private set; }
     public Boolean SubscriptionRequired { get; private set; }
 
-    public Course(Guid id, string name, int level, string description, string category, IList<string> tags, int pointsOnCompletion, IList<string> learnList, int duration, Guid coverImageId, Guid bannerImageId, bool subscriptionRequired)
+    
+    public Course(Guid id, string name, int level, string description, string category, IList<string> tags, int pointsOnCompletion, IList<string> learnList, int duration, Guid coverImageId, Guid bannerImageId, bool subscriptionRequired) // NOSONAR
     {
         Id = id;
         Name = name;
@@ -34,8 +35,8 @@ public class Course
     }
 
 
-    public Course(string name, int level, string description, string category, IList<string> tags, int pointsOnCompletion, IList<string> learnList, int duration, Guid coverImageId, Guid bannerImageId, Boolean subscriptionRequired)
-        : this(Guid.NewGuid(), name, level, description, category, tags, pointsOnCompletion, learnList, duration, coverImageId, bannerImageId, subscriptionRequired)
+    public Course(string name, int level, string description, string category, IList<string> tags, int pointsOnCompletion, IList<string> learnList, int duration, Guid coverImageId, Guid bannerImageId, Boolean subscriptionRequired)// NOSONAR
+        : this(Guid.NewGuid(), name, level, description, category, tags, pointsOnCompletion, learnList, duration, coverImageId, bannerImageId, subscriptionRequired) // NOSONAR
     {
     }
 }

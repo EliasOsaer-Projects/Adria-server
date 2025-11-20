@@ -14,7 +14,7 @@ public sealed class AllSubscriptionTypesController
     {
         IReadOnlyCollection<SubscriptionData> subscriptionData = await AllSubscriptionTypes.Execute();
 
-        if (!subscriptionData.Any())
+        if (subscriptionData.Count > 0)
         {
             return TypedResults.NotFound();
         }

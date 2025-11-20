@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Adria.Infrastructure.WebApi.Controllers;
 
-public class EnrollUserInCourseController
+public sealed class EnrollUserInCourseController
 {
     public static async Task<Results<Ok<UserCourseData>, BadRequest<string>>> Invoke(
             Guid userId,

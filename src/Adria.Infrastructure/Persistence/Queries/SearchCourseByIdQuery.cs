@@ -28,7 +28,7 @@ public sealed class SearchCourseByIdQuery
 
     public async Task<CourseData> Fetch(Guid id)
     {
-        _logger.LogInformation("Fetching course with ID {id}", id);
+        _logger.LogInformation("Fetching course with ID {Id}", id);
         
         using var connection = _factory.CreateConnection() ?? throw new InvalidOperationException("DBFactory provided a null connection");
         connection.ConnectionString = _connectionString;
@@ -46,8 +46,8 @@ public sealed class SearchCourseByIdQuery
 
         if (!await reader.ReadAsync())
         {
-            _logger.LogInformation("Course with ID {id} not found", id);
-            return null;
+            _logger.LogInformation("Course with ID {Id} not found", id);
+            return null!;
         }
 
         return new CourseData(

@@ -32,7 +32,7 @@ public sealed class SearchAllCoursesTests
             Category: "Programming",
             Tags: new List<string> { "Java", "Programming"},
             PointsOnCompletion: 100,
-            LearnList:[],
+            LearnList: new List<string>() {"variables", "loops", "classes"},
             Duration: 10,
             SubscriptionRequired: false
         );
@@ -51,8 +51,15 @@ public sealed class SearchAllCoursesTests
         // Assert
         Assert.NotNull(result);
         Assert.NotEmpty(result);
-        Assert.Contains(result, tl => tl.Name == "Introduction to C#");
         Assert.Contains(result, tl => tl.Name == "Introduction to Java");
+        Assert.Contains(result, tl => tl.Level == 1);
+        Assert.Contains(result, tl => tl.Description == "Learn the basics of Java, including syntax, data types, and OOP principles.");
+        Assert.Contains(result, tl => tl.Category == "Programming");
+        Assert.Contains(result, tl => tl.Tags.SequenceEqual(new List<string> { "Java", "Programming" }));
+        Assert.Contains(result, tl => tl.PointsOnCompletion == 100);
+        Assert.Contains(result, tl => tl.LearnList.SequenceEqual(new List<string> { "variables", "loops", "classes" }));
+        Assert.Contains(result, tl => tl.Duration == 10);
+        Assert.Contains(result, tl => !tl.SubscriptionRequired);
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains($"Fetching all courses", mockLogger.LoggedMessages[0]);
     }

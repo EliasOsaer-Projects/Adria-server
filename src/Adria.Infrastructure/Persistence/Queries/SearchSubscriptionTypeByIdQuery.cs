@@ -20,7 +20,7 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
 
     public async Task<SubscriptionData> Fetch(Guid id)
     {
-        _logger.LogInformation("Fetching subscription data for id {id}", id);
+        _logger.LogInformation("Fetching subscription data for id {Id}", id);
         
         using var connection = _factory.CreateConnection() ?? throw new InvalidOperationException("DBFactory provided a null connection");
 

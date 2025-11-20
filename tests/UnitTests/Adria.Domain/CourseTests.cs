@@ -1,4 +1,5 @@
-﻿using Adria.Domain;
+﻿using Adria.Application.Contracts.Data;
+using Adria.Domain;
 
 
 namespace UnitTests.Adria.Domain;
@@ -33,6 +34,36 @@ public sealed class CourseTests
         Assert.Equal(duration, course.Duration);
         Assert.Equal(1, course.Level);
         Assert.Equal(points, course.PointsOnCompletion);
+    }
+
+    [Fact]
+    public void CourseData_SetAllProperties()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var name = "C# Basics";
+        var category = "Development";
+        var description = "Learn the basics of C#.";
+        var learnList = new List<string> { "variables", "loops", "classes" };
+        var duration = 8;
+        var levelInt = 1; 
+        var points = 100;
+        var tags = new List<string>{"fun", "coding"};
+        var subscriptionRequired = false;
+        
+        var course = new CourseData(id, name, levelInt, description, category, tags, points, learnList, duration, subscriptionRequired);
+        
+        // Assert
+        Assert.Equal(id, course.Id);
+        Assert.Equal(name, course.Name);
+        Assert.Equal(category, course.Category);
+        Assert.Equal(description, course.Description);
+        Assert.Equal(tags, course.Tags);
+        Assert.Same(learnList, course.LearnList); 
+        Assert.Equal(duration, course.Duration);
+        Assert.Equal(1, course.Level);
+        Assert.Equal(points, course.PointsOnCompletion);
+        Assert.Equal(subscriptionRequired, course.SubscriptionRequired);
     }
   
     [Fact]
