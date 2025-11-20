@@ -90,6 +90,14 @@ public static class PersistenceModule
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<SearchCourseByIdQuery>>()
                 );
+            })
+            .AddScoped<IEnrollUserInCourseQuery, EnrollUserInCourseQuery>(serviceProvider =>
+            {
+                return new EnrollUserInCourseQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<EnrollUserInCourseQuery>>()
+                );
             });
     }
 

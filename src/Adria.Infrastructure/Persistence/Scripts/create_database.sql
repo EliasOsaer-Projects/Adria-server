@@ -38,15 +38,15 @@ CREATE TABLE `Subscription` (
 
 -- CUSTOMER SUBSCRIPTIONS
 CREATE TABLE `UserSubscription` (
-                                    `UserSubscriptionID` VARCHAR(36) PRIMARY KEY NOT NULL,
-                                    `StartDate` DATETIME NOT NULL,
-                                    `EndDate` DATETIME NOT NULL,
-                                    `Status` VARCHAR(50) NOT NULL,
-                                    `AdriaID` VARCHAR(36) NOT NULL,
-                                    `SubscriptionID` VARCHAR(36) NOT NULL,
+                                `UserSubscriptionID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                                `StartDate` DATETIME NOT NULL,
+                                `EndDate` DATETIME NOT NULL,
+                                `Status` VARCHAR(50) NOT NULL,
+                                `AdriaID` VARCHAR(36) NOT NULL,
+                                `SubscriptionID` VARCHAR(36) NOT NULL,
 
-                                    FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE,
-                                    FOREIGN KEY (`SubscriptionID`) REFERENCES `Subscription`(`SubscriptionID`) ON DELETE CASCADE
+                                FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE,
+                                FOREIGN KEY (`SubscriptionID`) REFERENCES `Subscription`(`SubscriptionID`) ON DELETE CASCADE
 );
 
 -- PAYMENTS
