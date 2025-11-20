@@ -114,3 +114,14 @@ public class MockSearchUserCourseByUser : IUserCoursesByUserQuery
         return Task.FromResult<IReadOnlyCollection<UserCourseData>>(_users.AsReadOnly());
     }
 }
+
+public class MockSearchCourseByIdQuery : ISearchCourseByIdQuery
+{
+    private readonly IList<CourseData> _courses = new List<CourseData>();
+    public Task<CourseData> Fetch(Guid id)
+    {
+        return Task.FromResult(_courses.First(c => c.Id == id));
+    }
+    
+    public void AddCourse(CourseData course) => _courses.Add(course);
+}
