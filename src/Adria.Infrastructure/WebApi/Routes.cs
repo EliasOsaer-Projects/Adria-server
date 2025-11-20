@@ -35,9 +35,18 @@ public static class Routes
     {
         var courseRoutes = app.MapGroup("api").WithTags("courses").WithDescription("All endpoints todo with courses").WithOpenApi();
 
-        courseRoutes.MapGet("/courses", SearchAllCoursesController.Invoke).WithDescription("All courses").
-            WithName(nameof(SearchAllCoursesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
-            WithOpenApi();
+        courseRoutes.MapGet("/courses", SearchAllCoursesController.Invoke)
+            .WithDescription("Get all courses")
+            .WithName(nameof(SearchAllCoursesController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        courseRoutes
+            .MapGet("/course/{courseId}", SearchCourseByIdController.Invoke)
+            .WithDescription("Get a certain course by its ID")
+            .WithName(nameof(SearchCourseByIdController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapUserRoutes(WebApplication app)

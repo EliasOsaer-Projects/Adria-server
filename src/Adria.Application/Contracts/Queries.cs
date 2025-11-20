@@ -31,3 +31,8 @@ public interface IUserCoursesByUserQuery
 {
     Task<IReadOnlyCollection<UserCourseData>> Fetch(Guid id);
 }
+
+public interface ISearchCourseByIdQuery
+{
+    Task<CourseData> Fetch(Guid id);
+}
