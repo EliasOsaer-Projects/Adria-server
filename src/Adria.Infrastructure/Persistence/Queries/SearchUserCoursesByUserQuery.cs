@@ -78,7 +78,7 @@ public sealed class SearchUserCoursesByUserQuery : IUserCoursesByUserQuery
         }
 
 
-        if (userCourseDataList != null)
+        if (userCourseDataList.Count > 0)
         {
             _logger.LogInformation("Fetched user {UserId} with {Count} courses", id, userCourseDataList.Count);
         }

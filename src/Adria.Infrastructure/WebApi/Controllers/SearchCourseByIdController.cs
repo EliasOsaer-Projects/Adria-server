@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Adria.Infrastructure.WebApi.Controllers;
 
-public class SearchCourseByIdController
+public sealed class SearchCourseByIdController
 {
     public static async Task<Results<Ok<CourseData>, NotFound>> Invoke(
         [FromRoute] Guid courseId,
