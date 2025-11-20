@@ -28,7 +28,9 @@ public sealed class SearchUserByIdTests
         Assert.NotNull(result);
         Assert.Equal(userId, result.AdriaId);
         Assert.Equal("Nathaniel", result.UserName);
+        Assert.Equal(1700, result.Wallet);
         Assert.Equal(0, result.PointsBalance);
+        Assert.Equal(subscription, result.Subscription);
         Assert.Equal(0, result.Streak);
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains($"Fetching user with ID: {userId}", mockLogger.LoggedMessages[0]);

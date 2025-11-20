@@ -10,12 +10,12 @@ public class UserSubscription
 
     public UserSubscription(Subscription currentSubscription, DateTime date)
     {
-        EnsureValidDate(this, date);
         CurrentSubscription = currentSubscription;
         StartDate = date;
         EndDate = StartDate.Add(new TimeSpan(30, 0, 0, 0));
 
         Status = true;
+        EnsureValidDate(this, date);
     }
 
     //Change current subscription and all data.
@@ -29,9 +29,9 @@ public class UserSubscription
     //Changing dates.
     public void ChangeDates(DateTime date)
     {
-        EnsureValidDate(this, date);
         StartDate = date;
         EndDate = StartDate.Add(new TimeSpan(30, 0, 0, 0));
+        EnsureValidDate(this, date);
     }
 
     //To check if subscription is still valid.
