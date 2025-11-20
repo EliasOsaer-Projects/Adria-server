@@ -33,11 +33,24 @@ public static class Routes
 
     private static void MapCourseRoutes(WebApplication app)
     {
-        var courseRoutes = app.MapGroup("api").WithTags("courses").WithDescription("All endpoints todo with courses").WithOpenApi();
+        var courseRoutes = app
+            .MapGroup("api")
+            .WithTags("Courses")
+            .WithDescription("All endpoints todo with courses")
+            .WithOpenApi();
 
-        courseRoutes.MapGet("/courses", SearchAllCoursesController.Invoke).WithDescription("All courses").
-            WithName(nameof(SearchAllCoursesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
-            WithOpenApi();
+        courseRoutes.MapGet("/courses", SearchAllCoursesController.Invoke)
+            .WithDescription("Get all courses")
+            .WithName(nameof(SearchAllCoursesController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        courseRoutes
+            .MapGet("/courses/{courseId}", SearchCourseByIdController.Invoke)
+            .WithDescription("Get a certain course by its ID")
+            .WithName(nameof(SearchCourseByIdController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapUserRoutes(WebApplication app)
@@ -63,9 +76,16 @@ public static class Routes
             .WithOpenApi();
         
         userRoutes
-            .MapGet("/{userId}/CustomerCourses", SearchUserCoursesByUserController.Invoke)
+            .MapGet("/{userId}/courses", SearchUserCoursesByUserController.Invoke)
             .WithDescription("Get all CustomerCourses and their corresponding course by user.")
             .WithName(nameof(SearchUserCoursesByUserController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/{userId}/enroll/{courseId}", EnrollUserInCourseController.Invoke)
+            .WithDescription("Enroll a user to a certain course")
+            .WithName(nameof(EnrollUserInCourseController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
     }
@@ -73,7 +93,11 @@ public static class Routes
     private static void MapSubscriptionRoutes(WebApplication app)
     {
 
-        var subscriptionRoutes = app.MapGroup("api/subscriptions").WithTags("subscriptions").WithDescription("All endpoints todo with subscriptions").WithOpenApi();
+        var subscriptionRoutes = app
+            .MapGroup("api/subscriptions")
+            .WithTags("Subscriptions")
+            .WithDescription("All endpoints todo with subscriptions")
+            .WithOpenApi();
 
         subscriptionRoutes.MapGet("/all-subscriptions", AllSubscriptionTypesController.Invoke).WithDescription("All subscriptions types").
           WithName(nameof(AllSubscriptionTypesController)).WithMetadata(new ProducesAttribute(APPLICATION_JSON)).
