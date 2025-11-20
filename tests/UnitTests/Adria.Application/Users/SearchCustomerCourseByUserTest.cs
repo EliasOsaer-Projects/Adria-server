@@ -2,6 +2,7 @@
 using Adria.Application.Users;
 using Adria.Domain;
 using UnitTests.Mocks;
+using Xunit.Sdk;
 
 namespace UnitTests.Adria.Application.Users;
 
@@ -33,8 +34,6 @@ public sealed class SearchCustomerCourseByUserTest
             ProgressPercentage: 0
         );
         
-        var userCourses = new List<UserCourseData> { userCourse };
-        
         var userData = new UserData(
             AdriaId: Guid.NewGuid(),
             UserName: "Nathaniel",
@@ -58,10 +57,10 @@ public sealed class SearchCustomerCourseByUserTest
         Assert.NotEmpty(result);
         Assert.Single(result); 
         
-        Assert.Equal("Introduction to Java", userCourses.First().CourseName);
-        Assert.Equal(1, userCourses.First().Difficulty);
+        Assert.Equal("Introduction to Java", userCourse.CourseName);
+        Assert.Equal(1, userCourse.Difficulty);
         
-        Assert.False(userCourses.First().CompletionStatus);
-        Assert.Equal(0, userCourses.First().ProgressPercentage);
+        Assert.False(userCourse.CompletionStatus);
+        Assert.Equal(0, userCourse.ProgressPercentage);
     }
 }
