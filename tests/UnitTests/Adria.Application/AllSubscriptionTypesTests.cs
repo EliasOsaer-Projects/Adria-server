@@ -13,7 +13,7 @@ public class AllSubscriptionTypesTests
         SubscriptionData subscription = new(Guid.NewGuid(), "Base", 2, ["base sub"], false);
         SubscriptionData subscription2 = new(Guid.NewGuid(), "Premium", 2, ["base sub"], true);
 
-        IList<SubscriptionData> subscriptions = new List<SubscriptionData> { subscription, subscription2 };
+        List<SubscriptionData> subscriptions = new List<SubscriptionData> { subscription, subscription2 };
 
         var mockquery = new MockAllSubscriptionQuery();
         mockquery.SetSubscriptions(subscriptions);
@@ -30,7 +30,7 @@ public class AllSubscriptionTypesTests
     [Fact]
     public async Task NoSubscriptions()
     {
-        IList<SubscriptionData> subscriptions = new List<SubscriptionData>();
+        List<SubscriptionData> subscriptions = new List<SubscriptionData>();
 
         var mockquery = new MockAllSubscriptionQuery();
         mockquery.SetSubscriptions(subscriptions);

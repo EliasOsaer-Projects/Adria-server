@@ -28,14 +28,14 @@ public class MockUserByIdQuery : IUserByIdQuery
 
 public class MockAllSubscriptionQuery : IAllSubscriptionTypes
 {
-    private IList<SubscriptionData> _subscriptions = new List<SubscriptionData>();
+    private List<SubscriptionData> _subscriptions = new List<SubscriptionData>();
 
     public Task<IReadOnlyCollection<SubscriptionData>> Fetch()
     {
         return Task.FromResult<IReadOnlyCollection<SubscriptionData>>(_subscriptions.AsReadOnly());
     }
 
-    public void SetSubscriptions(IList<SubscriptionData> subscriptions)
+    public void SetSubscriptions(List<SubscriptionData> subscriptions)
     {
         this._subscriptions = subscriptions;
     }
@@ -49,9 +49,9 @@ public class MockAllSubscriptionQuery : IAllSubscriptionTypes
 public class MockSearchSubscriptionByIdQuery : ISearchSubscriptionTypeByIdQuery
 {
 
-    private IDictionary<Guid, SubscriptionData> _subscriptions = new Dictionary<Guid, SubscriptionData>();
+    private Dictionary<Guid, SubscriptionData> _subscriptions = new Dictionary<Guid, SubscriptionData>();
 
-    public void SetSubscriptions(IDictionary<Guid, SubscriptionData> subscriptions)
+    public void SetSubscriptions(Dictionary<Guid, SubscriptionData> subscriptions)
     {
         _subscriptions = subscriptions;
     }
@@ -92,7 +92,7 @@ public class MockTopUsersByPointsQuery : ITopUsersByPointsQuery
 
 public class MockAllCoursesQuery : IAllCoursesQuery
 {
-    private readonly IList<CourseData> _courses = new List<CourseData>();
+    private readonly List<CourseData> _courses = new List<CourseData>();
 
     public Task<IReadOnlyCollection<CourseData>> Fetch()
     {
@@ -118,7 +118,7 @@ public class MockSearchUserCourseByUser : IUserCoursesByUserQuery
 
 public class MockSearchCourseByIdQuery : ISearchCourseByIdQuery
 {
-    private readonly IList<CourseData> _courses = new List<CourseData>();
+    private readonly List<CourseData> _courses = new List<CourseData>();
     public Task<CourseData> Fetch(Guid id)
     {
         return Task.FromResult(_courses.First(c => c.Id == id));
@@ -129,7 +129,7 @@ public class MockSearchCourseByIdQuery : ISearchCourseByIdQuery
 
 public class MockEnrollUserInCourseQuery : IEnrollUserInCourseQuery
 {
-    private readonly IList<UserCourseData> _userCourses = new List<UserCourseData>();
+    private readonly List<UserCourseData> _userCourses = new List<UserCourseData>();
     
     public void Enroll(Course course, Guid userId)
     {

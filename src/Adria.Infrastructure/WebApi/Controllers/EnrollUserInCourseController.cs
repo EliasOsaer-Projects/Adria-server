@@ -29,4 +29,6 @@ public sealed class EnrollUserInCourseController
         
         return TypedResults.Ok(userCourse);
     }
+    
+    private EnrollUserInCourseController() { }
 }

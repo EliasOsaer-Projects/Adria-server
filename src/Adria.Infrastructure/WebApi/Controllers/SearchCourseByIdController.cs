@@ -17,4 +17,6 @@ public sealed class SearchCourseByIdController
         CourseData courseData = await searchCourseById.Execute(new SearchCourseByIdInput(courseId));
         return TypedResults.Ok(courseData);
     }
+    
+    private SearchCourseByIdController() { }
 }

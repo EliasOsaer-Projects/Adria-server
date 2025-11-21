@@ -7,6 +7,7 @@ namespace UnitTests.Courses;
 
 public class SearchCourseByIdTest
 {
+    [Fact]
     public async Task Execute_ReturnsCourseById()
     {
         // Arrange
