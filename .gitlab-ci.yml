@@ -54,6 +54,5 @@ create-image:
   variables:
     DOCKER_TLS_CERTDIR: ""
   script:
-    - cd config/docker
-    - docker build --build-arg BUILD_ENV=test -t hcr.technet.howest.be/adria-server-group-01:latest .
+    - docker build --build-arg BUILD_ENV=test -f config/docker/Dockerfile -t hcr.technet.howest.be/adria-server-group-01:latest .
     - docker push hcr.technet.howest.be/adria-server-group-01:latest
