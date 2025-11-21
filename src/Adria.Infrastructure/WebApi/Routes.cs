@@ -44,11 +44,18 @@ public static class Routes
             .WithName(nameof(SearchAllCoursesController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
-        
+
         courseRoutes
             .MapGet("/courses/{courseId}", SearchCourseByIdController.Invoke)
             .WithDescription("Get a certain course by its ID")
             .WithName(nameof(SearchCourseByIdController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        courseRoutes
+            .MapGet("/courses/{courseId}/modules", GetCourseModulesController.Invoke)
+            .WithDescription("Get modules linked to a course by its ID")
+            .WithName(nameof(GetCourseModulesController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
     }
