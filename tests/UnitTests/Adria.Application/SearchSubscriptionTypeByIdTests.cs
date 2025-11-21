@@ -17,7 +17,7 @@ public class SearchSubscriptionTypeByIdTests
         SubscriptionData subscription2 = new(_id2, "Premium", 10, ["premium sub"], true);
         SubscriptionData subscription3 = new(_id3, "Super", 9001, ["SUPER! sub!"], false);
 
-        IDictionary<Guid, SubscriptionData> subscriptions = new Dictionary<Guid, SubscriptionData>();
+        Dictionary<Guid, SubscriptionData> subscriptions = new Dictionary<Guid, SubscriptionData>();
 
         subscriptions.Add(_id, subscription);
         subscriptions.Add(_id2, subscription2);

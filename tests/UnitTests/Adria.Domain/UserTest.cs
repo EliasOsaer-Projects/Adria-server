@@ -61,6 +61,9 @@ public class UserTest
         
         // Act
         _user.ResetStreak();
+        
+        // Assert
+        Assert.Equal(0, _user.Streak);
     }
     
     [Fact]

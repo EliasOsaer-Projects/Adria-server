@@ -22,4 +22,6 @@ public sealed class SearchSubscriptionTypeByIdController
         return TypedResults.Ok(subscriptionData.ToList());
 
     }
+    
+    private SearchSubscriptionTypeByIdController() { }
 }

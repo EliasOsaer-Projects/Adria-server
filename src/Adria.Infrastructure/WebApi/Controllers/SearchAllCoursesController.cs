@@ -37,4 +37,6 @@ public sealed class SearchAllCoursesController
     
         return TypedResults.Ok(filteredData.ToList());
     }
+    
+    private SearchAllCoursesController() { }
 }

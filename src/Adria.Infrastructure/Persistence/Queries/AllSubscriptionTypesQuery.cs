@@ -39,7 +39,7 @@ public sealed class AllSubscriptionTypesQuery : IAllSubscriptionTypes
 
             await using var reader = await command.ExecuteReaderAsync();
 
-            IList<SubscriptionData> subscriptions = new List<SubscriptionData>();
+            List<SubscriptionData> subscriptions = new List<SubscriptionData>();
 
             while (await reader.ReadAsync())
             {

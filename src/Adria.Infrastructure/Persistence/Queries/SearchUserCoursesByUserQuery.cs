@@ -62,7 +62,7 @@ public sealed class SearchUserCoursesByUserQuery : IUserCoursesByUserQuery
         using var reader = await command.ExecuteReaderAsync();
         
 
-        IList<UserCourseData> userCourseDataList = new List<UserCourseData>();
+        List<UserCourseData> userCourseDataList = new List<UserCourseData>();
         
 
         while (await reader.ReadAsync())

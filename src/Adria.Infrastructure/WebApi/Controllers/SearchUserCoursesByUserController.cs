@@ -27,6 +27,8 @@ public sealed class SearchUserCoursesByUserController
 
         return TypedResults.Ok(userCourseData);
     }
+    
+    private SearchUserCoursesByUserController() { }
 }
 
    
