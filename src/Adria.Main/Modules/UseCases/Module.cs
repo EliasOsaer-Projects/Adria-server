@@ -20,6 +20,7 @@ public static class UseCases
             
             .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
             .AddScoped<IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>, SearchUserCoursesByUser>()
-            .AddScoped<IUseCase<SearchCourseByIdInput, Task<CourseData>>, SearchCourseById>();
+            .AddScoped<IUseCase<SearchCourseByIdInput, Task<CourseData>>, SearchCourseById>()
+            .AddScoped<IUseCase<GetCourseModulesInput, Task<IEnumerable<CourseModuleData>>>, GetCourseModules>();
     }
 }
