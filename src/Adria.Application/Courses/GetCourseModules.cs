@@ -6,19 +6,20 @@ namespace Adria.Application.Courses;
 
 public sealed record GetCourseModulesInput(Guid CourseId);
 
-public sealed class GetCourseModules : IUseCase<GetCourseModulesInput, Task<IEnumerable<CourseModuleData>>>
+public sealed class GetCourseModules 
+    : IUseCase<GetCourseModulesInput, Task<IEnumerable<CourseModuleData>>>
 {
     private readonly ICourseModulesByCourseIdQuery _query;
-    private readonly ILogger _logger;
+    private readonly ILogger<GetCourseModules> _logger;
 
-    public GetCourseModules(ICourseModulesByCourseIdQuery query, ILogger logger)
+    public GetCourseModules(ICourseModulesByCourseIdQuery query, ILogger<GetCourseModules> logger)
     {
         _query = query;
         _logger = logger;
     }
 
     public async Task<IEnumerable<CourseModuleData>> Execute(GetCourseModulesInput input)
-    { 
+    {
         _logger.LogInformation("Fetching course modules");
         return await _query.Fetch(input.CourseId);
     }
