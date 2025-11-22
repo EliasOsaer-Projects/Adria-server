@@ -147,3 +147,19 @@ public class MockEnrollUserInCourseQuery : IEnrollUserInCourseQuery
         return Task.FromResult(_userCourses.First(uc => uc.CourseId == courseId));
     }
 }
+
+public class MockCourseModulesByCourseIdQuery : ICourseModulesByCourseIdQuery
+{
+    private readonly Dictionary<Guid, List<CourseModuleData>> _modulesByCourse = new();
+
+    public void AddModules(Guid courseId, List<CourseModuleData> modules)
+    {
+        _modulesByCourse[courseId] = modules;
+    }
+
+    public Task<IEnumerable<CourseModuleData>> Fetch(Guid courseId)
+    {
+        _modulesByCourse.TryGetValue(courseId, out var modules);
+        return Task.FromResult<IEnumerable<CourseModuleData>>(modules ?? new List<CourseModuleData>());
+    }
+}
