@@ -8,20 +8,20 @@ namespace Adria.Infrastructure;
 
 public sealed class SearchSubscriptionTypeByIdController
 {
-    public static async Task<Results<Ok<List<SubscriptionData>>, NotFound>> Invoke(
-        Guid subscriptionId,
-        [FromServices] IUseCase<SearchSubscriptionTypeByIdInput, Task<IReadOnlyCollection<SubscriptionData>>> searchSubscriptionById
+    public static async Task<Results<Ok<SubscriptionData>, NotFound>> Invoke(
+        [FromRoute] Guid subscriptionId,
+        [FromServices] IUseCase<SearchSubscriptionTypeByIdInput, Task<SubscriptionData>> searchSubscriptionById
         )
     {
         if (subscriptionId == Guid.Empty)
             return TypedResults.NotFound();
-        
-        SearchSubscriptionTypeByIdInput input = new SearchSubscriptionTypeByIdInput(subscriptionId);
-        IReadOnlyCollection<SubscriptionData> subscriptionData = await searchSubscriptionById.Execute(input);
 
-        return TypedResults.Ok(subscriptionData.ToList());
+        SearchSubscriptionTypeByIdInput input = new SearchSubscriptionTypeByIdInput(subscriptionId);
+        SubscriptionData subscriptionData = await searchSubscriptionById.Execute(input);
+
+        return TypedResults.Ok(subscriptionData);
 
     }
-    
+
     private SearchSubscriptionTypeByIdController() { }
 }
