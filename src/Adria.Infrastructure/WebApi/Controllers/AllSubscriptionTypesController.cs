@@ -14,11 +14,11 @@ public sealed class AllSubscriptionTypesController
     {
         IReadOnlyCollection<SubscriptionData> subscriptionData = await AllSubscriptionTypes.Execute();
 
-        if (subscriptionData.Count > 0)
+        if (subscriptionData.Count <= 0)
         {
             return TypedResults.NotFound();
         }
-        
+
         return TypedResults.Ok(subscriptionData.ToList());
     }
 
