@@ -83,7 +83,7 @@ public class EnrollUserInCourseQuery
         return new UserCourseData(
             CourseId: reader.GetGuid(reader.GetOrdinal("CourseID")),
             CourseName: reader.GetString(reader.GetOrdinal("CourseName")),
-            Difficulty: reader.GetInt16(reader.GetOrdinal("CourseDifficulty")),
+            Level: reader.GetInt16(reader.GetOrdinal("CourseDifficulty")),
             ProgressPercentage: reader.GetInt32(reader.GetOrdinal("ProgressPercentage")),
             CompletionStatus: reader.GetBoolean(reader.GetOrdinal("CompletionStatus"))
         );

@@ -29,7 +29,7 @@ public sealed class SearchCustomerCourseByUserTest
         var userCourse = new UserCourseData(
             CourseId: course.Id,
             CourseName: course.Name,
-            Difficulty: course.Level,
+            Level: course.Level,
             CompletionStatus: false,
             ProgressPercentage: 0
         );
@@ -58,7 +58,7 @@ public sealed class SearchCustomerCourseByUserTest
         Assert.Single(result); 
         
         Assert.Equal("Introduction to Java", userCourse.CourseName);
-        Assert.Equal(1, userCourse.Difficulty);
+        Assert.Equal(1, userCourse.Level);
         
         Assert.False(userCourse.CompletionStatus);
         Assert.Equal(0, userCourse.ProgressPercentage);
