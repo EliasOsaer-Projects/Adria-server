@@ -143,6 +143,11 @@ public static class PersistenceModule
         using DbCommand command = connection.CreateCommand();
         command.CommandText = File.ReadAllText(scriptPath);
         command.ExecuteNonQuery();
+        
+        
+        
         return app;
     }
+    
+
 }
