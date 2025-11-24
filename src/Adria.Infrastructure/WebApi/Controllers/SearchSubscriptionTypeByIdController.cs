@@ -9,7 +9,7 @@ namespace Adria.Infrastructure;
 public sealed class SearchSubscriptionTypeByIdController
 {
     public static async Task<Results<Ok<SubscriptionData>, NotFound>> Invoke(
-        Guid subscriptionId,
+        [FromRoute] Guid subscriptionId,
         [FromServices] IUseCase<SearchSubscriptionTypeByIdInput, Task<SubscriptionData>> searchSubscriptionById
         )
     {
