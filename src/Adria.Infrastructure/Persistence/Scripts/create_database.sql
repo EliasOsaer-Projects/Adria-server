@@ -178,10 +178,10 @@ INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `Pro
 INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`) VALUES ('db5b29f6-7078-48cf-94e8-f491096482be', 'Kai Anderson', 45.25, 95, 1, NULL);
 
 -- ===== SUBSCRIPTIONS =====
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('e9024415-00e5-401c-84c3-5d4b2489b975', 'Free', 0.0, 0, 'Basic access to limited courses and features');
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('26d25a2b-970c-4428-b224-438d5b1584a5', 'Basic', 9.99, 0, 'Access to most courses with standard features');
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('eebfa304-3e1f-4a75-9d0d-d147b78c735f', 'Premium', 19.99, 1, 'Full access to all courses, priority support, and bonus content');
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('5e04b02d-eac7-42c0-b877-9ecbc695cec2', 'Ultimate', 29.99, 0, 'Everything in Premium plus exclusive masterclasses and personal learning assistant');
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('e9024415-00e5-401c-84c3-5d4b2489b975', 'Basic', 12.99, 0, 'Basic access to limited courses and features');
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('26d25a2b-970c-4428-b224-438d5b1584a5', 'Standart', 18.99, 0, 'Access to most courses with standard features');
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('eebfa304-3e1f-4a75-9d0d-d147b78c735f', 'Premium', 24.99, 1, 'Full access to all courses, priority support, and bonus content');
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('5e04b02d-eac7-42c0-b877-9ecbc695cec2', 'Ultimate', 32.99, 0, 'Everything in Premium plus exclusive masterclasses and personal learning assistant');
 
 -- ===== USER SUBSCRIPTIONS =====
 INSERT INTO `UserSubscription` (`UserSubscriptionID`, `StartDate`, `EndDate`, `Status`, `AdriaID`, `SubscriptionID`) VALUES ('7c3c7712-cfb8-4e29-9386-f61ff2c53b0e', '2084-01-15 10:00:00', '2085-01-15 10:00:00', 'Active', '389bc6fb-080e-4450-ac9a-2ff10868b0d6', 'eebfa304-3e1f-4a75-9d0d-d147b78c735f');
