@@ -144,7 +144,8 @@ public static class PersistenceModule
         command.CommandText = File.ReadAllText(scriptPath);
         command.ExecuteNonQuery();
         
-    // For demonstration purposes, we will just read some data from the Course table.
+        
+        // Seed images
         var courseIds = new List<(string CourseId, string CourseName)>();
         using (DbCommand selectCmd = connection.CreateCommand())
         {
