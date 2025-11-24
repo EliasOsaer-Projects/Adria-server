@@ -144,9 +144,90 @@ public static class PersistenceModule
         command.CommandText = File.ReadAllText(scriptPath);
         command.ExecuteNonQuery();
         
-        
+    // For demonstration purposes, we will just read some data from the Course table.
+        var courseIds = new List<(string CourseId, string CourseName)>();
+        using (DbCommand selectCmd = connection.CreateCommand())
+        {
+            selectCmd.CommandText = "SELECT CourseID, CourseName FROM Course";
+            using (var reader = selectCmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    courseIds.Add((reader.GetString(0), reader.GetString(1)));
+                }
+            }
+        }
+
+        Console.WriteLine(courseIds.Count + " courses found in the database.");
+
+        foreach (var course in courseIds)
+        {
+            Console.WriteLine($"Course {course.CourseName} ({course.CourseId})");
+            string coverImageId = Guid.NewGuid().ToString();
+            string bannerImageId = Guid.NewGuid().ToString();
+
+            string coverImgPath = Path.Combine(
+                AppContext.BaseDirectory, 
+                "Persistence/Scripts/SeedImages/Covers", 
+                $"{course.CourseName}.jpg"
+            );
+            string bannerImgPath = Path.Combine(
+                AppContext.BaseDirectory, 
+                "Persistence/Scripts/SeedImages/Banners", 
+                $"{course.CourseName}.jpg"
+            );
+
+            using (var imageCommand = connection.CreateCommand())
+            {
+                imageCommand.CommandText = @"
+                INSERT INTO CoverImage (CoverImageID, CoverImage) 
+                VALUES (@id, @img)
+                ";
+                
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@id", coverImageId));
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@img", File.ReadAllBytes(coverImgPath)));
+                
+                imageCommand.ExecuteNonQuery();
+                imageCommand.Parameters.Clear();
+                
+                imageCommand.CommandText = @"
+                INSERT INTO BannerImage (BannerImageID, BannerImage) 
+                VALUES (@id, @img)
+                ";
+                
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@id", bannerImageId));
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@img", File.ReadAllBytes(bannerImgPath)));
+                
+                imageCommand.ExecuteNonQuery();
+                imageCommand.Parameters.Clear();
+            }
+
+            using (var updateCourseForeignKeys = connection.CreateCommand())
+            {
+                updateCourseForeignKeys.CommandText = @"
+                    UPDATE Course 
+                    SET CoverImageID = @coverID, 
+                        BannerImageID = @bannerID 
+                    WHERE CourseID = @courseID
+                ";
+                
+                updateCourseForeignKeys.Parameters.Add(CreateParam(updateCourseForeignKeys, "@coverID", coverImageId));
+                updateCourseForeignKeys.Parameters.Add(CreateParam(updateCourseForeignKeys, "@bannerID", bannerImageId));
+                updateCourseForeignKeys.Parameters.Add(CreateParam(updateCourseForeignKeys, "@courseID", course.CourseId));
+                
+                updateCourseForeignKeys.ExecuteNonQuery();
+            }
+        }
         
         return app;
+    }
+    
+    private static DbParameter CreateParam(DbCommand cmd, string name, object value)
+    {
+        var param = cmd.CreateParameter();
+        param.ParameterName = name;
+        param.Value = value;
+        return param;
     }
     
 
