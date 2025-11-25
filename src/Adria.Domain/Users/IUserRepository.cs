@@ -2,6 +2,6 @@
 
 public interface IUserRepository
 {
-    Task<User?> GetById(Guid adriaId);
+    Task<User?> ById(Guid adriaId);
     Task Save(User user);
 }
