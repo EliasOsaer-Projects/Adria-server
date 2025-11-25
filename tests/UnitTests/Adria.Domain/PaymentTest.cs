@@ -25,7 +25,7 @@ public class PaymentTest
             _wallet
         );
 
-        Payment? _payment = new Payment();
+        _payment = new Payment();
     }
 
     [Fact]
