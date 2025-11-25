@@ -43,14 +43,14 @@ public sealed class SubscribeUser : IUseCase<SubscribeUserInput, Task>
         if (current != null)
         {
             current.ChangeSubscription(subscription, DateTime.UtcNow);
+            _logger.LogInformation("User subscription updated: {UserId}", user.AdriaId);
         }
         else
         {
             current = new UserSubscription(subscription, DateTime.UtcNow);
+            _logger.LogInformation("User subscribed successfully: {UserId}", user.AdriaId);
         }
         
         await _userSubscriptionRepository.Save(user, current);
-
-        _logger.LogInformation("User {UserId} subscribed to {SubscriptionId}", input.AdriaId, input.SubscriptionId);
     }
 }
