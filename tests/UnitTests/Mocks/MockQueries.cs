@@ -139,6 +139,7 @@ public class MockEnrollUserInCourseQuery : IEnrollUserInCourseQuery
                 course.Name,
                 course.Level,
                 false,
+                new byte[3],
                 0
             ));
     }

@@ -33,7 +33,8 @@ public sealed class SearchCustomerCourseByUserTest
             CourseName: course.Name,
             Level: course.Level,
             CompletionStatus: false,
-            ProgressPercentage: 0
+            ProgressPercentage: 0,
+            CoverImage: new byte[3]
         );
         
         var userData = new UserData(
