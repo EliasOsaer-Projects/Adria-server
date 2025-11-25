@@ -43,7 +43,7 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
         {
             if (!await reader.ReadAsync())
             {
-                _logger.LogInformation("{id} wasn't found", id);
+                _logger.LogInformation("{Id} wasn't found", id);
                 return null!;
             }
 
