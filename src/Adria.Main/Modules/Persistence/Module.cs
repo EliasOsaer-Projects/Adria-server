@@ -144,8 +144,14 @@ public static class PersistenceModule
         command.CommandText = File.ReadAllText(scriptPath);
         command.ExecuteNonQuery();
         
+        SeedImages(connection);
         
-        // Seed images
+        return app;
+    }
+
+    private static void SeedImages(DbConnection connection)
+    {
+                // Seed images
         var courseIds = new List<(string CourseId, string CourseName)>();
         using (DbCommand selectCmd = connection.CreateCommand())
         {
@@ -177,7 +183,7 @@ public static class PersistenceModule
                 "Persistence/Scripts/SeedImages/Banners", 
                 $"{course.CourseName}.jpg"
             );
-
+            
             using (var imageCommand = connection.CreateCommand())
             {
                 imageCommand.CommandText = @"
@@ -219,10 +225,9 @@ public static class PersistenceModule
                 updateCourseForeignKeys.ExecuteNonQuery();
             }
         }
-        
-        return app;
+
     }
-    
+
     private static DbParameter CreateParam(DbCommand cmd, string name, object value)
     {
         var param = cmd.CreateParameter();
