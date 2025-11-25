@@ -23,6 +23,8 @@ public sealed class SearchCustomerCourseByUserTest
             PointsOnCompletion: 100,
             LearnList:[],
             Duration: 10,
+            CoverImage: new byte[3],
+            BannerImage: new byte[3],
             SubscriptionRequired: false
         );
         

@@ -8,5 +8,6 @@ public sealed record UserCourseData
     string CourseName,
     int Level,
     Boolean CompletionStatus,
+    byte[] CoverImage,
     int ProgressPercentage
 );

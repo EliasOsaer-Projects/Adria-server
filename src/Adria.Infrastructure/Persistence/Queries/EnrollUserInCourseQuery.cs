@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
+using Adria.Domain.Shared.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Adria.Infrastructure.Persistence.Queries;
@@ -18,9 +19,11 @@ public class EnrollUserInCourseQuery
         c.CourseName,
         c.CourseDifficulty,
         uc.ProgressPercentage,
-        uc.CompletionStatus
+        uc.CompletionStatus,
+        ci.CoverImage
         FROM UserCourse uc
         JOIN Course c ON uc.CourseID = c.CourseID
+        JOIN CoverImage ci ON Course.CoverImageID = CoverImage.CoverImageID
         WHERE uc.AdriaID = @userID AND uc.CourseID = @courseId
     ";
     
@@ -85,7 +88,8 @@ public class EnrollUserInCourseQuery
             CourseName: reader.GetString(reader.GetOrdinal("CourseName")),
             Level: reader.GetInt16(reader.GetOrdinal("CourseDifficulty")),
             ProgressPercentage: reader.GetInt32(reader.GetOrdinal("ProgressPercentage")),
-            CompletionStatus: reader.GetBoolean(reader.GetOrdinal("CompletionStatus"))
+            CompletionStatus: reader.GetBoolean(reader.GetOrdinal("CompletionStatus")), 
+            CoverImage: await Helper.ReadBlobAsync(reader, reader.GetOrdinal("CoverImage"))
         );
     }
 }
