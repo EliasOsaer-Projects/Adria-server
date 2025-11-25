@@ -12,7 +12,7 @@ public sealed record CourseData(
     int PointsOnCompletion,
     IList<string> LearnList,
     int Duration,
-    // Guid CoverImageId,
-    // Guid BannerImageId,
+    byte[] CoverImage,
+    byte[] BannerImage,
     Boolean SubscriptionRequired
 );

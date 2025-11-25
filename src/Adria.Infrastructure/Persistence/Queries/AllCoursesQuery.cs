@@ -2,6 +2,7 @@
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
 using Adria.Domain;
+using Adria.Domain.Shared.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Adria.Infrastructure.Persistence.Queries;
@@ -11,6 +12,7 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
     private static readonly string QRY = @"
         SELECT *
         From Course
+        JOIN CoverImage ON Course.CoverImageID = CoverImage.CoverImageID
     ";
 
 
@@ -58,10 +60,10 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
             var ordPointsOnCompletion = reader.GetOrdinal("PointsOnCompletion");
             var ordEstimatedDuration = reader.GetOrdinal("EstimatedDurationInHours");
             var ordLearnList = reader.GetOrdinal("LearnList");
-            // Add banner image here
-            // Add cover image here
+            var ordCoverImage = reader.GetOrdinal("CoverImage");
             var ordSubscriptionRequired = reader.GetOrdinal("SubscriptionRequired");
             
+            byte[] coverImageBytes = await Helper.ReadBlobAsync(reader, ordCoverImage);
             courses.Add(new CourseData(
                 Id: reader.GetGuid(ordCourseId),
                 Name: reader.GetString(ordCourseName),
@@ -72,7 +74,9 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
                 PointsOnCompletion: reader.GetInt32(ordPointsOnCompletion),
                 Duration: reader.GetInt32(ordEstimatedDuration),
                 LearnList: reader.GetString(ordLearnList).Split(',', StringSplitOptions.TrimEntries).ToList(),
-                SubscriptionRequired: reader.GetBoolean(ordSubscriptionRequired)
+                SubscriptionRequired: reader.GetBoolean(ordSubscriptionRequired),
+                CoverImage: coverImageBytes,
+                BannerImage: new byte[0]
             ));
         }
         
@@ -81,5 +85,6 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
 
         return courses.AsReadOnly();
     }
-
+    
+    
 }

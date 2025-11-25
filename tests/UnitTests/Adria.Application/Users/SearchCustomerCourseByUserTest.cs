@@ -23,6 +23,8 @@ public sealed class SearchCustomerCourseByUserTest
             PointsOnCompletion: 100,
             LearnList:[],
             Duration: 10,
+            CoverImage: new byte[3],
+            BannerImage: new byte[3],
             SubscriptionRequired: false
         );
         
@@ -31,7 +33,8 @@ public sealed class SearchCustomerCourseByUserTest
             CourseName: course.Name,
             Level: course.Level,
             CompletionStatus: false,
-            ProgressPercentage: 0
+            ProgressPercentage: 0,
+            CoverImage: new byte[3]
         );
         
         var userData = new UserData(

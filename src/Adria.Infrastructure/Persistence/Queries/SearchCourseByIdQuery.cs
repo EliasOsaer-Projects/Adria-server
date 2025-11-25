@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
+using Adria.Domain.Shared.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Adria.Infrastructure.Persistence.Queries;
@@ -9,7 +10,11 @@ public sealed class SearchCourseByIdQuery
     : ISearchCourseByIdQuery
 {
     private static readonly string QRY = @"
-        SELECT * FROM Course WHERE CourseID = @id";
+        SELECT * 
+        FROM Course 
+        JOIN BannerImage ON Course.BannerImageID = BannerImage.BannerImageID
+        WHERE Course.CourseID = @id
+    ";
     
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
@@ -60,7 +65,9 @@ public sealed class SearchCourseByIdQuery
             PointsOnCompletion: reader.GetInt32(reader.GetOrdinal("PointsOnCompletion")),
             LearnList: reader.GetString(reader.GetOrdinal("LearnList")).Split(',', StringSplitOptions.TrimEntries).ToList(),
             Duration: reader.GetInt32(reader.GetOrdinal("EstimatedDurationInHours")),
-            SubscriptionRequired: reader.GetBoolean(reader.GetOrdinal("SubscriptionRequired"))
+            SubscriptionRequired: reader.GetBoolean(reader.GetOrdinal("SubscriptionRequired")),
+            CoverImage: new byte[0],
+            BannerImage: await Helper.ReadBlobAsync(reader, reader.GetOrdinal("BannerImage"))
         );
     }
 }

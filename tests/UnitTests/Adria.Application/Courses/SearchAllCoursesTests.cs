@@ -21,6 +21,8 @@ public sealed class SearchAllCoursesTests
             PointsOnCompletion: 100,
             LearnList:[],
             Duration: 10,
+            CoverImage: new byte[3],
+            BannerImage: new byte[3],
             SubscriptionRequired: false
         );
         
@@ -34,6 +36,8 @@ public sealed class SearchAllCoursesTests
             PointsOnCompletion: 100,
             LearnList: new List<string>() {"variables", "loops", "classes"},
             Duration: 10,
+            CoverImage: new byte[3],
+            BannerImage: new byte[3],
             SubscriptionRequired: false
         );
         

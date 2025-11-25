@@ -24,6 +24,8 @@ public class SearchCourseByIdTest
             120,
             new List<string>{"variables", "loops", "classes"},
             28,
+            CoverImage: new byte[3],
+            BannerImage: new byte[3],
             false
         );
         
@@ -37,6 +39,8 @@ public class SearchCourseByIdTest
             120,
             new List<string>{"variables", "loops", "classes"},
             28,
+            CoverImage: new byte[3],
+            BannerImage: new byte[3],
             false
         );
         

@@ -49,9 +49,12 @@ public sealed class CourseTests
         var levelInt = 1; 
         var points = 100;
         var tags = new List<string>{"fun", "coding"};
+        byte[] bannerImage = new byte[] {1, 2, 3};
+        byte[] coverImage = new byte[] {1, 2, 3};
         var subscriptionRequired = false;
-        
-        var course = new CourseData(id, name, levelInt, description, category, tags, points, learnList, duration, subscriptionRequired);
+
+        var course = new CourseData(id, name, levelInt, description, category, tags, points, learnList, duration,
+            coverImage, bannerImage, subscriptionRequired);
         
         // Assert
         Assert.Equal(id, course.Id);
