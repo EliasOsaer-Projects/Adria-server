@@ -34,7 +34,7 @@ public sealed class AdoSubscriptionRepository : AbstractAdoRepository, ISubscrip
 
     public async Task<Subscription?> ById(Guid subscriptionId)
     {
-        DbParameter id = CreateParameter("@Id", subscriptionId.ToString());
+        DbParameter id = CreateParameter("@SubscriptionId", subscriptionId.ToString());
         DbDataReader dbDataReader = await ExecuteReaderAsync(SELECT_SUBSCRIPTION_BY_ID, [id]);
         try
         {

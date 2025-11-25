@@ -45,7 +45,7 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
 
     public async Task<User?> ById(Guid adriaId)
     {
-        DbParameter id = CreateParameter("@Id", adriaId.ToString());
+        DbParameter id = CreateParameter("@UserId", adriaId.ToString());
         DbDataReader dbDataReader = await ExecuteReaderAsync(SELECT_USER_BY_ID, [id]);
 
         try

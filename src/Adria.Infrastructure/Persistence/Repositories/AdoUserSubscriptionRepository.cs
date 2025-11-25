@@ -51,8 +51,8 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
 
     public async Task<UserSubscription?> ById(Guid userId)
     {
-        DbParameter param = CreateParameter("@UserId", userId.ToString());
-        await using var reader = await ExecuteReaderAsync(SELECT_BY_USER_ID, [param]);
+        var param = CreateParameter("@UserId", userId.ToString());
+        await using var reader = await ExecuteReaderAsync(SELECT_BY_USER_ID, new[] { param });
 
         if (!await reader.ReadAsync()) return null;
 
@@ -60,13 +60,16 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         {
             var subsId = reader.GetGuid(reader.GetOrdinal(COL_SUBS_ID));
             var startDate = reader.GetDateTime(reader.GetOrdinal(COL_START));
-            var status = reader.GetBoolean(reader.GetOrdinal(COL_STATUS));
+            var statusStr = reader.GetString(reader.GetOrdinal(COL_STATUS));
 
-            var subscription = await _subscriptionRepository.ById(subsId); 
+            var subscription = await _subscriptionRepository.ById(subsId);
             if (subscription == null) return null;
 
             var userSubscription = new UserSubscription(subscription, startDate);
-            if (!status) userSubscription.IsSubscriptionPaid(false);
+            if (!string.Equals(statusStr, "Active", StringComparison.OrdinalIgnoreCase))
+            {
+                userSubscription.IsSubscriptionPaid(false);
+            }
 
             return userSubscription;
         }
@@ -79,23 +82,21 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     public async Task Save(User user, UserSubscription userSubscription)
     {
         var exists = await ById(user.AdriaId);
-
-        string query = exists == null ? INSERT_SUBSCRIPTION : UPDATE_SUBSCRIPTION;
+        var query = exists == null ? INSERT_SUBSCRIPTION : UPDATE_SUBSCRIPTION;
 
         try
         {
-            DbParameter[] parameters =
-            [
+            var parameters = new[]
+            {
                 CreateParameter("@Id", Guid.NewGuid().ToString()), // for insert only
                 CreateParameter("@UserId", user.AdriaId.ToString()),
                 CreateParameter("@SubsId", userSubscription.CurrentSubscription.SubscriptionId),
                 CreateParameter("@Start", userSubscription.StartDate),
                 CreateParameter("@End", userSubscription.EndDate),
-                CreateParameter("@Status", userSubscription.Status)
-            ];
+                CreateParameter("@Status", userSubscription.Status ? "Active" : "Inactive")
+            };
 
             await ExecuteNonQueryAsync(query, parameters);
-
             _logger.LogInformation("Saved subscription for user {UserId}", user.AdriaId);
         }
         catch (DbException ex)
