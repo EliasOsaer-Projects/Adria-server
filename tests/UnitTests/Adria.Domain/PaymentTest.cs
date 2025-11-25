@@ -54,8 +54,6 @@ public class PaymentTest
             var payment = new Payment(1001, _user);
         });
 
-
+        Assert.Equal("The user had insufficient resources", ex.Message);
     }
-
-
 }

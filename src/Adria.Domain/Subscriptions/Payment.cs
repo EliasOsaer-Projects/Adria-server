@@ -20,6 +20,6 @@ public class Payment
     private void EnsureValidPayment(decimal amount, decimal wallet)
     {
         if (amount > wallet)
-            throw new GenesisException("The user is too poor to pay");
+            throw new GenesisException("The user had insufficient resources");
     }
 }
