@@ -43,7 +43,8 @@ public sealed class SearchCustomerCourseByUserTest
             Wallet: 1700m,
             PointsBalance: 0,
             Streak: 0,
-            Subscription: subscription
+            Subscription: subscription,
+            Occupation: "Software Engineer"
         );
         var mockQuery = new MockSearchUserCourseByUser();
         var mockLogger = new MockLogger<SearchUserCoursesByUser>();
