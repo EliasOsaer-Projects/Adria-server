@@ -14,6 +14,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
             User.Wallet, 
             User.PointsBalance, 
             User.Streak, 
+            User.Occupation,
             cs.UserSubscriptionID, 
             cs.Status, 
             Subscription.SubscriptionID, 
@@ -73,7 +74,11 @@ public sealed class UserByIdQuery : IUserByIdQuery
         var wallet = reader.GetDecimal(reader.GetOrdinal("Wallet"));
         var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
         var streak = reader.GetInt32(reader.GetOrdinal("Streak"));
-
+        int ordOccupation = reader.GetOrdinal("Occupation");
+        string occupation = await reader.IsDBNullAsync(ordOccupation) 
+            ? "" 
+            : reader.GetString(ordOccupation);
+        
         Guid? subscriptionId = await reader.IsDBNullAsync(reader.GetOrdinal("SubscriptionID"))
             ? null
             : Guid.Parse(reader.GetString(reader.GetOrdinal("SubscriptionID")));
@@ -99,7 +104,8 @@ public sealed class UserByIdQuery : IUserByIdQuery
         wallet,
         points,
         streak,
-        subscription
+        subscription,
+        occupation
     );
 }
 }
