@@ -21,10 +21,13 @@ public static class Helper
         {
             int read = (int)Math.Min(bufferSize, blobLength - bytesRead);
             int actualRead = (int)reader.GetBytes(ordinal, fieldOffset, buffer, 0, read);
-            await ms.WriteAsync(buffer, 0, actualRead);
+
+            await ms.WriteAsync(buffer.AsMemory(0, actualRead), CancellationToken.None);
+
             bytesRead += actualRead;
             fieldOffset += actualRead;
         }
+
         return ms.ToArray();
     }
 }
