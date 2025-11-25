@@ -35,8 +35,8 @@ public class PaymentTest
         Type p = typeof(Payment);
 
         //Assert
-        Assert.IsType(p, _payment.GetType());
-        Assert.False(null == _payment.TransactionID);
+        Assert.IsType(p, _payment);
+        Assert.NotNull(_payment.TransactionID);
     }
 
     public void SuccesfullPayment()
