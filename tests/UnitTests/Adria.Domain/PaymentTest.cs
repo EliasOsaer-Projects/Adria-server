@@ -1,4 +1,5 @@
-﻿using Adria.Domain;
+﻿using System.Threading.Tasks;
+using Adria.Domain;
 
 namespace UnitTests;
 
@@ -38,6 +39,21 @@ public class PaymentTest
         Assert.IsType(p, _payment);
         Assert.NotEqual(Guid.Empty, _payment.TransactionID);
         Assert.Equal(900m, _user.Wallet);
+
+    }
+
+    [Fact]
+    public void Constructor_WithNoValidProperties_SetAllProperties()
+    {
+        //Act
+        Type p = typeof(Payment);
+
+        //Assert
+        var ex = Assert.Throws<GenesisException>(() =>
+        {
+            var payment = new Payment(1001, _user);
+        });
+
 
     }
 
