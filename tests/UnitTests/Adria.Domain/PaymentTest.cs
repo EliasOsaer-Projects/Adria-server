@@ -43,7 +43,7 @@ public class PaymentTest
     public void SuccesfullPayment()
     {
         //Act
-        _user.Wallet = _payment.Transaction(100, _user.Wallet);
+        _payment.Transaction(100, _user);
 
         Assert.Equal(900m, _user.Wallet);
 

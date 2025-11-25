@@ -11,14 +11,12 @@ public class Payment
         TransactionID = Guid.NewGuid();
     }
 
-    public decimal Transaction(decimal amount, decimal wallet)
+    public void Transaction(decimal amount, User user)
     {
-        EnsureValidPayment(amount, wallet);
+        EnsureValidPayment(amount, user.Wallet);
         TransactionDate = DateTime.Today;
 
-        wallet -= amount;
-
-        return wallet;
+        user.Wallet -= amount;
     }
 
     private void EnsureValidPayment(decimal amount, decimal wallet)
