@@ -76,7 +76,7 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
                 LearnList: reader.GetString(ordLearnList).Split(',', StringSplitOptions.TrimEntries).ToList(),
                 SubscriptionRequired: reader.GetBoolean(ordSubscriptionRequired),
                 CoverImage: coverImageBytes,
-                BannerImage: new byte[0]
+                BannerImage: Array.Empty<byte>()
             ));
         }
         
