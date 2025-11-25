@@ -2,6 +2,6 @@
 
 public interface IUserSubscriptionRepository
 {
-    Task<UserSubscription?> ByUserId(Guid adriaId);
-    Task Save(UserSubscription userSubscription, Guid adriaId);
+    Task<UserSubscription?> GetByUserId(Guid userId);
+    Task Save(User user, UserSubscription userSubscription);
 }
