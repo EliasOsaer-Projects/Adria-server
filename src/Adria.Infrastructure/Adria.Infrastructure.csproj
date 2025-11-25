@@ -22,6 +22,132 @@
     <None Include="Persistence\Scripts\*.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\A complete guide to cats.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Baking bread for the modern household.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Basic culinary skills.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Bird blindness - a deepdive.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Carpenters guide.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Cleaning 101.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Fishing 101.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\How to hunt.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\How to mine.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\How to raise children.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\How to train your dragon.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Intro to bricklaying.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\King Von-ism - a history.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Outback basics.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Primates and pizza.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Programming fundamentals.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Psych 101.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Salsa and cha-cha.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Surgery for dummies.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\Wilderness basics.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Banners\World history.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\A complete guide to cats.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Baking bread for the modern household.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Basic culinary skills.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Bird blindness - a deepdive.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Carpenters guide.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Cleaning 101.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Fishing 101.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\How to hunt.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\How to mine.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\How to raise children.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\How to train your dragon.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Intro to bricklaying.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\King Von-ism - a history.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Outback basics.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Primates and pizza.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Programming fundamentals.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Psych 101.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Salsa and cha-cha.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Surgery for dummies.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\Wilderness basics.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Covers\World history.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

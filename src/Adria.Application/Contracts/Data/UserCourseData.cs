@@ -6,7 +6,7 @@ public sealed record UserCourseData
 (
     Guid CourseId,
     string CourseName,
-    int Difficulty,
+    int Level,
     Boolean CompletionStatus,
     int ProgressPercentage
 );
