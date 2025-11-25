@@ -18,9 +18,9 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
         _logger = logger;
     }
 
-    public async Task<SubscriptionData> Fetch(Guid currentId)
+    public async Task<SubscriptionData> Fetch(Guid id)
     {
-        _logger.LogInformation("Fetching subscription data for id {Id}", currentId);
+        _logger.LogInformation("Fetching subscription data for id {Id}", id);
 
         using var connection = _factory.CreateConnection() ?? throw new InvalidOperationException("DBFactory provided a null connection");
 
@@ -34,7 +34,7 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
 
         var subscriptionId = command.CreateParameter();
         subscriptionId.ParameterName = "@id";
-        subscriptionId.Value = currentId.ToString();
+        subscriptionId.Value = id.ToString();
 
         command.Parameters.Add(subscriptionId);
 
@@ -43,7 +43,7 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
         {
             if (!await reader.ReadAsync())
             {
-                _logger.LogInformation("{id} wasn't found", currentId);
+                _logger.LogInformation("{id} wasn't found", id);
                 return null!;
             }
 
