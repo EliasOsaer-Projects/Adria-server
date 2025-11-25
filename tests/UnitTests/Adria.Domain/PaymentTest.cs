@@ -9,7 +9,6 @@ public class PaymentTest
     private readonly string _name;
     private readonly decimal _wallet;
     private readonly User _user;
-    private readonly Payment _payment;
 
     public PaymentTest()
     {
@@ -25,28 +24,22 @@ public class PaymentTest
             _wallet
         );
 
-        _payment = new Payment();
     }
 
     [Fact]
     public void Constructor_WithValidProperties_SetAllProperties()
     {
         //Act
+        Payment _payment = new Payment(100, _user);
+
         Type p = typeof(Payment);
 
         //Assert
         Assert.IsType(p, _payment);
-        Assert.NotNull(_payment.TransactionID);
-    }
-
-    [Fact]
-    public void SuccesfullPayment()
-    {
-        //Act
-        _payment.Transaction(100, _user);
-
+        Assert.NotEqual(Guid.Empty, _payment.TransactionID);
         Assert.Equal(900m, _user.Wallet);
 
     }
+
 
 }

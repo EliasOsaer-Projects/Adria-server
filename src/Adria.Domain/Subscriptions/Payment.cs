@@ -6,17 +6,15 @@ public class Payment
     public decimal AdriaCoinAmount { get; set; }
     public DateTime TransactionDate { get; set; }
 
-    public Payment()
+    public Payment(decimal amount, User user)
     {
         TransactionID = Guid.NewGuid();
-    }
 
-    public void Transaction(decimal amount, User user)
-    {
         EnsureValidPayment(amount, user.Wallet);
         TransactionDate = DateTime.Today;
 
         user.Wallet -= amount;
+
     }
 
     private void EnsureValidPayment(decimal amount, decimal wallet)
