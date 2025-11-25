@@ -1,5 +1,4 @@
 ﻿using Adria.Application.Contracts;
-using Adria.Application.Subscriptions;
 using Adria.Application.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,18 +8,18 @@ namespace Adria.Infrastructure.WebApi.Controllers
     public sealed class SubscribeUserToSubscriptionController
     {
         public static async Task<IResult> Invoke(
-            Guid adriaID,
-            Guid subscriptionId,
+            [FromRoute] Guid userId,
+            [FromRoute] Guid subscriptionId,
             [FromServices] IUseCase<SubscribeUserInput, Task> subscribeUser
         )
         {
-            if (adriaID == Guid.Empty || subscriptionId == Guid.Empty)
+            if (userId == Guid.Empty || subscriptionId == Guid.Empty)
             {
                 return Results.BadRequest("UserId and SubscriptionId cannot be empty.");
             }
 
             var input = new SubscribeUserInput(
-                AdriaId: adriaID,
+                AdriaId: userId,
                 SubscriptionId: subscriptionId
             );
 
@@ -29,6 +28,6 @@ namespace Adria.Infrastructure.WebApi.Controllers
             return Results.Ok(new { Message = "User subscribed successfully." });
         }
         
-        private SubscribeUserToSubscriptionController(){ }
+        private SubscribeUserToSubscriptionController() { }
     }
 }

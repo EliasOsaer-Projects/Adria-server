@@ -97,7 +97,7 @@ public static class Routes
             .WithOpenApi();
         
         userRoutes
-            .MapPost("/{userId}/subscribe/{subscriptionId}", EnrollUserInCourseController.Invoke)
+            .MapPost("/{userId}/subscribe/{subscriptionId}", SubscribeUserToSubscriptionController.Invoke)
             .WithDescription("Subscribe a user to a subscription")
             .WithName(nameof(SubscribeUserToSubscriptionController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
