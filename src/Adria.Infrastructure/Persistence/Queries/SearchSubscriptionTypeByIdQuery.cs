@@ -44,7 +44,7 @@ public sealed class SearchSubscriptionTypeByIdQuery : ISearchSubscriptionTypeByI
             if (!await reader.ReadAsync())
             {
                 _logger.LogInformation($"{id} wasn't found");
-                return null;
+                return null!;
             }
 
             var subId = reader.GetOrdinal("SubscriptionID");
