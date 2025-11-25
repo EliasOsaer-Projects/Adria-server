@@ -1,8 +1,9 @@
 ﻿using Adria.Domain;
+using Adria.Domain.Subscriptions;
 
 namespace UnitTests.Mocks;
 
-public class MockSubscriptionRepository
+public class MockSubscriptionRepository : ISubscriptionRepository
 {
     private readonly Dictionary<Guid, Subscription> _subscriptions = new ();
     
