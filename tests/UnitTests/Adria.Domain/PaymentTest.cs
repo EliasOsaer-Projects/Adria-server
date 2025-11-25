@@ -39,6 +39,7 @@ public class PaymentTest
         Assert.NotNull(_payment.TransactionID);
     }
 
+    [Fact]
     public void SuccesfullPayment()
     {
         //Act
