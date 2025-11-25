@@ -9,6 +9,8 @@ public class User
     public decimal Wallet { get; set; }
     public int PointsBalance { get; set; }
     public int Streak { get; set; }
+    
+    public UserSubscription? CurrentSubscription { get; private set; }
 
 
     public User(Guid id, string name, decimal wallet)
@@ -62,4 +64,11 @@ public class User
             throw new GenesisException("User is too poor");
     }
 
+    public void Subscribe(Subscription subscription)
+    {
+        if (CurrentSubscription == null)
+            CurrentSubscription = new UserSubscription(subscription, DateTime.UtcNow);
+        else
+            CurrentSubscription.ChangeSubscription(subscription, DateTime.UtcNow);
+    }
 }
