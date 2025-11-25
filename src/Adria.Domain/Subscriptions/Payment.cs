@@ -6,5 +6,10 @@ public class Payment
     public decimal AdriaCoinAmount { get; set; }
     public DateTime TransactionDate { get; set; }
 
+    public Payment()
+    {
+        TransactionID = Guid.NewGuid();
+    }
+
 
 }
