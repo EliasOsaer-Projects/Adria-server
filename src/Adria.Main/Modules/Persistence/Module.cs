@@ -151,7 +151,7 @@ public static class PersistenceModule
 
     private static void SeedImages(DbConnection connection)
     {
-                // Seed images
+        // Seed images
         var courseIds = new List<(string CourseId, string CourseName)>();
         using (DbCommand selectCmd = connection.CreateCommand())
         {

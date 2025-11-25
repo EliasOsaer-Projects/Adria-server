@@ -9,5 +9,6 @@ public sealed record UserData
     decimal Wallet,
     int PointsBalance,
     int Streak,
-    SubscriptionData? Subscription
+    SubscriptionData? Subscription,
+    string Occupation
 );
