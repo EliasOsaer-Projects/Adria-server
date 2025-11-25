@@ -3,5 +3,5 @@
 public interface IUserCourseRepository
 {
     Task<UserCourse?> ById(Guid userCourseId);
-    Task Save(UserCourse userCourse);
+    Task Save(User user, UserCourse userCourse);
 }
