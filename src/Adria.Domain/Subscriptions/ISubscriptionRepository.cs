@@ -2,5 +2,5 @@
 
 public interface ISubscriptionRepository
 {
-    Task<Subscription?> GetById(Guid subscriptionId);
+    Task<Subscription?> ById(Guid subscriptionId);
 }
