@@ -1,7 +1,10 @@
 using Adria.Infrastructure;
 using System.Data.Common;
 using Adria.Application.Contracts;
+using Adria.Domain.Subscriptions;
+using Adria.Domain.Users;
 using Adria.Infrastructure.Persistence.Queries;
+using Adria.Infrastructure.Persistence.Repositories;
 using Taskly.Infrastructure.Persistence.Queries;
 
 namespace Adria.Main.Modules.Persistence;
@@ -31,7 +34,23 @@ public static class PersistenceModule
     )
     {
         // Configure repositories here.
-        return services;
+        return services
+            .AddScoped<IUserRepository, AdoUserRepository>(serviceProvider =>
+            {
+                return new AdoUserRepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoUserRepository>>()
+                );
+            })
+            .AddScoped<ISubscriptionRepository, AdoSubscriptionRepository>(serviceProvider =>
+            {
+                return new AdoSubscriptionRepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoSubscriptionRepository>>()
+                );
+            });
     }
 
     private static IServiceCollection AddQueries(
