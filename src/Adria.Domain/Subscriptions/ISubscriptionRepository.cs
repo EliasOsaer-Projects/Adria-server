@@ -1,4 +1,4 @@
-﻿namespace Adria.Domain;
+﻿namespace Adria.Domain.Subscriptions;
 
 public interface ISubscriptionRepository
 {
