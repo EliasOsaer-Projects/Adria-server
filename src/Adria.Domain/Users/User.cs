@@ -53,13 +53,13 @@ public class User
     private static void EnsureUserIdIsValid(Guid id)
     {
         if (id.ToString().Length <= 0)
-            throw new ArgumentException("This user id is empty");
+            throw new GenesisException("This user id is empty");
     }
 
     private static void EnsureEnoughPoints(User user, int points)
     {
         if (points > user.PointsBalance)
-            throw new ArgumentException("User is too poor");
+            throw new GenesisException("User is too poor");
     }
 
 }
