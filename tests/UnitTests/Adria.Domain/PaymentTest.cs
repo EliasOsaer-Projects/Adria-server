@@ -5,15 +5,43 @@ namespace UnitTests;
 public class PaymentTest
 {
 
+    private readonly Guid _adriaId;
+    private readonly string _name;
+    private readonly decimal _wallet;
+    private readonly User _user;
+    private readonly Payment _payment;
+
+    public PaymentTest()
+    {
+        // Arrange
+        _adriaId = Guid.NewGuid();
+        _name = "Matthias Blomme";
+        _wallet = 1000m;
+
+        // Act
+        _user = new User(
+            _adriaId,
+            _name,
+            _wallet
+        );
+
+        Payment _payment = new Payment();
+    }
+
     [Fact]
     public void Constructor_WithValidProperties_SetAllProperties()
     {
         //Act
-        Payment payment = new Payment();
         Type p = typeof(Payment);
 
         //Assert
-        Assert.IsType(p, payment.GetType());
+        Assert.IsType(p, _payment.GetType());
+        Assert.False(null == _payment.TransactionID);
+    }
+
+    public void SuccesfullPayment()
+    {
+
     }
 
 }
