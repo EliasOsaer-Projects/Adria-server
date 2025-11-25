@@ -11,5 +11,14 @@ public class Payment
         TransactionID = Guid.NewGuid();
     }
 
+    public void Transaction(decimal amount, decimal wallet)
+    {
+        TransactionDate = DateTime.Today;
+    }
 
+    private void EnsureValidPayment(decimal amount, decimal wallet)
+    {
+        if (amount > wallet)
+            throw new ArgumentException("The user is too poor to pay");
+    }
 }
