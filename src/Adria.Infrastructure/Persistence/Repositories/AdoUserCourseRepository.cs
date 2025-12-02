@@ -24,6 +24,20 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         _userCourse = userCourseRepository;
     }
 
+    private static readonly string SELECT_COURSE_BY_USER_AND_COURSE_ID = @$"
+      select {COL_ID}, {COL_USER_ID}, {COL_COMPLETION}, {COL_PROGRESS} from {TABLE_USER_COURSE}
+      where {COL_ID} = @courseId and {COL_USER_ID} = @userId";
+
+    private static readonly string UPDATE_COMPLETION = @$"
+      update {TABLE_USER_COURSE}
+      set {COL_COMPLETION} = 1
+      where {COL_PROGRESS} = 100";
+
+    private static readonly string UPDATE_PROGRESS = @$"
+      update {TABLE_USER_COURSE}
+      set {COL_PROGRESS} = {COL_PROGRESS} + @amount
+      where {COL_ID} = @courseId and {COL_USER_ID} = @userId";
+
     public async Task<UserCourse?> ById(Guid id, Guid courseId)
     {
         return new UserCourse(Guid.Empty, Guid.Empty);
