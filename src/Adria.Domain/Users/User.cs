@@ -86,7 +86,7 @@ public class User
         Occupation = occupation.Trim();
     }
 
-    public void AddInterest(List<String> interests)
+    public void AddInterests(List<String> interests)
     {
         if (interests.Count != 3)
             throw new GenesisException("A user must have exactly 3 interests.");

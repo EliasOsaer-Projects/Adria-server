@@ -102,6 +102,13 @@ public static class Routes
             .WithName(nameof(SubscribeUserToSubscriptionController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/{userId}/addInfo/{occupation}/{interests}", AddOccupationAndInterestController.Invoke)
+            .WithDescription("Add the users occupation and interests to the user")
+            .WithName(nameof(AddOccupationAndInterestController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)

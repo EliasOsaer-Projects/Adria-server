@@ -15,6 +15,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
             User.PointsBalance, 
             User.Streak, 
             User.Occupation,
+            User.Interests,
             cs.UserSubscriptionID, 
             cs.Status, 
             Subscription.SubscriptionID, 

@@ -16,6 +16,8 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
     private static readonly string COL_WALLET = "Wallet";
     private static readonly string COL_POINTS = "PointsBalance";
     private static readonly string COL_STREAK = "Streak";
+    private static readonly string COL_OCCUPATION = "Occupation";
+    private static readonly string COL_INTERESTS = "Interests";
 
     private static readonly string SELECT_USER_BY_ID = $@"
         SELECT {COL_ID}, {COL_NAME}, {COL_WALLET}, {COL_POINTS}, {COL_STREAK} 
@@ -31,6 +33,18 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
     private static readonly string UPDATE_USER = $@"
         UPDATE {TABLE_USERS}
         SET {COL_NAME} = @Name, {COL_WALLET} = @Wallet, {COL_POINTS} = @Points, {COL_STREAK} = @Streak
+        WHERE {COL_ID} = @Id;
+    ";
+    
+    private static readonly string ADD_OCCUPATION_TO_USER = $@"
+        UPDATE {TABLE_USERS}
+        SET {COL_OCCUPATION} = @Occupation
+        WHERE {COL_ID} = @Id;
+    ";
+    
+    private static readonly string ADD_INTERESTS_TO_USER = $@"
+        UPDATE {TABLE_USERS}
+        SET {COL_INTERESTS} = @Interests
         WHERE {COL_ID} = @Id;
     ";
 
@@ -101,6 +115,29 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
         {
             _logger.LogError(ex, "Failed to save user with ID {UserId} to database.", user.AdriaId);
             throw new AdriaDatabaseException("Failed to save user to database.", ex);
+        }
+    }
+    
+    public async Task SaveOccupation(User user)
+    {
+        _logger.LogInformation("Saving occupation in user with ID {UserId}.", user.AdriaId);
+        string userQuery = ADD_OCCUPATION_TO_USER;
+
+        try
+        {
+            DbParameter[] parameters =
+            [
+                CreateParameter("@Id", user.AdriaId.ToString()),
+                CreateParameter("@Occupation", user.Occupation)
+            ];//misschien hier probleem met private set
+
+            await ExecuteNonQueryAsync(userQuery, parameters);
+
+        }
+        catch (DbException ex)
+        {
+            _logger.LogError(ex, "Failed to Save occupation in user with ID {UserId}.", user.AdriaId);
+            throw new AdriaDatabaseException("Failed to Save occupation in user.", ex);
         }
     }
 }

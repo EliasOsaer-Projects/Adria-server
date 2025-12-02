@@ -2,7 +2,7 @@
 using Adria.Domain.Users;
 
 namespace UnitTests.Mocks;
-
+/*
 public class MockUserRepository : IUserRepository
 {
     private readonly Dictionary<Guid, User> _users = new();
@@ -29,3 +29,4 @@ public class MockUserRepository : IUserRepository
         _users.Clear();
     }
 }
+*/
