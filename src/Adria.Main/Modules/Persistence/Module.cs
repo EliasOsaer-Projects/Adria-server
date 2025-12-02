@@ -1,6 +1,7 @@
 using Adria.Infrastructure;
 using System.Data.Common;
 using Adria.Application.Contracts;
+using Adria.Domain;
 using Adria.Domain.Subscriptions;
 using Adria.Domain.Users;
 using Adria.Infrastructure.Persistence.Queries;
@@ -59,6 +60,15 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<AdoUserSubscriptionRepository>>(),
                     serviceProvider.GetRequiredService<ISubscriptionRepository>()
                 );
+            })
+            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(ServiceProvider =>
+            {
+                return new AdoUserCourseRepository(
+                    ServiceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    ServiceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>(),
+                    ServiceProvider.GetRequiredService<IUserCourseRepository>()
+                    );
             });
     }
 
@@ -171,15 +181,15 @@ public static class PersistenceModule
         using DbCommand command = connection.CreateCommand();
         command.CommandText = File.ReadAllText(scriptPath);
         command.ExecuteNonQuery();
-        
+
         SeedImages(connection);
-        
+
         return app;
     }
 
     private static void SeedImages(DbConnection connection)
     {
-                // Seed images
+        // Seed images
         var courseIds = new List<(string CourseId, string CourseName)>();
         using (DbCommand selectCmd = connection.CreateCommand())
         {
@@ -202,37 +212,37 @@ public static class PersistenceModule
             string bannerImageId = Guid.NewGuid().ToString();
 
             string coverImgPath = Path.Combine(
-                AppContext.BaseDirectory, 
-                "Persistence/Scripts/SeedImages/Covers", 
+                AppContext.BaseDirectory,
+                "Persistence/Scripts/SeedImages/Covers",
                 $"{course.CourseName}.jpg"
             );
             string bannerImgPath = Path.Combine(
-                AppContext.BaseDirectory, 
-                "Persistence/Scripts/SeedImages/Banners", 
+                AppContext.BaseDirectory,
+                "Persistence/Scripts/SeedImages/Banners",
                 $"{course.CourseName}.jpg"
             );
-            
+
             using (var imageCommand = connection.CreateCommand())
             {
                 imageCommand.CommandText = @"
                 INSERT INTO CoverImage (CoverImageID, CoverImage) 
                 VALUES (@id, @img)
                 ";
-                
+
                 imageCommand.Parameters.Add(CreateParam(imageCommand, "@id", coverImageId));
                 imageCommand.Parameters.Add(CreateParam(imageCommand, "@img", File.ReadAllBytes(coverImgPath)));
-                
+
                 imageCommand.ExecuteNonQuery();
                 imageCommand.Parameters.Clear();
-                
+
                 imageCommand.CommandText = @"
                 INSERT INTO BannerImage (BannerImageID, BannerImage) 
                 VALUES (@id, @img)
                 ";
-                
+
                 imageCommand.Parameters.Add(CreateParam(imageCommand, "@id", bannerImageId));
                 imageCommand.Parameters.Add(CreateParam(imageCommand, "@img", File.ReadAllBytes(bannerImgPath)));
-                
+
                 imageCommand.ExecuteNonQuery();
                 imageCommand.Parameters.Clear();
             }
@@ -245,11 +255,11 @@ public static class PersistenceModule
                         BannerImageID = @bannerID 
                     WHERE CourseID = @courseID
                 ";
-                
+
                 updateCourseForeignKeys.Parameters.Add(CreateParam(updateCourseForeignKeys, "@coverID", coverImageId));
                 updateCourseForeignKeys.Parameters.Add(CreateParam(updateCourseForeignKeys, "@bannerID", bannerImageId));
                 updateCourseForeignKeys.Parameters.Add(CreateParam(updateCourseForeignKeys, "@courseID", course.CourseId));
-                
+
                 updateCourseForeignKeys.ExecuteNonQuery();
             }
         }
@@ -263,6 +273,6 @@ public static class PersistenceModule
         param.Value = value;
         return param;
     }
-    
+
 
 }
