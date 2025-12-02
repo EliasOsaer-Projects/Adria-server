@@ -21,7 +21,7 @@ public static class Routes
             Email = "info@group-01.adria"
         }
     };
-
+    
     public static WebApplication MapRoutes(this WebApplication app)
     {
         MapUserRoutes(app);
