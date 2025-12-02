@@ -29,15 +29,19 @@ public sealed class AddOccupationAndInterests : IUseCase<AddOccupationAndInteres
     {
         User user = await _userRepository.ById(input.AdriaId)
                      ?? throw new ArgumentException($"User {input.AdriaId} not found.");
-        
-        user.AddOccupation(input.Occupation);
-        _logger.LogInformation("Occupation added to user {UserId}", user.AdriaId);
-        user.AddInterests(input.Interests.Split(',', StringSplitOptions.TrimEntries).ToList());
-        _logger.LogInformation("Interests added to user {UserId}", user.AdriaId);
-        
-        
-        await  _userRepository.SaveOccupation(user);
-        await _userRepository.SaveInterests(user);
-        
+
+        if (!string.IsNullOrWhiteSpace(input.Occupation))
+        {
+            user.AddOccupation(input.Occupation);
+            await _userRepository.SaveOccupation(user);
+            _logger.LogInformation("Occupation added to user {UserId}", user.AdriaId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(input.Interests))
+        {
+            user.AddInterests(input.Interests.Split(',', StringSplitOptions.TrimEntries).ToList());
+            await _userRepository.SaveInterests(user);
+            _logger.LogInformation("Interests added to user {UserId}", user.AdriaId);
+        }
     }
 }

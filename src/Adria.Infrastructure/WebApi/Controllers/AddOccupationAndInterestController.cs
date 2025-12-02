@@ -19,7 +19,14 @@ public class AddOccupationAndInterestController
         {
             return Results.BadRequest("UserId cannot be empty.");
         }
-
+        
+        if (string.IsNullOrWhiteSpace(occupation))
+            occupation = string.Empty;
+        
+        if (string.IsNullOrWhiteSpace(interests))
+            interests = string.Empty;
+        
+        
         var input = new AddOccupationAndInterestsInput( 
             AdriaId: userId,
             Occupation: occupation, 

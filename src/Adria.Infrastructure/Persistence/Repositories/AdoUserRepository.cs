@@ -125,14 +125,16 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
 
         try
         {
-            DbParameter[] parameters =
-            [
-                CreateParameter("@Id", user.AdriaId.ToString()),
-                CreateParameter("@Occupation", user.Occupation)
-            ];
+            if (user.Occupation != null)
+            {
+                DbParameter[] parameters =
+                [
+                    CreateParameter("@Id", user.AdriaId.ToString()),
+                    CreateParameter("@Occupation", user.Occupation)
+                ];
 
-            await ExecuteNonQueryAsync(userQuery, parameters);
-
+                await ExecuteNonQueryAsync(userQuery, parameters);
+            }
         }
         catch (DbException ex)
         {
@@ -148,14 +150,16 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
 
         try
         {
-            DbParameter[] parameters =
-            [
-                CreateParameter("@Id", user.AdriaId.ToString()),
-                CreateParameter("@Interests", string.Join(", ", user.Interests))
-            ];
+            if (user.Interests != null)
+            {
+                DbParameter[] parameters =
+                [
+                    CreateParameter("@Id", user.AdriaId.ToString()),
+                    CreateParameter("@Interests", string.Join(", ", user.Interests))
+                ];
 
-            await ExecuteNonQueryAsync(userQuery, parameters);
-
+                await ExecuteNonQueryAsync(userQuery, parameters);
+            }
         }
         catch (DbException ex)
         {
