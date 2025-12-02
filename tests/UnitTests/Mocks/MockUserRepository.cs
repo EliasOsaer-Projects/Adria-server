@@ -2,7 +2,7 @@
 using Adria.Domain.Users;
 
 namespace UnitTests.Mocks;
-/*
+
 public class MockUserRepository : IUserRepository
 {
     private readonly Dictionary<Guid, User> _users = new();
@@ -19,6 +19,18 @@ public class MockUserRepository : IUserRepository
         return Task.CompletedTask;
     }
 
+    public Task SaveOccupation(User user)
+    {
+        _users[user.AdriaId] = user;
+        return Task.CompletedTask;
+    }//Ben niet zeker of dit hier zo moet maar heb het hier gewoon gezet zodat alles nog werkte.
+
+    public Task SaveInterests(User user)
+    {
+        _users[user.AdriaId] = user;
+        return Task.CompletedTask;
+    }
+
     public void AddUser(User user)
     {
         _users[user.AdriaId] = user;
@@ -29,4 +41,3 @@ public class MockUserRepository : IUserRepository
         _users.Clear();
     }
 }
-*/
