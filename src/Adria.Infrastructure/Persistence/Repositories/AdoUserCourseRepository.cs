@@ -40,6 +40,35 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
       set {COL_PROGRESS} = {COL_PROGRESS} + @amount
       where {COL_ID} = @courseId and {COL_USER_ID} = @userId";
 
+    public async Task<UserCourse?> ById(Guid id, Guid courseId)
+    {
+        var param = CreateParameter("@userId", id);
+        var param2 = CreateParameter("@courseId", courseId);
+
+        await using var reader = await ExecuteReaderAsync(SELECT_COURSE_BY_USER_AND_COURSE_ID, [param, param2]);
+
+        if (!await reader.ReadAsync())
+            return null;
+
+        try
+        {
+            var userId = reader.GetGuid(reader.GetOrdinal(COL_USER_ID));
+            var chosenCourseId = reader.GetGuid(reader.GetOrdinal(COL_ID));
+            var completion = reader.GetBoolean(reader.GetOrdinal(COL_COMPLETION));
+            var progress = reader.GetInt16(reader.GetOrdinal(COL_PROGRESS));
+            var startDate = reader.GetDateTime(reader.GetOrdinal(COL_START_DATE));
+            var endDate = reader.GetDateTime(reader.GetOrdinal(COL_END_DATE));
+
+            UserCourse userCourse = new(userId, chosenCourseId, startDate, endDate, progress, completion);
+
+            return userCourse;
+        }
+        finally
+        {
+            await reader.DisposeAsync();
+        }
+    }
+
     public async Task Save(UserCourse course, int progress)
     {
         UserCourse futureStatus = course;
