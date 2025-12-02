@@ -1,6 +1,7 @@
 using Adria.Infrastructure;
 using System.Data.Common;
 using Adria.Application.Contracts;
+using Adria.Domain;
 using Adria.Domain.Subscriptions;
 using Adria.Domain.Users;
 using Adria.Infrastructure.Persistence.Queries;
@@ -49,6 +50,15 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AdoSubscriptionRepository>>()
+                );
+            })
+            .AddScoped(<IUserCourseRepository, AdoUserCourseRepository>(serviceProvider =>
+            {
+                return new AdoUserCourseRepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>(),
+                    serviceProvider.GetRequiredService(<AdoUserCourseRepository>)
                 );
             })
             .AddScoped<IUserSubscriptionRepository, AdoUserSubscriptionRepository>(serviceProvider =>

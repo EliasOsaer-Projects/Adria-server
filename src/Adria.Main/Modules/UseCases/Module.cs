@@ -13,7 +13,7 @@ public static class UseCases
         return services
             .AddScoped<IUseCase<SearchSubscriptionTypeByIdInput, Task<SubscriptionData>>, SearchSubscriptionTypeById>()
             .AddScoped<IUseCase<Task<IReadOnlyCollection<SubscriptionData>>>, AllSubscriptionTypes>()
-            .AddScoped<IUseCase<EnrollUserInCourseInput, Task<UserCourseData>>, EnrollUserInCourse>()
+            .AddScoped<IUseCase<EnrollUserInCourseInput, Task<Domain.Contracts.UserCourseData>>, EnrollUserInCourse>()
             .AddScoped<IUseCase<SubscribeUserInput, Task>, SubscribeUser>()
             
             .AddScoped<IUseCase<SearchUserByIdInput, Task<UserData>>, SearchUserById>()

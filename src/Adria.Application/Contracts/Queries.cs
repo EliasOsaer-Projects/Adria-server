@@ -37,11 +37,6 @@ public interface ISearchCourseByIdQuery
     Task<CourseData> Fetch(Guid id);
 }
 
-public interface IEnrollUserInCourseQuery
-{
-    Task<UserCourseData> Fetch(Guid userId, Guid courseId);
-}
-
 public interface ICourseModulesByCourseIdQuery
 {
     Task<IEnumerable<CourseModuleData>> Fetch(Guid courseId);
