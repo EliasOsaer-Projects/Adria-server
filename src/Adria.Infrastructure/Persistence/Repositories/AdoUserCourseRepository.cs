@@ -64,9 +64,9 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
             await reader.DisposeAsync();
         }
     }
-    public async Task Save(User user, UserCourse course)
+    public async Task Save(UserCourse course)
     {
-
+        var exist = ById(course.AdriaId, course.CourseId);
     }
 
 }
