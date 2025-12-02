@@ -52,13 +52,12 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<AdoSubscriptionRepository>>()
                 );
             })
-            .AddScoped(<IUserCourseRepository, AdoUserCourseRepository>(serviceProvider =>
+            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(serviceProvider =>
             {
                 return new AdoUserCourseRepository(
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>(),
-                    serviceProvider.GetRequiredService(<AdoUserCourseRepository>)
+                    serviceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
                 );
             })
             .AddScoped<IUserSubscriptionRepository, AdoUserSubscriptionRepository>(serviceProvider =>
@@ -127,14 +126,6 @@ public static class PersistenceModule
                 return new SearchCourseByIdQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<SearchCourseByIdQuery>>()
-                );
-            })
-            .AddScoped<IEnrollUserInCourseQuery, EnrollUserInCourseQuery>(serviceProvider =>
-            {
-                return new EnrollUserInCourseQuery(
-                    serviceProvider.GetRequiredService<DbProviderFactory>(),
-                    _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<EnrollUserInCourseQuery>>()
                 );
             })
             .AddScoped<ICourseModulesByCourseIdQuery, CourseModulesByCourseIdQuery>(serviceProvider =>

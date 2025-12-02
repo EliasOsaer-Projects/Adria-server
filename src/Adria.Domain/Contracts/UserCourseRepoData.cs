@@ -1,6 +1,6 @@
 ﻿namespace Adria.Domain.Contracts;
 
-sealed public record UserCourseData
+sealed public record UserCourseRepoData
 (
     Guid CourseId,
     string CourseName,

@@ -8,9 +8,9 @@ public class MockUserCourseRepository
 {
     private readonly Dictionary<Guid, User> _users = new();
 
-    public Task<UserCourseData> Save(Guid adriaId, Guid courseId)
+    public Task<UserCourseRepoData> Save(Guid userId, Guid courseId)
     {
-        return Task.FromResult(new UserCourseData(
+        return Task.FromResult(new UserCourseRepoData(
             courseId,
             "Mock Course",
             1,

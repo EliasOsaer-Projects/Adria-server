@@ -12,13 +12,10 @@ public class AdoUserCourseRepository
     : AbstractAdoRepository, IUserCourseRepository
 {
     private readonly ILogger<AdoUserCourseRepository> _logger;
-    private readonly IUserCourseRepository _userCourseRepository;
 
     private static readonly string TABLE_USER_SUBS = "UserCourse";
     private static readonly string COL_USER_ID = "AdriaID";
     private static readonly string COL_SUBS_ID = "CourseID";
-    private static readonly string COL_START = "StartDate";
-    private static readonly string COL_END = "EndDate";
 
     private static readonly string INSERT_USERCOURSE = $@"
         INSERT INTO {TABLE_USER_SUBS} ({COL_USER_ID}, {COL_SUBS_ID})
@@ -35,9 +32,8 @@ public class AdoUserCourseRepository
         ci.CoverImage
         FROM UserCourse uc
         JOIN Course c ON uc.CourseID = c.CourseID
-        JOIN CoverImage ci ON Course.CoverImageID = CoverImage.CoverImageID
+        JOIN CoverImage ci ON c.CoverImageID = ci.CoverImageID
         WHERE uc.AdriaID = @userID AND uc.CourseID = @courseId
-
     ";
 
     
@@ -45,15 +41,13 @@ public class AdoUserCourseRepository
     (
         DbProviderFactory factory,
         string connectionString,
-        ILogger<AdoUserCourseRepository> logger,
-        IUserCourseRepository userCourseRepository
+        ILogger<AdoUserCourseRepository> logger
     ) : base(factory, connectionString)
     {
         _logger = logger;
-        _userCourseRepository = userCourseRepository;
     }
 
-    public async Task<UserCourseData> Save(Guid userId, Guid courseId)
+    public async Task<UserCourseRepoData> Save(Guid userId, Guid courseId)
     {
         try
         {
@@ -75,7 +69,7 @@ public class AdoUserCourseRepository
         }
     }
     
-    public async Task<UserCourseData> GetUserCourse(Guid userId, Guid courseId)
+    public async Task<UserCourseRepoData> GetUserCourse(Guid userId, Guid courseId)
     {
         try
         {
@@ -92,7 +86,7 @@ public class AdoUserCourseRepository
                 throw new InvalidOperationException($"UserCourse not found for user {userId} and course {courseId}");
             }
         
-            return new UserCourseData(
+            return new UserCourseRepoData(
                 CourseId: reader.GetGuid(reader.GetOrdinal("CourseID")),
                 CourseName: reader.GetString(reader.GetOrdinal("CourseName")),
                 Level: reader.GetInt16(reader.GetOrdinal("CourseDifficulty")),

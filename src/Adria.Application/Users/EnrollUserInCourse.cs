@@ -8,7 +8,7 @@ namespace Adria.Application.Users;
 public sealed record EnrollUserInCourseInput(Guid UserId, Guid CourseId);
 
 public class EnrollUserInCourse 
-    : IUseCase<EnrollUserInCourseInput, Task<UserCourseData>>
+    : IUseCase<EnrollUserInCourseInput, Task<UserCourseRepoData>>
 {
    private readonly ILogger<EnrollUserInCourse> _logger;
     private readonly IUserCourseRepository _userCourseRepository;
@@ -22,7 +22,7 @@ public class EnrollUserInCourse
         _userCourseRepository = userCourseRepository;
     }
 
-    public async Task<UserCourseData> Execute(EnrollUserInCourseInput input)
+    public async Task<UserCourseRepoData> Execute(EnrollUserInCourseInput input)
     {
         _logger.LogInformation("Enrolling user {UserId} in course {CourseId}", input.UserId, input.CourseId);
         
