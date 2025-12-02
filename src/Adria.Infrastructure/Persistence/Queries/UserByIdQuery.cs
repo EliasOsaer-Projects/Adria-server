@@ -79,6 +79,11 @@ public sealed class UserByIdQuery : IUserByIdQuery
             ? "" 
             : reader.GetString(ordOccupation);
         
+        int ordInterests = reader.GetOrdinal("Interests");
+        var interests = await reader.IsDBNullAsync(ordInterests) 
+            ? new List<string>()
+            : reader.GetString(reader.GetOrdinal("Interests")).Split(',', StringSplitOptions.TrimEntries).ToList();
+        
         Guid? subscriptionId = await reader.IsDBNullAsync(reader.GetOrdinal("SubscriptionID"))
             ? null
             : Guid.Parse(reader.GetString(reader.GetOrdinal("SubscriptionID")));
@@ -105,7 +110,8 @@ public sealed class UserByIdQuery : IUserByIdQuery
         points,
         streak,
         subscription,
-        occupation
+        occupation,
+        interests
     );
 }
 }

@@ -10,5 +10,6 @@ public sealed record UserData
     int PointsBalance,
     int Streak,
     SubscriptionData? Subscription,
-    string Occupation
+    string Occupation,
+    IList<string> Interests
 );

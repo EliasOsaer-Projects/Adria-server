@@ -44,7 +44,8 @@ public sealed class SearchCustomerCourseByUserTest
             PointsBalance: 0,
             Streak: 0,
             Subscription: subscription,
-            Occupation: "Software Engineer"
+            Occupation: "Software Engineer",
+            Interests: new List<string> { "mining", "hunting", "history"}
         );
         var mockQuery = new MockSearchUserCourseByUser();
         var mockLogger = new MockLogger<SearchUserCoursesByUser>();

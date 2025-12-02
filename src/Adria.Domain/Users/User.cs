@@ -11,6 +11,9 @@ public class User
     public int Streak { get; set; }
     
     public UserSubscription? CurrentSubscription { get; private set; }
+    
+    public string? Occupation { get; private set; }
+    public IList<string>? Interests { get; private set; }
 
 
     public User(Guid id, string name, decimal wallet)
@@ -70,5 +73,24 @@ public class User
             CurrentSubscription = new UserSubscription(subscription, DateTime.UtcNow);
         else
             CurrentSubscription.ChangeSubscription(subscription, DateTime.UtcNow);
+    }
+
+    public void AddOccupation(string occupation)
+    {
+        if (string.IsNullOrWhiteSpace(occupation))
+            throw new GenesisException("Occupation cannot be empty.");
+
+        if (occupation.All(char.IsDigit))
+            throw new GenesisException("Occupation cannot be a number.");
+        
+        Occupation = occupation.Trim();
+    }
+
+    public void AddInterest(List<String> interests)
+    {
+        if (interests.Count != 3)
+            throw new GenesisException("A user must have exactly 3 interests.");
+        
+        Interests = interests;
     }
 }
