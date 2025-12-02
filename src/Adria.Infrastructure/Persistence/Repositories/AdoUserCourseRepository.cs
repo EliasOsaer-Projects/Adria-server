@@ -51,7 +51,8 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
             var parameters = new[]
             {
               CreateParameter("@userId", course.AdriaId),
-              CreateParameter("@courseId", course.CourseId)
+              CreateParameter("@courseId", course.CourseId),
+              CreateParameter("@amount", progress)
             };
 
             await ExecuteNonQueryAsync(query, parameters);
