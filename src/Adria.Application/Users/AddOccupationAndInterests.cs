@@ -32,8 +32,12 @@ public sealed class AddOccupationAndInterests : IUseCase<AddOccupationAndInteres
         
         user.AddOccupation(input.Occupation);
         _logger.LogInformation("Occupation added to user {UserId}", user.AdriaId);
+        user.AddInterests(input.Interests.Split(',', StringSplitOptions.TrimEntries).ToList());
+        _logger.LogInformation("Interests added to user {UserId}", user.AdriaId);
+        
         
         await  _userRepository.SaveOccupation(user);
+        await _userRepository.SaveInterests(user);
         
     }
 }

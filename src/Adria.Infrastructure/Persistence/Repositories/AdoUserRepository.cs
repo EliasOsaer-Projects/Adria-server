@@ -129,7 +129,7 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
             [
                 CreateParameter("@Id", user.AdriaId.ToString()),
                 CreateParameter("@Occupation", user.Occupation)
-            ];//misschien hier probleem met private set
+            ];
 
             await ExecuteNonQueryAsync(userQuery, parameters);
 
@@ -138,6 +138,29 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
         {
             _logger.LogError(ex, "Failed to Save occupation in user with ID {UserId}.", user.AdriaId);
             throw new AdriaDatabaseException("Failed to Save occupation in user.", ex);
+        }
+    }
+    
+    public async Task SaveInterests(User user)
+    {
+        _logger.LogInformation("Saving interests in user with ID {UserId}.", user.AdriaId);
+        string userQuery = ADD_INTERESTS_TO_USER;
+
+        try
+        {
+            DbParameter[] parameters =
+            [
+                CreateParameter("@Id", user.AdriaId.ToString()),
+                CreateParameter("@Interests", string.Join(", ", user.Interests))
+            ];
+
+            await ExecuteNonQueryAsync(userQuery, parameters);
+
+        }
+        catch (DbException ex)
+        {
+            _logger.LogError(ex, "Failed to Save interests in user with ID {UserId}.", user.AdriaId);
+            throw new AdriaDatabaseException("Failed to Save interests in user.", ex);
         }
     }
 }
