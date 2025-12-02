@@ -150,4 +150,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Persistence\Scripts\SeedImages\ProfilePictures\" />
+  </ItemGroup>
+
 </Project>
