@@ -32,41 +32,36 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
     private static readonly string UPDATE_COMPLETION = @$"
       update {TABLE_USER_COURSE}
-      set {COL_COMPLETION} = 1
-      where {COL_PROGRESS} = 100";
+      set {COL_COMPLETION} = 1, {COL_PROGRESS} = 100
+      where {COL_ID} = @courseId and {COL_USER_ID} = @userId";
 
     private static readonly string UPDATE_PROGRESS = @$"
       update {TABLE_USER_COURSE}
       set {COL_PROGRESS} = {COL_PROGRESS} + @amount
       where {COL_ID} = @courseId and {COL_USER_ID} = @userId";
 
-    public async Task<UserCourse?> ById(Guid id, Guid courseId)
+    public async Task Save(UserCourse course, int progress)
     {
-        var param = CreateParameter("@userId", id);
-        var param2 = CreateParameter("@courseId", courseId);
-
-        await using var reader = await ExecuteReaderAsync(SELECT_COURSE_BY_USER_AND_COURSE_ID, [param, param2]);
-
-        if (!await reader.ReadAsync())
-            return null;
+        UserCourse futureStatus = course;
+        futureStatus.UpdateProgress(progress);
+        var query = futureStatus.CompletionStatus == true ? UPDATE_COMPLETION : UPDATE_PROGRESS;
 
         try
         {
-            var userId = reader.GetGuid(reader.GetOrdinal(COL_USER_ID));
-            var chosenCourseId = reader.GetGuid(reader.GetOrdinal(COL_ID));
+            var parameters = new[]
+            {
+              CreateParameter("@userId", course.AdriaId),
+              CreateParameter("@courseId", course.CourseId)
+            };
 
-            UserCourse userCourse = new(userId, chosenCourseId);
-
-            return userCourse;
+            await ExecuteNonQueryAsync(query, parameters);
+            _logger.LogInformation("Progress Updated");
         }
-        finally
+        catch (DbException ex)
         {
-            await reader.DisposeAsync();
+            _logger.LogError(ex, "Failed to update for course for user {UserId}", course.AdriaId);
+            throw new AdriaDatabaseException("Failed to update course.", ex);
         }
-    }
-
-    public async Task Save(UserCourse course)
-    {
     }
 
 }

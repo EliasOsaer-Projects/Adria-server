@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Adria.Application;
 
-public sealed record AddProgressToCourseInput(Guid userId, Guid courseId);
+public sealed record AddProgressToCourseInput(Guid userId, Guid courseId, int progress);
 
 public sealed class AddProgressToCourse : IUseCase<AddProgressToCourseInput, Task<Guid>>
 {
@@ -25,7 +25,7 @@ public sealed class AddProgressToCourse : IUseCase<AddProgressToCourseInput, Tas
         UserCourse? userCourse = (await _userCourseRepository.ById(input.userId, input.courseId)) ?? throw new ElementNotFoundException($"userCourse with id {input.courseId} not found");
 
         _logger.LogInformation("vhanging data");
-        await _userCourseRepository.Save(userCourse);
+        await _userCourseRepository.Save(userCourse, input.progress);
         return userCourse.AdriaId;
     }
 }

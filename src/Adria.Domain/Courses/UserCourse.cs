@@ -41,7 +41,7 @@ public class UserCourse
         }
     }
 
-    public void EnsureCompletionIsValid(bool complete, int progress)
+    private void EnsureCompletionIsValid(bool complete, int progress)
     {
         if (complete && progress < 100 || !complete && progress == 100)
             throw new GenesisException("The progress and completion status do not match");
