@@ -1,5 +1,6 @@
 ﻿using System.Data.Common;
 using Adria.Domain;
+using Adria.Domain.Shared.Helpers;
 using Adria.Domain.Users;
 using Adria.Infrastructure.Persistence.Shared;
 using Microsoft.Extensions.Logging;
@@ -16,10 +17,11 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
     private static readonly string COL_WALLET = "Wallet";
     private static readonly string COL_POINTS = "PointsBalance";
     private static readonly string COL_STREAK = "Streak";
+    private static readonly string COL_OCCUPATION = "Occupation";
     private static readonly string COL_PROFILE_PICTURE = "ProfilePicture";
 
     private static readonly string SELECT_USER_BY_ID = $@"
-        SELECT {COL_ID}, {COL_NAME}, {COL_WALLET}, {COL_POINTS}, {COL_STREAK} 
+        SELECT {COL_ID}, {COL_NAME}, {COL_WALLET}, {COL_POINTS}, {COL_STREAK}, {COL_OCCUPATION}, {COL_PROFILE_PICTURE}
         FROM {TABLE_USERS} 
         WHERE {COL_ID} = @UserId;
     ";
@@ -53,10 +55,17 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
         {
             if (await dbDataReader.ReadAsync())
             {
+                byte[]? profilePicture = await dbDataReader.IsDBNullAsync(dbDataReader.GetOrdinal("ProfilePicture")) 
+                    ? null
+                    : await Helper.ReadBlobAsync(dbDataReader, dbDataReader.GetOrdinal("ProfilePicture"));
                 return new User(
                     dbDataReader.GetGuid(dbDataReader.GetOrdinal(COL_ID)),
                     dbDataReader.GetString(dbDataReader.GetOrdinal(COL_NAME)),
-                    dbDataReader.GetDecimal(dbDataReader.GetOrdinal(COL_WALLET))
+                    dbDataReader.GetDecimal(dbDataReader.GetOrdinal(COL_WALLET)),
+                    dbDataReader.GetInt32(dbDataReader.GetOrdinal(COL_POINTS)),
+                    dbDataReader.GetInt32(dbDataReader.GetOrdinal(COL_STREAK)),
+                    dbDataReader.IsDBNull(dbDataReader.GetOrdinal(COL_OCCUPATION)) ? "" : dbDataReader.GetString(dbDataReader.GetOrdinal(COL_OCCUPATION)),
+                    profilePicture
                 );
             }
 

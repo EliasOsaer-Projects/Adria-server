@@ -2,5 +2,6 @@
 
 public record LeaderBoardData(
     string Name,
-    int PointsBalance
-    );
+    int PointsBalance,
+    byte[]? ProfilePicture
+);

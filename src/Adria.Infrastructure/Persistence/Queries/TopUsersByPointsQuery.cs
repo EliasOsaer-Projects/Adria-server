@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
+using Adria.Domain.Shared.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Adria.Infrastructure.Persistence.Queries;
@@ -8,7 +9,7 @@ namespace Adria.Infrastructure.Persistence.Queries;
 public sealed class TopUsersByPointsQuery : ITopUsersByPointsQuery
 {
     private static readonly string QRY = @"
-        SELECT Name, PointsBalance
+        SELECT Name, PointsBalance, ProfilePicture
         FROM `User`
         ORDER BY PointsBalance DESC
         LIMIT 10;
@@ -46,9 +47,13 @@ public sealed class TopUsersByPointsQuery : ITopUsersByPointsQuery
 
         while (await reader.ReadAsync())
         {
+            byte[]? profilePicture = await reader.IsDBNullAsync(reader.GetOrdinal("ProfilePicture")) 
+                ? null
+                : await Helper.ReadBlobAsync(reader, reader.GetOrdinal("ProfilePicture"));
             users.Add(new LeaderBoardData(
                 Name: reader.GetString(reader.GetOrdinal("Name")),
-                PointsBalance: reader.GetInt32(reader.GetOrdinal("PointsBalance"))
+                PointsBalance: reader.GetInt32(reader.GetOrdinal("PointsBalance")),
+                ProfilePicture: profilePicture
             ));
         }
 

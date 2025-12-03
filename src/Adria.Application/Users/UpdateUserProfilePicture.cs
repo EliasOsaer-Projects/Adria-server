@@ -26,7 +26,7 @@ public class UpdateUserProfilePicture
     {
         User? user = await _userRepository.ById(input.UserId)
             ?? throw new ArgumentException($"User {input.UserId} not found.");
-        
+
         user.ProfilePicture = input.Image;
         await _userRepository.Save(user);
     }
