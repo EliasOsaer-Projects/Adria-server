@@ -40,7 +40,7 @@ namespace UnitTests.Subscriptions
             );
 
             // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() =>
+            await Assert.ThrowsAsync<GenesisException>(() =>
                 useCase.Execute(new CancelUserSubscriptionInput(Guid.NewGuid())));
         }
 
@@ -58,7 +58,7 @@ namespace UnitTests.Subscriptions
             );
 
             // Act & Assert
-            await Assert.ThrowsAsync<Exception>(() =>
+            await Assert.ThrowsAsync<GenesisException>(() =>
                 useCase.Execute(new CancelUserSubscriptionInput(userId)));
         }
     }
