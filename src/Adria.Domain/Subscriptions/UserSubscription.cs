@@ -60,4 +60,10 @@ public class UserSubscription
         if (date > subscription.EndDate)
             throw new GenesisException("new Date is younger than End date");
     }
+    
+    public void Cancel()
+    {
+        Status = false;
+        EndDate = DateTime.UtcNow;
+    }
 }
