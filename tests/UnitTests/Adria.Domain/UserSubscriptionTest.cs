@@ -34,7 +34,7 @@ public class UserSubscriptionTest
         Assert.Equal(_subscription, userSubscription.CurrentSubscription);
         Assert.Equal(_startDate, userSubscription.StartDate);
         Assert.Equal(_endDate, userSubscription.EndDate);
-        Assert.True(userSubscription.Status);
+        Assert.Equal("Active", userSubscription.Status);
     }
 
     [Fact]
@@ -65,14 +65,14 @@ public class UserSubscriptionTest
         
         // Act
         userSubscription.PaySubscription(_subscription.PriceCycle, _endDate);
-        userSubscription.IsSubscriptionPaid(userSubscription.Status);
+        userSubscription.SetPaid(userSubscription.Status == "Active");
         userSubscription.ChangeDates(_endDate);
 
         
         // Assert
         Assert.Equal(_subscription, userSubscription.CurrentSubscription);
         Assert.Equal(_endDate.AddDays(30), userSubscription.EndDate);
-        Assert.True(userSubscription.Status);
+        Assert.Equal("Active", userSubscription.Status);
     }
 
 }

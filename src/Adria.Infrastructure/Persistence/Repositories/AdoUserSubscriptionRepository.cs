@@ -68,7 +68,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
             var userSubscription = new UserSubscription(subscription, startDate);
             if (!string.Equals(statusStr, "Active", StringComparison.OrdinalIgnoreCase))
             {
-                userSubscription.IsSubscriptionPaid(false);
+                userSubscription.SetPaid(false);
             }
 
             return userSubscription;
@@ -93,7 +93,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
                 CreateParameter("@SubsId", userSubscription.CurrentSubscription.SubscriptionId),
                 CreateParameter("@Start", userSubscription.StartDate),
                 CreateParameter("@End", userSubscription.EndDate),
-                CreateParameter("@Status", userSubscription.Status ? "Active" : "Inactive")
+                CreateParameter("@Status", userSubscription.Status)
             };
 
             await ExecuteNonQueryAsync(query, parameters);

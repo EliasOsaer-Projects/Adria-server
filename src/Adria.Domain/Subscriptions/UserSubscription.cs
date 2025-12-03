@@ -6,7 +6,7 @@ public class UserSubscription
     public Subscription CurrentSubscription { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-    public bool Status { get; set; }
+    public string Status { get; set; }
 
     public UserSubscription(Subscription currentSubscription, DateTime date)
     {
@@ -14,7 +14,7 @@ public class UserSubscription
         StartDate = date;
         EndDate = StartDate.Add(new TimeSpan(30, 0, 0, 0));
 
-        Status = true;
+        Status = "Active";
         EnsureValidDate(this, date);
     }
 
@@ -23,7 +23,7 @@ public class UserSubscription
     {
         CurrentSubscription = subscription;
         ChangeDates(date);
-        Status = true;
+        Status = "Active";
     }
 
     //Changing dates.
@@ -35,23 +35,23 @@ public class UserSubscription
     }
 
     //To check if subscription is still valid.
-    public void IsSubscriptionPaid(bool status)
+    public void SetPaid(bool paid)
     {
-        Status = status;
+        Status = paid ? "Active" : "Inactive";
     }
 
     //Montly Payment
-    public decimal PaySubscription(decimal price, DateTime date)
+    public decimal PaySubscription(decimal wallet, DateTime date)
     {
-        if (price >= CurrentSubscription.PriceCycle)
+        if (wallet >= CurrentSubscription.PriceCycle)
         {
-            IsSubscriptionPaid(true);
+            SetPaid(true);
             ChangeDates(date);
-            return price - CurrentSubscription.PriceCycle;
+            return wallet - CurrentSubscription.PriceCycle;
         }
 
-        IsSubscriptionPaid(false);
-        return price;
+        SetPaid(false);
+        return wallet;
     }
 
     //Security
@@ -63,7 +63,7 @@ public class UserSubscription
     
     public void Cancel()
     {
-        Status = false;
+        Status = "Inactive";
         EndDate = DateTime.UtcNow;
     }
 }
