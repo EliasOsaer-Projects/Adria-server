@@ -16,6 +16,7 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
     private static readonly string COL_WALLET = "Wallet";
     private static readonly string COL_POINTS = "PointsBalance";
     private static readonly string COL_STREAK = "Streak";
+    private static readonly string COL_PROFILE_PICTURE = "ProfilePicture";
 
     private static readonly string SELECT_USER_BY_ID = $@"
         SELECT {COL_ID}, {COL_NAME}, {COL_WALLET}, {COL_POINTS}, {COL_STREAK} 
@@ -30,7 +31,7 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
     
     private static readonly string UPDATE_USER = $@"
         UPDATE {TABLE_USERS}
-        SET {COL_NAME} = @Name, {COL_WALLET} = @Wallet, {COL_POINTS} = @Points, {COL_STREAK} = @Streak
+        SET {COL_NAME} = @Name, {COL_WALLET} = @Wallet, {COL_POINTS} = @Points, {COL_STREAK} = @Streak, {COL_PROFILE_PICTURE} = @ProfilePicture
         WHERE {COL_ID} = @Id;
     ";
 
@@ -91,7 +92,10 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
                 CreateParameter("@Name", user.Name),
                 CreateParameter("@Wallet", user.Wallet),
                 CreateParameter("@Points", user.PointsBalance),
-                CreateParameter("@Streak", user.Streak)
+                CreateParameter("@Streak", user.Streak),
+                user.ProfilePicture != null
+                    ? CreateParameter("@ProfilePicture", user.ProfilePicture)
+                    : CreateParameter("@ProfilePicture", DBNull.Value)
             ];
 
             await ExecuteNonQueryAsync(userQuery, parameters);

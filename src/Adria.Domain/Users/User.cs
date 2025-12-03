@@ -9,6 +9,7 @@ public class User
     public decimal Wallet { get; set; }
     public int PointsBalance { get; set; }
     public int Streak { get; set; }
+    public byte[]? ProfilePicture { get; set; }
     
     public UserSubscription? CurrentSubscription { get; private set; }
 

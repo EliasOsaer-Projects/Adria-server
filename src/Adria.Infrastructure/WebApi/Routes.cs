@@ -102,6 +102,13 @@ public static class Routes
             .WithName(nameof(SubscribeUserToSubscriptionController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+
+        userRoutes
+            .MapPost("/{userId}/profilePicture", UpdateUserProfilePictureController.Invoke)
+            .WithDescription("Update a user profile picture")
+            .WithName(nameof(UpdateUserProfilePictureController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)
