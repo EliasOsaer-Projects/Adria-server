@@ -1,6 +1,7 @@
 using Adria.Infrastructure;
 using System.Data.Common;
 using Adria.Application.Contracts;
+using Adria.Domain;
 using Adria.Domain.Subscriptions;
 using Adria.Domain.Users;
 using Adria.Infrastructure.Persistence.Queries;
@@ -49,6 +50,14 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AdoSubscriptionRepository>>()
+                );
+            })
+            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(serviceProvider =>
+            {
+                return new AdoUserCourseRepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
                 );
             })
             .AddScoped<IUserSubscriptionRepository, AdoUserSubscriptionRepository>(serviceProvider =>
@@ -119,14 +128,6 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<SearchCourseByIdQuery>>()
                 );
             })
-            .AddScoped<IEnrollUserInCourseQuery, EnrollUserInCourseQuery>(serviceProvider =>
-            {
-                return new EnrollUserInCourseQuery(
-                    serviceProvider.GetRequiredService<DbProviderFactory>(),
-                    _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<EnrollUserInCourseQuery>>()
-                );
-            })
             .AddScoped<ICourseModulesByCourseIdQuery, CourseModulesByCourseIdQuery>(serviceProvider =>
             {
                 return new CourseModulesByCourseIdQuery(
@@ -172,12 +173,54 @@ public static class PersistenceModule
         command.CommandText = File.ReadAllText(scriptPath);
         command.ExecuteNonQuery();
         
-        SeedImages(connection);
+        SeedCoverAndBannerImages(connection);
+        SeedProfilePictures(connection);
         
         return app;
     }
 
-    private static void SeedImages(DbConnection connection)
+    private static void SeedProfilePictures(DbConnection connection)
+    {
+        var users = new List<(string AdriaID, string Name)>();
+        using (DbCommand selectCmd = connection.CreateCommand())
+        {
+            selectCmd.CommandText = "SELECT AdriaID, Name FROM User";
+            using (var reader = selectCmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    users.Add((reader.GetString(0), reader.GetString(1)));
+                }
+            }
+        }
+
+        foreach (var user in users)
+        {
+            Console.WriteLine($"User {user.AdriaID} ({user.Name})");
+            
+            string coverImgPath = Path.Combine(
+                AppContext.BaseDirectory, 
+                "Persistence/Scripts/SeedImages/ProfilePictures", 
+                $"{user.Name}.jpg"
+            );
+
+            using (var imageCommand = connection.CreateCommand())
+            {
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@id", user.AdriaID));
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@img", File.ReadAllBytes(coverImgPath)));
+
+                imageCommand.CommandText = @"
+                    UPDATE User 
+                    SET ProfilePicture = @img
+                    WHERE AdriaID = @id                
+                ";
+
+                imageCommand.ExecuteNonQuery();
+            }
+        }
+    }
+
+    private static void SeedCoverAndBannerImages(DbConnection connection)
     {
         // Seed images
         var courseIds = new List<(string CourseId, string CourseName)>();
@@ -192,9 +235,7 @@ public static class PersistenceModule
                 }
             }
         }
-
-        Console.WriteLine(courseIds.Count + " courses found in the database.");
-
+        
         foreach (var course in courseIds)
         {
             Console.WriteLine($"Course {course.CourseName} ({course.CourseId})");

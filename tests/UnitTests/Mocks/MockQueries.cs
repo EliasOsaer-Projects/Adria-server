@@ -127,28 +127,6 @@ public class MockSearchCourseByIdQuery : ISearchCourseByIdQuery
     public void AddCourse(CourseData course) => _courses.Add(course);
 }
 
-public class MockEnrollUserInCourseQuery : IEnrollUserInCourseQuery
-{
-    private readonly List<UserCourseData> _userCourses = new List<UserCourseData>();
-    
-    public void Enroll(Course course, Guid userId)
-    {
-        _userCourses.Add(
-            new UserCourseData(
-                course.Id,
-                course.Name,
-                course.Level,
-                false,
-                new byte[3],
-                0
-            ));
-    }
-    public Task<UserCourseData> Fetch(Guid userId, Guid courseId)
-    {
-        return Task.FromResult(_userCourses.First(uc => uc.CourseId == courseId));
-    }
-}
-
 public class MockCourseModulesByCourseIdQuery : ICourseModulesByCourseIdQuery
 {
     private readonly Dictionary<Guid, List<CourseModuleData>> _modulesByCourse = new();

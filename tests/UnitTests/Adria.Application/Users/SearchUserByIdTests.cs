@@ -14,7 +14,7 @@ public sealed class SearchUserByIdTests
         // Arrange
         var subscription = new SubscriptionData(Guid.NewGuid(), "Basic", 15.99m, ["test"], true);
         var userId = Guid.NewGuid();
-        var userData = new UserData(userId, "Nathaniel", 1700, 0,0,subscription, "Software Developer");
+        var userData = new UserData(userId, "Nathaniel", 1700, 0,0,subscription, "Software Developer", []);
         var mockQuery = new MockUserByIdQuery();
         mockQuery.AddUser(userData);
         var mockLogger = new MockLogger<SearchUserById>();

@@ -148,6 +148,39 @@
     <None Update="Persistence\Scripts\SeedImages\Covers\World history.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Ann Audenaert.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Antonio Soprano.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Dieter Mourisse.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Floris Delahaye.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Frederic Vlummens.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Gene Vangampelaere.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Kris Moltisanti.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Mathieu Paggy Pinsart.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Mattias De Wael.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Simon Cornelissis.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Sterling Archer.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
