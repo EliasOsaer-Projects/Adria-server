@@ -102,6 +102,13 @@ public static class Routes
             .WithName(nameof(SubscribeUserToSubscriptionController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/{userId}/subscription/cancel", CancelUserSubscriptionController.Invoke)
+            .WithDescription("cancels a user's subscription")
+            .WithName(nameof(CancelUserSubscriptionController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)
