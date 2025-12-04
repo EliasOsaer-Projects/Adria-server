@@ -18,7 +18,8 @@ public sealed class GetTop10UsersTests
             {
                 mockQuery.AddUser(new LeaderBoardData(
                     Name: $"Testuser-{i}",
-                    PointsBalance: i
+                    PointsBalance: i,
+                    []
                 ));
             }
 
@@ -43,6 +44,7 @@ public sealed class GetTop10UsersTests
                 mockQuery.AddUser(new LeaderBoardData(
                     Name: $"Testuser-{i}",
                     PointsBalance: i * 10
+                    ,[]
                 ));
             }
 

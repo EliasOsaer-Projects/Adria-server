@@ -102,6 +102,20 @@ public static class Routes
             .WithName(nameof(SubscribeUserToSubscriptionController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+
+        userRoutes
+            .MapPost("/{userId}/profilePicture", UpdateUserProfilePictureController.Invoke)
+            .WithDescription("Update a user's profile picture")
+            .WithName(nameof(UpdateUserProfilePictureController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        userRoutes
+            .MapDelete("/{userId}/profilePicture", DeleteUserProfilePictureController.Invoke)
+            .WithDescription("Delete a user's profile picture")
+            .WithName(nameof(DeleteUserProfilePictureController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)

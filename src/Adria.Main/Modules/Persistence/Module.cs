@@ -68,6 +68,14 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<AdoUserSubscriptionRepository>>(),
                     serviceProvider.GetRequiredService<ISubscriptionRepository>()
                 );
+            })
+            .AddScoped<IUserRepository, AdoUserRepository>(serviceProvider =>
+            {
+                return new AdoUserRepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoUserRepository>>()
+                );
             });
     }
 
