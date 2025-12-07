@@ -9,7 +9,7 @@ namespace Adria.Application;
 
 public sealed record AddProgressToCourseInput(Guid userId, Guid courseId, int progress);
 
-public sealed class AddProgressToCourse : IUseCase<AddProgressToCourseInput, Task<Guid>>
+public sealed class AddProgressToCourse : IUseCase<AddProgressToCourseInput, Task>
 {
     IUserCourseRepository _userCourseRepository;
     ILogger<AddProgressToCourse> _logger;
@@ -20,12 +20,11 @@ public sealed class AddProgressToCourse : IUseCase<AddProgressToCourseInput, Tas
         _logger = logger;
     }
 
-    public async Task<Guid> Execute(AddProgressToCourseInput input)
+    public async Task Execute(AddProgressToCourseInput input)
     {
         UserCourse? userCourse = (await _userCourseRepository.ById(input.userId, input.courseId)) ?? throw new ElementNotFoundException($"userCourse with id {input.courseId} not found");
 
         _logger.LogInformation("vhanging data");
         await _userCourseRepository.Save(userCourse, input.progress);
-        return userCourse.AdriaId;
     }
 }
