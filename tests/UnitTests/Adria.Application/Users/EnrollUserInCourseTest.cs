@@ -36,11 +36,11 @@ public class EnrollUserInCourseTest
         );
         
         // Act
-        var mockQuery = new MockEnrollUserInCourseQuery();
+        var mockRepo = new MockUserCourseRepository();
         var mockLogger = new MockLogger<EnrollUserInCourse>();
-        var useCase = new EnrollUserInCourse(mockQuery, mockLogger);
+        var useCase = new EnrollUserInCourse(mockLogger, mockRepo);
         
-        mockQuery.Enroll(course, user.AdriaId);
+        await mockRepo.Save(user.AdriaId, courseId);
         var result = await useCase.Execute(new EnrollUserInCourseInput(userId, courseId));
 
         // Assert

@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
+using Adria.Domain.Shared.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Taskly.Infrastructure.Persistence.Queries;
@@ -16,6 +17,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
             User.Streak, 
             User.Occupation,
             User.Interests,
+            User.ProfilePicture,
             cs.UserSubscriptionID, 
             cs.Status, 
             Subscription.SubscriptionID, 
@@ -76,6 +78,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
         var points = reader.GetInt32(reader.GetOrdinal("PointsBalance"));
         var streak = reader.GetInt32(reader.GetOrdinal("Streak"));
         int ordOccupation = reader.GetOrdinal("Occupation");
+        int ordProfilePicture = reader.GetOrdinal("ProfilePicture");
         string occupation = await reader.IsDBNullAsync(ordOccupation) 
             ? "" 
             : reader.GetString(ordOccupation);
@@ -84,6 +87,11 @@ public sealed class UserByIdQuery : IUserByIdQuery
         var interests = await reader.IsDBNullAsync(ordInterests) 
             ? new List<string>()
             : reader.GetString(reader.GetOrdinal("Interests")).Split(',', StringSplitOptions.TrimEntries).ToList();
+        
+        byte[]? profilePicture = await reader.IsDBNullAsync(ordProfilePicture) 
+            ? null
+            : await Helper.ReadBlobAsync(reader, ordProfilePicture);
+
         
         Guid? subscriptionId = await reader.IsDBNullAsync(reader.GetOrdinal("SubscriptionID"))
             ? null
@@ -112,7 +120,8 @@ public sealed class UserByIdQuery : IUserByIdQuery
         streak,
         subscription,
         occupation,
-        interests
+        interests,
+        profilePicture
     );
 }
 }

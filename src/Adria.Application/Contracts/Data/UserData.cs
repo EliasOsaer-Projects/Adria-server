@@ -11,5 +11,6 @@ public sealed record UserData
     int Streak,
     SubscriptionData? Subscription,
     string Occupation,
-    IList<string> Interests
+    IList<string> Interests,
+    byte[]? ProfilePicture
 );

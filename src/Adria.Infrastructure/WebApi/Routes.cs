@@ -13,15 +13,15 @@ public static class Routes
     public static OpenApiInfo OpenApiInfo { get; } = new OpenApiInfo
     {
         Version = "v1",
-        Title = "Your nice title here",
+        Title = "INKEA Genesis API",
         Description = "Your even nicer description here",
         Contact = new OpenApiContact
         {
-            Name = "Group XX",
-            Email = "info@group-XX.adria"
+            Name = "Group 01",
+            Email = "info@group-01.adria"
         }
     };
-
+    
     public static WebApplication MapRoutes(this WebApplication app)
     {
         MapUserRoutes(app);
@@ -101,6 +101,20 @@ public static class Routes
             .WithDescription("Subscribe a user to a subscription")
             .WithName(nameof(SubscribeUserToSubscriptionController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+
+        userRoutes
+            .MapPost("/{userId}/profilePicture", UpdateUserProfilePictureController.Invoke)
+            .WithDescription("Update a user's profile picture")
+            .WithName(nameof(UpdateUserProfilePictureController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        userRoutes
+            .MapDelete("/{userId}/profilePicture", DeleteUserProfilePictureController.Invoke)
+            .WithDescription("Delete a user's profile picture")
+            .WithName(nameof(DeleteUserProfilePictureController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
         
         userRoutes
