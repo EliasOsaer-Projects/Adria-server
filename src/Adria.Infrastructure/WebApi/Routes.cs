@@ -104,7 +104,7 @@ public static class Routes
             .WithOpenApi();
 
         userRoutes
-          .MapPost("/{userId}/userCourses/{courseId}/{progress}", AddProgressToCourseController.Invoke)
+          .MapPatch("/{userId}/userCourses/{courseId}/{progress}", AddProgressToCourseController.Invoke)
           .WithDescription("Adds porgress to the user course")
           .WithName(nameof(AddProgressToCourseController))
           .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))

@@ -12,9 +12,9 @@ public sealed record AddProgressToCourseInput(Guid userId, Guid courseId, int pr
 public sealed class AddProgressToCourse : IUseCase<AddProgressToCourseInput, Task<Guid>>
 {
     IUserCourseRepository _userCourseRepository;
-    ILogger _logger;
+    ILogger<AddProgressToCourse> _logger;
 
-    public AddProgressToCourse(IUserCourseRepository userCourse, ILogger logger)
+    public AddProgressToCourse(IUserCourseRepository userCourse, ILogger<AddProgressToCourse> logger)
     {
         _userCourseRepository = userCourse;
         _logger = logger;

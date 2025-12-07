@@ -9,7 +9,7 @@ namespace Adria.Infrastructure;
 
 public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseRepository
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<AdoUserCourseRepository> _logger;
     private readonly IUserCourseRepository _userCourse;
 
     private static readonly string TABLE_USER_COURSE = "UserCourse";
@@ -20,7 +20,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
     private static readonly string COL_START_DATE = "StartDate";
     private static readonly string COL_END_DATE = "EndDate";
 
-    public AdoUserCourseRepository(DbProviderFactory factory, string connectionString, ILogger logger, IUserCourseRepository userCourseRepository) : base(factory, connectionString)
+    public AdoUserCourseRepository(DbProviderFactory factory, string connectionString, ILogger<AdoUserCourseRepository> logger, IUserCourseRepository userCourseRepository) : base(factory, connectionString)
     {
         _logger = logger;
         _userCourse = userCourseRepository;
