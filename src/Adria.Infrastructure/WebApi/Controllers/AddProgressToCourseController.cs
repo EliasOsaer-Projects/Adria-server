@@ -12,7 +12,7 @@ public class AddProgressToCourseController
         [FromRoute] Guid userId,
         [FromRoute] Guid courseId,
         [FromRoute] int progress,
-        [FromServices] IUseCase<AddProgressToCourseInput, Task<Guid>> AddProgressToCourse
+        [FromServices] IUseCase<AddProgressToCourseInput, Task> AddProgressToCourse
         )
     {
         if (userId == Guid.Empty || courseId == Guid.Empty)

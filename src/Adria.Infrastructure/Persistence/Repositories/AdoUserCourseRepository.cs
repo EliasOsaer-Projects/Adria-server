@@ -10,7 +10,6 @@ namespace Adria.Infrastructure;
 public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseRepository
 {
     private readonly ILogger<AdoUserCourseRepository> _logger;
-    private readonly IUserCourseRepository _userCourse;
 
     private static readonly string TABLE_USER_COURSE = "UserCourse";
     private static readonly string COL_ID = "CourseID";
@@ -20,10 +19,9 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
     private static readonly string COL_START_DATE = "StartDate";
     private static readonly string COL_END_DATE = "EndDate";
 
-    public AdoUserCourseRepository(DbProviderFactory factory, string connectionString, ILogger<AdoUserCourseRepository> logger, IUserCourseRepository userCourseRepository) : base(factory, connectionString)
+    public AdoUserCourseRepository(DbProviderFactory factory, string connectionString, ILogger<AdoUserCourseRepository> logger) : base(factory, connectionString)
     {
         _logger = logger;
-        _userCourse = userCourseRepository;
     }
 
     private static readonly string SELECT_COURSE_BY_USER_AND_COURSE_ID = @$"
@@ -71,6 +69,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
     public async Task Save(UserCourse course, int progress)
     {
+        _logger.LogInformation("Progress Hit");
         UserCourse futureStatus = course;
         futureStatus.UpdateProgress(progress);
         var query = futureStatus.CompletionStatus == true ? UPDATE_COMPLETION : UPDATE_PROGRESS;

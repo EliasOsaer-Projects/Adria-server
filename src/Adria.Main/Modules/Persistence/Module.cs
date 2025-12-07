@@ -66,8 +66,7 @@ public static class PersistenceModule
                 return new AdoUserCourseRepository(
                     ServiceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
-                    ServiceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>(),
-                    ServiceProvider.GetRequiredService<IUserCourseRepository>()
+                    ServiceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
                     );
             });
     }
