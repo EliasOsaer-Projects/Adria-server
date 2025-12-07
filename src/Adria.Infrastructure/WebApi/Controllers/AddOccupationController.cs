@@ -6,13 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Adria.Infrastructure.WebApi.Controllers;
 
-public class AddOccupationAndInterestController
+public class AddOccupationController
 {
     public static async Task<IResult> Invoke(
         [FromRoute] Guid userId,
         [FromRoute] string? occupation,
-        [FromRoute] string? interests,
-        [FromServices]  IUseCase<AddOccupationAndInterestsInput, Task> AddOccupationAndInterests
+        [FromServices]  IUseCase<AddOccupationInput, Task> AddOccupation
     )
     {
         if (userId == Guid.Empty)
@@ -23,18 +22,13 @@ public class AddOccupationAndInterestController
         if (string.IsNullOrWhiteSpace(occupation))
             occupation = string.Empty;
         
-        if (string.IsNullOrWhiteSpace(interests))
-            interests = string.Empty;
-        
-        
-        var input = new AddOccupationAndInterestsInput( 
+        var input = new AddOccupationInput( 
             AdriaId: userId,
-            Occupation: occupation, 
-            Interests: interests
+            Occupation: occupation
         );
 
-        await AddOccupationAndInterests.Execute(input);
+        await AddOccupation.Execute(input);
 
-        return Results.Ok(new { Message = "Occupation and Interests added successfully" });
+        return Results.Ok(new { Message = "Occupation added successfully" });
     }
 }

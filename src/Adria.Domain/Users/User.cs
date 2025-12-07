@@ -75,7 +75,7 @@ public class User
             CurrentSubscription.ChangeSubscription(subscription, DateTime.UtcNow);
     }
 
-    public void AddOccupation(string occupation)
+    public void AddOccupation(string occupation) //mogen er spaties zijn in een occupation?
     {
         if (string.IsNullOrWhiteSpace(occupation))
             throw new GenesisException("Occupation cannot be empty.");

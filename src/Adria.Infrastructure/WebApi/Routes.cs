@@ -104,9 +104,16 @@ public static class Routes
             .WithOpenApi();
         
         userRoutes
-            .MapPost("/{userId}/addInfo/{occupation}/{interests}", AddOccupationAndInterestController.Invoke)
+            .MapPost("/{userId}/addOccupation/{occupation}", AddOccupationController.Invoke)
             .WithDescription("Add the users occupation and interests to the user")
-            .WithName(nameof(AddOccupationAndInterestController))
+            .WithName(nameof(AddOccupationController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/{userId}/addInterests/{interests}", AddInterestsController.Invoke)
+            .WithDescription("Add the users interests to the user")
+            .WithName(nameof(AddInterestsController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
     }

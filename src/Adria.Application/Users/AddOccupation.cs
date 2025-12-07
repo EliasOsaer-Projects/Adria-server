@@ -6,26 +6,25 @@ using Microsoft.Extensions.Logging;
 namespace Adria.Application.Users;
 
 
-public sealed record AddOccupationAndInterestsInput(
+public sealed record AddOccupationInput(
     Guid AdriaId,
-    string Occupation,
-    string Interests
+    string Occupation
 );
 
-public sealed class AddOccupationAndInterests : IUseCase<AddOccupationAndInterestsInput, Task>
+public sealed class AddOccupation : IUseCase<AddOccupationInput, Task>
 {
     private readonly IUserRepository _userRepository;
-    private readonly ILogger<AddOccupationAndInterests> _logger;
+    private readonly ILogger<AddOccupation> _logger;
 
-    public AddOccupationAndInterests(
+    public AddOccupation(
         IUserRepository userRepository,
-        ILogger<AddOccupationAndInterests> logger)
+        ILogger<AddOccupation> logger)
     {
         _userRepository = userRepository;
         _logger = logger;
     }
 
-    public async Task Execute(AddOccupationAndInterestsInput input)
+    public async Task Execute(AddOccupationInput input)
     {
         User user = await _userRepository.ById(input.AdriaId)
                      ?? throw new ArgumentException($"User {input.AdriaId} not found.");
@@ -35,13 +34,6 @@ public sealed class AddOccupationAndInterests : IUseCase<AddOccupationAndInteres
             user.AddOccupation(input.Occupation);
             await _userRepository.SaveOccupation(user);
             _logger.LogInformation("Occupation added to user {UserId}", user.AdriaId);
-        }
-
-        if (!string.IsNullOrWhiteSpace(input.Interests))
-        {
-            user.AddInterests(input.Interests.Split(',', StringSplitOptions.TrimEntries).ToList());
-            await _userRepository.SaveInterests(user);
-            _logger.LogInformation("Interests added to user {UserId}", user.AdriaId);
         }
     }
 }
