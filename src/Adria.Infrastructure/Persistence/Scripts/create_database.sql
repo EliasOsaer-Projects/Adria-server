@@ -24,7 +24,8 @@ CREATE TABLE `User` (
                         `Wallet` DECIMAL(10,2) NOT NULL DEFAULT 0,
                         `PointsBalance` INT DEFAULT 0,
                         `Streak` INT DEFAULT 0,
-                        `ProfilePicture` LONGBLOB
+                        `ProfilePicture` LONGBLOB,
+                        `Occupation` VARCHAR(150) DEFAULT NULL
 );
 
 -- SUBSCRIPTIONS
@@ -172,14 +173,21 @@ CREATE TABLE `PointsPayment` (
 -- =====================================================
 
 -- ===== USERS =====
-INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`) VALUES ('389bc6fb-080e-4450-ac9a-2ff10868b0d6', 'Sarah Chen', 125.5, 350, 7, NULL);
-INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`) VALUES ('48a0cbe3-b26f-40bb-8386-89099378f2a0', 'Marcus Thompson', 89.75, 520, 14, NULL);
-INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`) VALUES ('34dd7192-9e23-4d16-bd3f-4223b301febc', 'Elena Rodriguez', 200.0, 180, 3, NULL);
-INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`) VALUES ('db5b29f6-7078-48cf-94e8-f491096482be', 'Kai Anderson', 45.25, 95, 1, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('db5b29f6-7078-48cf-94e8-f491096482be', 'Ann Audenaert', 45.25, 95, 1, NULL, NULL); -- has no subscription
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('f41d6df2-dc8c-4c11-88a3-1f7a2ad4ece9', 'Antonio Soprano', 35.90, 135, 4, NULL, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('f72a54ce-0bf3-4516-81d6-908c69ca924e', 'Dieter Mourisse', 64.89, 210, 7, NULL, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('0c7cac71-f956-48db-8807-74903c164d2f', 'Floris Delahaye', 78.30, 260, 2, NULL, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('91171dab-1bc7-4af8-9bfa-620847e9e9f3', 'Frederic Vlummens', 200.00, 500, 15, NULL, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('b0dcf0f3-4c79-42c3-af01-ab57ea8bc43d', 'Gene Vangampelaere', 15.75, 60, 1, NULL, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('ae41d8b0-5123-42bb-8a6e-ffa4022e9122', 'Kris Moltisanti', 102.45, 320, 10, NULL, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('d37be1f3-54f1-4ae2-9cbf-e19f782667b5', 'Mattias De Wael', 50.00, 80, 5, NULL, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('34dd7192-9e23-4d16-bd3f-4223b301febc', 'Sterling Archer', 200.0, 180, 3, NULL, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('48a0cbe3-b26f-40bb-8386-89099378f2a0', 'Mathieu Paggy Pinsart', 89.75, 520, 14, NULL, NULL);
+INSERT INTO `User` (`AdriaID`, `Name`, `Wallet`, `PointsBalance`, `Streak`, `ProfilePicture`, `Occupation`) VALUES ('389bc6fb-080e-4450-ac9a-2ff10868b0d6', 'Simon Cornelissis', 125.5, 350, 7, NULL, NULL);
 
 -- ===== SUBSCRIPTIONS =====
 INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('e9024415-00e5-401c-84c3-5d4b2489b975', 'Basic', 12.99, 0, 'Basic access to limited courses and features');
-INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('26d25a2b-970c-4428-b224-438d5b1584a5', 'Standart', 18.99, 0, 'Access to most courses with standard features');
+INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('26d25a2b-970c-4428-b224-438d5b1584a5', 'Standard', 18.99, 0, 'Access to most courses with standard features');
 INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('eebfa304-3e1f-4a75-9d0d-d147b78c735f', 'Premium', 24.99, 1, 'Full access to all courses, priority support, and bonus content');
 INSERT INTO `Subscription` (`SubscriptionID`, `Type`, `Price`, `IsMostPopular`, `Description`) VALUES ('5e04b02d-eac7-42c0-b877-9ecbc695cec2', 'Ultimate', 32.99, 0, 'Everything in Premium plus exclusive masterclasses and personal learning assistant');
 

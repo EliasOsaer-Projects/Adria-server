@@ -66,7 +66,7 @@ public sealed class SearchCourseByIdQuery
             LearnList: reader.GetString(reader.GetOrdinal("LearnList")).Split(',', StringSplitOptions.TrimEntries).ToList(),
             Duration: reader.GetInt32(reader.GetOrdinal("EstimatedDurationInHours")),
             SubscriptionRequired: reader.GetBoolean(reader.GetOrdinal("SubscriptionRequired")),
-            CoverImage: new byte[0],
+            CoverImage: Array.Empty<byte>(),
             BannerImage: await Helper.ReadBlobAsync(reader, reader.GetOrdinal("BannerImage"))
         );
     }

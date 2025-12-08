@@ -2,11 +2,11 @@
 
 namespace Adria.Domain.Shared.Helpers;
 
-public class Helper
+public static class Helper
 {
     public static async Task<byte[]> ReadBlobAsync(DbDataReader reader, int ordinal)
     {
-        if (reader.IsDBNull(ordinal))
+        if (await reader.IsDBNullAsync(ordinal))
             return Array.Empty<byte>();
 
         const int bufferSize = 8192;
@@ -21,10 +21,13 @@ public class Helper
         {
             int read = (int)Math.Min(bufferSize, blobLength - bytesRead);
             int actualRead = (int)reader.GetBytes(ordinal, fieldOffset, buffer, 0, read);
-            ms.Write(buffer, 0, actualRead);
+
+            await ms.WriteAsync(buffer.AsMemory(0, actualRead), CancellationToken.None);
+
             bytesRead += actualRead;
             fieldOffset += actualRead;
         }
+
         return ms.ToArray();
     }
 }
