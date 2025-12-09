@@ -45,6 +45,7 @@ public sealed class SearchCustomerCourseByUserTest
             Streak: 0,
             Subscription: subscription,
             Occupation: "Software Engineer",
+            Interests: new List<string> { "mining", "hunting", "history"},
             ProfilePicture: []
         );
         var mockQuery = new MockSearchUserCourseByUser();

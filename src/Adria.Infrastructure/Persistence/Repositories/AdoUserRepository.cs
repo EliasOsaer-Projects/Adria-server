@@ -18,6 +18,7 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
     private static readonly string COL_POINTS = "PointsBalance";
     private static readonly string COL_STREAK = "Streak";
     private static readonly string COL_OCCUPATION = "Occupation";
+    private static readonly string COL_INTERESTS = "Interests";
     private static readonly string COL_PROFILE_PICTURE = "ProfilePicture";
 
     private static readonly string SELECT_USER_BY_ID = $@"
@@ -34,6 +35,18 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
     private static readonly string UPDATE_USER = $@"
         UPDATE {TABLE_USERS}
         SET {COL_NAME} = @Name, {COL_WALLET} = @Wallet, {COL_POINTS} = @Points, {COL_STREAK} = @Streak, {COL_PROFILE_PICTURE} = @ProfilePicture
+        WHERE {COL_ID} = @Id;
+    ";
+    
+    private static readonly string ADD_OCCUPATION_TO_USER = $@"
+        UPDATE {TABLE_USERS}
+        SET {COL_OCCUPATION} = @Occupation
+        WHERE {COL_ID} = @Id;
+    ";
+    
+    private static readonly string ADD_INTERESTS_TO_USER = $@"
+        UPDATE {TABLE_USERS}
+        SET {COL_INTERESTS} = @Interests
         WHERE {COL_ID} = @Id;
     ";
 
@@ -64,7 +77,6 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
                     dbDataReader.GetDecimal(dbDataReader.GetOrdinal(COL_WALLET)),
                     dbDataReader.GetInt32(dbDataReader.GetOrdinal(COL_POINTS)),
                     dbDataReader.GetInt32(dbDataReader.GetOrdinal(COL_STREAK)),
-                    dbDataReader.IsDBNull(dbDataReader.GetOrdinal(COL_OCCUPATION)) ? "" : dbDataReader.GetString(dbDataReader.GetOrdinal(COL_OCCUPATION)),
                     profilePicture
                 );
             }
@@ -114,6 +126,56 @@ public sealed class AdoUserRepository : AbstractAdoRepository, IUserRepository
         {
             _logger.LogError(ex, "Failed to save user with ID {UserId} to database.", user.AdriaId);
             throw new AdriaDatabaseException("Failed to save user to database.", ex);
+        }
+    }
+    
+    public async Task SaveOccupation(User user)
+    {
+        _logger.LogInformation("Saving occupation in user with ID {UserId}.", user.AdriaId);
+        string userQuery = ADD_OCCUPATION_TO_USER;
+
+        try
+        {
+            if (user.Occupation != null)
+            {
+                DbParameter[] parameters =
+                [
+                    CreateParameter("@Id", user.AdriaId.ToString()),
+                    CreateParameter("@Occupation", user.Occupation)
+                ];
+
+                await ExecuteNonQueryAsync(userQuery, parameters);
+            }
+        }
+        catch (DbException ex)
+        {
+            _logger.LogError(ex, "Failed to Save occupation in user with ID {UserId}.", user.AdriaId);
+            throw new AdriaDatabaseException("Failed to Save occupation in user.", ex);
+        }
+    }
+    
+    public async Task SaveInterests(User user)
+    {
+        _logger.LogInformation("Saving interests in user with ID {UserId}.", user.AdriaId);
+        string userQuery = ADD_INTERESTS_TO_USER;
+
+        try
+        {
+            if (user.Interests != null)
+            {
+                DbParameter[] parameters =
+                [
+                    CreateParameter("@Id", user.AdriaId.ToString()),
+                    CreateParameter("@Interests", string.Join(", ", user.Interests))
+                ];
+
+                await ExecuteNonQueryAsync(userQuery, parameters);
+            }
+        }
+        catch (DbException ex)
+        {
+            _logger.LogError(ex, "Failed to Save interests in user with ID {UserId}.", user.AdriaId);
+            throw new AdriaDatabaseException("Failed to Save interests in user.", ex);
         }
     }
 }

@@ -25,7 +25,8 @@ CREATE TABLE `User` (
                         `PointsBalance` INT DEFAULT 0,
                         `Streak` INT DEFAULT 0,
                         `ProfilePicture` LONGBLOB,
-                        `Occupation` VARCHAR(150) DEFAULT NULL
+                        `Occupation` VARCHAR(150) DEFAULT NULL,
+                        `Interests` VARCHAR(255) DEFAULT NULL
 );
 
 -- SUBSCRIPTIONS

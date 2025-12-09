@@ -130,6 +130,20 @@ public static class Routes
             .WithName(nameof(DeleteUserProfilePictureController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/{userId}/addOccupation/{occupation}", AddOccupationController.Invoke)
+            .WithDescription("Add the users occupation and interests to the user")
+            .WithName(nameof(AddOccupationController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/{userId}/addInterests/{interests}", AddInterestsController.Invoke)
+            .WithDescription("Add the users interests to the user")
+            .WithName(nameof(AddInterestsController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)

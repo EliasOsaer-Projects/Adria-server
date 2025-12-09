@@ -24,6 +24,9 @@ public static class UseCases
 
             .AddScoped<IUseCase<SearchUserByIdInput, Task<UserData>>, SearchUserById>()
             .AddScoped<IUseCase<Task<IEnumerable<LeaderBoardData>>>, Top10Users>()
+            .AddScoped<IUseCase<AddOccupationInput, Task>, AddOccupation>()
+            .AddScoped<IUseCase<AddInterestsInput, Task>, AddInterests>()
+            
 
             .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
             .AddScoped<IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>, SearchUserCoursesByUser>()

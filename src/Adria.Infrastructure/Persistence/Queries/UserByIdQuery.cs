@@ -16,6 +16,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
             User.PointsBalance, 
             User.Streak, 
             User.Occupation,
+            User.Interests,
             User.ProfilePicture,
             cs.UserSubscriptionID, 
             cs.Status, 
@@ -82,6 +83,11 @@ public sealed class UserByIdQuery : IUserByIdQuery
             ? "" 
             : reader.GetString(ordOccupation);
         
+        int ordInterests = reader.GetOrdinal("Interests");
+        var interests = await reader.IsDBNullAsync(ordInterests) 
+            ? new List<string>()
+            : reader.GetString(reader.GetOrdinal("Interests")).Split(',', StringSplitOptions.TrimEntries).ToList();
+        
         byte[]? profilePicture = await reader.IsDBNullAsync(ordProfilePicture) 
             ? null
             : await Helper.ReadBlobAsync(reader, ordProfilePicture);
@@ -114,6 +120,7 @@ public sealed class UserByIdQuery : IUserByIdQuery
         streak,
         subscription,
         occupation,
+        interests,
         profilePicture
     );
 }

@@ -136,3 +136,4 @@ public sealed class SubscribeUserTests
         await Assert.ThrowsAsync<ArgumentException>(() => useCase.Execute(input));
     }
 }
+
