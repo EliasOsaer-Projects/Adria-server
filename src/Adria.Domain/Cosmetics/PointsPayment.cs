@@ -1,4 +1,6 @@
-﻿namespace Adria.Domain;
+﻿using Adria.Domain.Shared.Exceptions;
+
+namespace Adria.Domain;
 
 public class PointsPayment
 {
@@ -10,10 +12,17 @@ public class PointsPayment
 
     public PointsPayment(CosmeticItem cosmeticItem, User user)
     {
+        EnsureValidTransaction(cosmeticItem, user);
         PointsTransactionID = Guid.NewGuid();
         CosmeticItemID = cosmeticItem.CosmeticItemID;
         AdriaID = user.AdriaId;
         PointsAmount = cosmeticItem.Points;
         TransactionDate = DateTime.Today;
+    }
+
+    public void EnsureValidTransaction(CosmeticItem item, User user)
+    {
+        if (item.Points < user.PointsBalance)
+            throw new GenesisException("User could not afford item.");
     }
 }
