@@ -48,7 +48,7 @@ public class AllCosmeticsQuery : IAllCosmeticsQuery
                     reader.GetDecimal(points)
                     ));
             }
-            return data.ToList();
+            return data.AsReadOnly();
         }
 
 
