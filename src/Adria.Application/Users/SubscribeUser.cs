@@ -17,7 +17,6 @@ public sealed class SubscribeUser : IUseCase<SubscribeUserInput, Task>
     private readonly IUserSubscriptionRepository _userSubscriptionRepository;
     private readonly ISubscriptionRepository _subscriptionRepository;
     private readonly ILogger<SubscribeUser> _logger;
-
     public SubscribeUser(
         IUserRepository userRepository,
         IUserSubscriptionRepository userSubscriptionRepository,
@@ -50,7 +49,7 @@ public sealed class SubscribeUser : IUseCase<SubscribeUserInput, Task>
             current = new UserSubscription(subscription, DateTime.UtcNow);
             _logger.LogInformation("User subscribed successfully: {UserId}", user.AdriaId);
         }
-        
+
         await _userSubscriptionRepository.Save(user, current);
     }
 }
