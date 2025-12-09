@@ -165,6 +165,12 @@ CREATE TABLE `PointsPayment` (
                                  FOREIGN KEY (`CosmeticItemID`) REFERENCES `CosmeticItem`(`CosmeticItemID`) ON DELETE CASCADE
 );
 
+-- PROMO CODES
+CREATE TABLE PromoCode (
+                               `PromoCodeID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                               `Code` VARCHAR(50) NOT NULL,
+                               `Active` BOOLEAN NOT NULL
+);
 
 -- SEED DATA
 -- =====================================================
@@ -3164,3 +3170,6 @@ INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALU
 INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('e5b5edcc-5672-4d49-ae86-4a7765fc0812', 'a8b8abef-668e-42ba-b687-526d3ba77399', '4f0489d4-c8cb-4ab9-a7c7-5df964b403bb', '092ff31c-c46b-47ca-a790-ea29a343a0a7');
 INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('12bb8c24-8db6-42d9-8986-e0b92fc27c8d', 'a8b8abef-668e-42ba-b687-526d3ba77399', '4f0489d4-c8cb-4ab9-a7c7-5df964b403bb', '6a5e9213-3818-4091-98b5-ff5f84d7aa7d');
 INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ef0e6193-713c-4b90-9894-651906b56ef1', 'a8b8abef-668e-42ba-b687-526d3ba77399', '4f0489d4-c8cb-4ab9-a7c7-5df964b403bb', '5ca60788-a22f-487f-9db7-1d4f70c0af6c');
+
+-- ===== PROMO CODES =====
+INSERT INTO `PromoCode` (PromoCodeID, Code, Active) VALUES ('985fd5bc-1c75-43e2-afa5-7d990e6cd728', 'AdriaNightHotel15', 1);

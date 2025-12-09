@@ -164,5 +164,11 @@ public static class Routes
           .WithName(nameof(SearchSubscriptionTypeByIdController))
           .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
           .WithOpenApi();
+
+        subscriptionRoutes.MapGet("/promocodes", GetActivePromoCodesController.Invoke)
+            .WithDescription("Get all active promo codes")
+            .WithName(nameof(GetActivePromoCodesController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 }

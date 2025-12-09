@@ -41,3 +41,8 @@ public interface ICourseModulesByCourseIdQuery
 {
     Task<IEnumerable<CourseModuleData>> Fetch(Guid courseId);
 }
+
+public interface IActivePromoCodesQuery
+{
+    Task<IEnumerable<string>> Fetch();
+}
