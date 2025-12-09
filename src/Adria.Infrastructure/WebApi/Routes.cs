@@ -21,13 +21,13 @@ public static class Routes
             Email = "info@group-01.adria"
         }
     };
-    
+
     public static WebApplication MapRoutes(this WebApplication app)
     {
         MapUserRoutes(app);
         MapSubscriptionRoutes(app);
         MapCourseRoutes(app);
-        
+
         return app;
     }
 
@@ -51,7 +51,7 @@ public static class Routes
             .WithName(nameof(SearchCourseByIdController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
-        
+
         courseRoutes
             .MapGet("/courses/{courseId}/modules", GetCourseModulesController.Invoke)
             .WithDescription("Get modules linked to a course by its ID")
@@ -67,47 +67,68 @@ public static class Routes
             .WithTags("Users")
             .WithDescription("All endpoints related to Genesis users.")
             .WithOpenApi();
-        
+
         userRoutes
             .MapGet("/{userId}", SearchUserByIdController.Invoke)
             .WithDescription("Get a user by their ID.")
             .WithName(nameof(SearchUserByIdController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
-        
+
         userRoutes
             .MapGet("/leaderboard", Top10UsersController.Invoke)
             .WithDescription("Get the top 10 users with the most points")
             .WithName(nameof(Top10UsersController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
-        
+
         userRoutes
             .MapGet("/{userId}/courses", SearchUserCoursesByUserController.Invoke)
             .WithDescription("Get all CustomerCourses and their corresponding course by user.")
             .WithName(nameof(SearchUserCoursesByUserController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
-        
+
         userRoutes
             .MapPost("/{userId}/enroll/{courseId}", EnrollUserInCourseController.Invoke)
             .WithDescription("Enroll a user to a certain course")
             .WithName(nameof(EnrollUserInCourseController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
-        
+
         userRoutes
             .MapPost("/{userId}/subscribe/{subscriptionId}", SubscribeUserToSubscriptionController.Invoke)
             .WithDescription("Subscribe a user to a subscription")
             .WithName(nameof(SubscribeUserToSubscriptionController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
-        
+
         userRoutes
             .MapPost("/{userId}/subscription/cancel", CancelUserSubscriptionController.Invoke)
             .WithDescription("cancels a user's subscription")
             .WithName(nameof(CancelUserSubscriptionController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+
+        userRoutes
+          .MapPatch("/{userId}/userCourses/{courseId}/{progress}", AddProgressToCourseController.Invoke)
+          .WithDescription("Adds porgress to the user course")
+          .WithName(nameof(AddProgressToCourseController))
+          .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+          .WithOpenApi();
+
+        userRoutes
+            .MapPost("/{userId}/profilePicture", UpdateUserProfilePictureController.Invoke)
+            .WithDescription("Update a user's profile picture")
+            .WithName(nameof(UpdateUserProfilePictureController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+
+        userRoutes
+            .MapDelete("/{userId}/profilePicture", DeleteUserProfilePictureController.Invoke)
+            .WithDescription("Delete a user's profile picture")
+            .WithName(nameof(DeleteUserProfilePictureController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
     }
 

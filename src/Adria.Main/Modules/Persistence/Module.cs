@@ -68,6 +68,22 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<AdoUserSubscriptionRepository>>(),
                     serviceProvider.GetRequiredService<ISubscriptionRepository>()
                 );
+            })
+            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(ServiceProvider =>
+            {
+                return new AdoUserCourseRepository(
+                    ServiceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    ServiceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
+                    );
+            })
+            .AddScoped<IUserRepository, AdoUserRepository>(serviceProvider =>
+            {
+                return new AdoUserRepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoUserRepository>>()
+                );
             });
     }
 
@@ -172,10 +188,14 @@ public static class PersistenceModule
         using DbCommand command = connection.CreateCommand();
         command.CommandText = File.ReadAllText(scriptPath);
         command.ExecuteNonQuery();
-        
+
+        //There would be something called SeedImages, I don't know if it important.
+        //SeedImages(connection);
+
+
         SeedCoverAndBannerImages(connection);
         SeedProfilePictures(connection);
-        
+
         return app;
     }
 
@@ -197,10 +217,10 @@ public static class PersistenceModule
         foreach (var user in users)
         {
             Console.WriteLine($"User {user.AdriaID} ({user.Name})");
-            
+
             string coverImgPath = Path.Combine(
-                AppContext.BaseDirectory, 
-                "Persistence/Scripts/SeedImages/ProfilePictures", 
+                AppContext.BaseDirectory,
+                "Persistence/Scripts/SeedImages/ProfilePictures",
                 $"{user.Name}.jpg"
             );
 
@@ -235,7 +255,7 @@ public static class PersistenceModule
                 }
             }
         }
-        
+
         foreach (var course in courseIds)
         {
             Console.WriteLine($"Course {course.CourseName} ({course.CourseId})");
@@ -243,37 +263,37 @@ public static class PersistenceModule
             string bannerImageId = Guid.NewGuid().ToString();
 
             string coverImgPath = Path.Combine(
-                AppContext.BaseDirectory, 
-                "Persistence/Scripts/SeedImages/Covers", 
+                AppContext.BaseDirectory,
+                "Persistence/Scripts/SeedImages/Covers",
                 $"{course.CourseName}.jpg"
             );
             string bannerImgPath = Path.Combine(
-                AppContext.BaseDirectory, 
-                "Persistence/Scripts/SeedImages/Banners", 
+                AppContext.BaseDirectory,
+                "Persistence/Scripts/SeedImages/Banners",
                 $"{course.CourseName}.jpg"
             );
-            
+
             using (var imageCommand = connection.CreateCommand())
             {
                 imageCommand.CommandText = @"
                 INSERT INTO CoverImage (CoverImageID, CoverImage) 
                 VALUES (@id, @img)
                 ";
-                
+
                 imageCommand.Parameters.Add(CreateParam(imageCommand, "@id", coverImageId));
                 imageCommand.Parameters.Add(CreateParam(imageCommand, "@img", File.ReadAllBytes(coverImgPath)));
-                
+
                 imageCommand.ExecuteNonQuery();
                 imageCommand.Parameters.Clear();
-                
+
                 imageCommand.CommandText = @"
                 INSERT INTO BannerImage (BannerImageID, BannerImage) 
                 VALUES (@id, @img)
                 ";
-                
+
                 imageCommand.Parameters.Add(CreateParam(imageCommand, "@id", bannerImageId));
                 imageCommand.Parameters.Add(CreateParam(imageCommand, "@img", File.ReadAllBytes(bannerImgPath)));
-                
+
                 imageCommand.ExecuteNonQuery();
                 imageCommand.Parameters.Clear();
             }
@@ -286,11 +306,11 @@ public static class PersistenceModule
                         BannerImageID = @bannerID 
                     WHERE CourseID = @courseID
                 ";
-                
+
                 updateCourseForeignKeys.Parameters.Add(CreateParam(updateCourseForeignKeys, "@coverID", coverImageId));
                 updateCourseForeignKeys.Parameters.Add(CreateParam(updateCourseForeignKeys, "@bannerID", bannerImageId));
                 updateCourseForeignKeys.Parameters.Add(CreateParam(updateCourseForeignKeys, "@courseID", course.CourseId));
-                
+
                 updateCourseForeignKeys.ExecuteNonQuery();
             }
         }
@@ -304,6 +324,6 @@ public static class PersistenceModule
         param.Value = value;
         return param;
     }
-    
+
 
 }

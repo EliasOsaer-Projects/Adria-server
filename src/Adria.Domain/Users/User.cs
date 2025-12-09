@@ -9,9 +9,22 @@ public class User
     public decimal Wallet { get; set; }
     public int PointsBalance { get; set; }
     public int Streak { get; set; }
+    public string Occupation { get; set; }
+    public byte[]? ProfilePicture { get; set; }
     
     public UserSubscription? CurrentSubscription { get; private set; }
 
+    
+    public User(Guid id, string name, decimal wallet, int pointsBalance, int streak, string occupation, byte[]? profilePicture)
+    {
+        AdriaId = id;
+        Name = name;
+        Wallet = wallet;
+        PointsBalance = pointsBalance;
+        Streak = streak;
+        Occupation = occupation;
+        ProfilePicture = profilePicture;
+    }
 
     public User(Guid id, string name, decimal wallet)
     {
