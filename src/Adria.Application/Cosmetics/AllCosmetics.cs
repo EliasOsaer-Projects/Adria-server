@@ -1,4 +1,5 @@
 ﻿using Adria.Application.Contracts;
+using Adria.Application.Contracts.Data;
 using Microsoft.Extensions.Logging;
 
 namespace Adria.Application;

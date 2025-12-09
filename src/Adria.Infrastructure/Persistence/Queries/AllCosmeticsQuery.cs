@@ -10,7 +10,7 @@ public class AllCosmeticsQuery : IAllCosmeticsQuery
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
 
-    private readonly string query = "select * from Cosmetics";
+    private readonly string query = "select * from CosmeticItem";
 
     public AllCosmeticsQuery(DbProviderFactory factory, string connectionString, ILogger<IAllCosmeticsQuery> logger)
     {
@@ -36,8 +36,19 @@ public class AllCosmeticsQuery : IAllCosmeticsQuery
 
             while (await reader.ReadAsync())
             {
-            }
+                var id = reader.GetOrdinal("CosmeticItemId");
+                var name = reader.GetOrdinal("ItemName");
+                var type = reader.GetOrdinal("ItemType");
+                var points = reader.GetOrdinal("PointsCost");
 
+                data.Add(new CosmeticItemData(
+                    reader.GetGuid(id),
+                    reader.GetString(name),
+                    reader.GetString(type),
+                    reader.GetDecimal(points)
+                    ));
+            }
+            return data.ToList();
         }
 
 
