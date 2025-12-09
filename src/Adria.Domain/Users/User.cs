@@ -102,6 +102,14 @@ public class User
     {
         if (interests.Count != 3)
             throw new GenesisException("A user must have exactly 3 interests.");
+
+        foreach (var interest in interests)
+        {
+            if (string.IsNullOrWhiteSpace(interest))
+            {
+                throw new GenesisException("Interest cannot be empty.");
+            }
+        }
         
         Interests = interests;
     }

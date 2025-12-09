@@ -1,5 +1,6 @@
 ﻿using Adria.Application.Contracts;
 using Adria.Domain;
+using Adria.Domain.Shared.Exceptions;
 using Adria.Domain.Users;
 using Microsoft.Extensions.Logging;
 
@@ -27,13 +28,17 @@ public sealed class AddInterests : IUseCase<AddInterestsInput, Task>
     public async Task Execute(AddInterestsInput input)
     {
         User user = await _userRepository.ById(input.AdriaId)
-                     ?? throw new ArgumentException($"User {input.AdriaId} not found.");
+                     ?? throw new ElementNotFoundException($"User {input.AdriaId} not found.");
 
         if (!string.IsNullOrWhiteSpace(input.Interests))
         {
             user.AddInterests(input.Interests.Split(',', StringSplitOptions.TrimEntries).ToList());
             await _userRepository.SaveInterests(user);
             _logger.LogInformation("Interests added to user {UserId}", user.AdriaId);
+        }
+        else
+        {
+            throw new GenesisException("No interests found.");
         }
     }
 }
