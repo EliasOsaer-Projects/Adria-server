@@ -44,5 +44,5 @@ public interface ICourseModulesByCourseIdQuery
 
 public interface IAllCosmeticsQuery
 {
-    Task<IEnumerable<CosmeticItemData>> Fetch();
+    Task<IReadOnlyCollection<CosmeticItemData>> Fetch();
 }
