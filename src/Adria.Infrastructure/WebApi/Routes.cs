@@ -104,6 +104,13 @@ public static class Routes
             .WithOpenApi();
 
         userRoutes
+            .MapPost("/{userId}/subscription/cancel", CancelUserSubscriptionController.Invoke)
+            .WithDescription("cancels a user's subscription")
+            .WithName(nameof(CancelUserSubscriptionController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+
+        userRoutes
           .MapPatch("/{userId}/userCourses/{courseId}/{progress}", AddProgressToCourseController.Invoke)
           .WithDescription("Adds porgress to the user course")
           .WithName(nameof(AddProgressToCourseController))

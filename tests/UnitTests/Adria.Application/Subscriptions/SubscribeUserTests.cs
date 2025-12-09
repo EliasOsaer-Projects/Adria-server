@@ -39,7 +39,7 @@ public sealed class SubscribeUserTests
         var savedSubscription = await mockUserSubscriptionRepo.ById(user.AdriaId);
         Assert.NotNull(savedSubscription);
         Assert.Equal(subscription.SubscriptionId, savedSubscription!.CurrentSubscription.SubscriptionId);
-        Assert.True(savedSubscription.Status);
+        Assert.Equal("Active", savedSubscription.Status);
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains("User subscribed successfully", mockLogger.LoggedMessages[0]);
     }
@@ -80,7 +80,7 @@ public sealed class SubscribeUserTests
         var updatedSubscription = await mockUserSubscriptionRepo.ById(user.AdriaId);
         Assert.NotNull(updatedSubscription);
         Assert.Equal(newSubscription.SubscriptionId, updatedSubscription!.CurrentSubscription.SubscriptionId);
-        Assert.True(updatedSubscription.Status);
+        Assert.Equal("Active", updatedSubscription.Status);
         Assert.True(updatedSubscription.EndDate > DateTime.UtcNow);
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains("User subscription updated", mockLogger.LoggedMessages[0]);
