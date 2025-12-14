@@ -150,3 +150,19 @@ public class MockCurrentPromoCodesQuery : IActivePromoCodesQuery
     public Task<IEnumerable<string>> Fetch()
         => Task.FromResult(PromoCodes);
 }
+
+public class MockAllOccupationsQuery : IAllOccupationsQuery
+{
+    public IReadOnlyCollection<OccupationData> Occupations { get; set; } = [];
+
+    public Task<IReadOnlyCollection<OccupationData>> Fetch()
+        => Task.FromResult(Occupations);
+}
+
+public class MockAllInterestsQuery : IAllInterestsQuery
+{
+    public IReadOnlyCollection<InterestData> Interests { get; set; } = [];
+
+    public Task<IReadOnlyCollection<InterestData>> Fetch()
+        => Task.FromResult(Interests);
+}
