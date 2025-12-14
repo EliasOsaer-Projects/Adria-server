@@ -27,6 +27,7 @@ public static class Routes
         MapUserRoutes(app);
         MapSubscriptionRoutes(app);
         MapCourseRoutes(app);
+        MapCosmeticRoutes(app);
 
         return app;
     }

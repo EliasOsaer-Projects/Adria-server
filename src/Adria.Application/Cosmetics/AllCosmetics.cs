@@ -7,9 +7,9 @@ namespace Adria.Application;
 public sealed class AllCosmetics : IUseCase<Task<IReadOnlyCollection<CosmeticItemData>>>
 {
     private readonly IAllCosmeticsQuery _allCosmetics;
-    private readonly ILogger _logger;
+    private readonly ILogger<AllCosmetics> _logger;
 
-    public AllCosmetics(IAllCosmeticsQuery cosmetics, ILogger logger)
+    public AllCosmetics(IAllCosmeticsQuery cosmetics, ILogger<AllCosmetics> logger)
     {
         _allCosmetics = cosmetics;
         _logger = logger;
