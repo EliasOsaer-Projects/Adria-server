@@ -151,4 +151,20 @@ public static class Routes
           .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
           .WithOpenApi();
     }
+
+    private static void MapCosmeticRoutes(WebApplication app)
+    {
+
+        var cosmeticRoute = app
+          .MapGroup("api/cosmetics")
+          .WithTags("Cosmetics")
+          .WithDescription("All endpoints to cosmetics")
+          .WithOpenApi();
+
+        cosmeticRoute.MapGet("/all-cosmetics", AllCosmeticsController.Invoke)
+          .WithDescription("Query for all cosmetics")
+          .WithName(nameof(AllCosmeticsController))
+          .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+          .WithOpenApi();
+    }
 }
