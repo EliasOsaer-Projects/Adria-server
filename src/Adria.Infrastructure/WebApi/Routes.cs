@@ -146,9 +146,16 @@ public static class Routes
             .WithOpenApi();
         
         userRoutes
-            .MapPost("/occupations", GetAllOccupationsController.Invoke)
+            .MapPost("/PossibleOccupations", GetAllOccupationsController.Invoke)
             .WithDescription("Get all possible occupations")
             .WithName(nameof(GetAllOccupationsController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/PossibleInterests", GetAllInterestsController.Invoke)
+            .WithDescription("Get all possible interests")
+            .WithName(nameof(GetAllInterestsController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
     }

@@ -49,5 +49,10 @@ public interface IActivePromoCodesQuery
 
 public interface IAllOccupationsQuery
 {
-    Task<IReadOnlyCollection<string>> Fetch();
+    Task<IReadOnlyCollection<OccupationData>> Fetch();
+}
+
+public interface IAllInterestsQuery
+{
+    Task<IReadOnlyCollection<InterestData>> Fetch();
 }

@@ -1,5 +1,6 @@
 ﻿using System.Data.Common;
 using Adria.Application.Contracts;
+using Adria.Application.Contracts.Data;
 using Microsoft.Extensions.Logging;
 
 namespace Adria.Infrastructure.Persistence.Queries;
@@ -26,7 +27,7 @@ public class AllOccupationsQuery : IAllOccupationsQuery
         _logger = logger;
     }
 
-    public async Task<IReadOnlyCollection<string>> Fetch()
+    public async Task<IReadOnlyCollection<OccupationData>> Fetch()
     {
         _logger.LogInformation("Starting to fetch all possible Occupations");
         
@@ -39,12 +40,12 @@ public class AllOccupationsQuery : IAllOccupationsQuery
 
         using var reader = await command.ExecuteReaderAsync();
 
-        var result = new List<string>();
+        var result = new List<OccupationData>();
 
         while (await reader.ReadAsync())
         {
             var occupation = reader.GetString(reader.GetOrdinal("OccupationName"));
-            result.Add(occupation);
+            result.Add(new OccupationData(occupation));
         }
         
         _logger.LogInformation("Fetched {Count} occupations", result.Count);
