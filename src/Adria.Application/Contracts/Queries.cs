@@ -46,3 +46,7 @@ public interface IAllCosmeticsQuery
 {
     Task<IReadOnlyCollection<CosmeticItemData>> Fetch();
 }
+public interface IActivePromoCodesQuery
+{
+    Task<IEnumerable<string>> Fetch();
+}

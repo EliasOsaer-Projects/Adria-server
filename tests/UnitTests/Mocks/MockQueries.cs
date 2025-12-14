@@ -142,3 +142,11 @@ public class MockCourseModulesByCourseIdQuery : ICourseModulesByCourseIdQuery
         return Task.FromResult<IEnumerable<CourseModuleData>>(modules ?? new List<CourseModuleData>());
     }
 }
+
+public class MockCurrentPromoCodesQuery : IActivePromoCodesQuery
+{
+    public IEnumerable<string> PromoCodes { get; set; } = [];
+
+    public Task<IEnumerable<string>> Fetch()
+        => Task.FromResult(PromoCodes);
+}

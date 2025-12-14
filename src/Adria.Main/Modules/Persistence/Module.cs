@@ -144,6 +144,13 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<SearchCourseByIdQuery>>()
                 );
             })
+            .AddScoped<IActivePromoCodesQuery, CurrentPromoCodesQuery>(serviceProvider =>
+            {
+                return new CurrentPromoCodesQuery(serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<CurrentPromoCodesQuery>>()
+                );
+            })
             .AddScoped<ICourseModulesByCourseIdQuery, CourseModulesByCourseIdQuery>(serviceProvider =>
             {
                 return new CourseModulesByCourseIdQuery(

@@ -131,6 +131,20 @@ public static class Routes
             .WithName(nameof(DeleteUserProfilePictureController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/{userId}/addOccupation/{occupation}", AddOccupationController.Invoke)
+            .WithDescription("Add the users occupation and interests to the user")
+            .WithName(nameof(AddOccupationController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/{userId}/addInterests/{interests}", AddInterestsController.Invoke)
+            .WithDescription("Add the users interests to the user")
+            .WithName(nameof(AddInterestsController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)
@@ -151,6 +165,12 @@ public static class Routes
           .WithName(nameof(SearchSubscriptionTypeByIdController))
           .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
           .WithOpenApi();
+
+        subscriptionRoutes.MapGet("/promocodes", GetActivePromoCodesController.Invoke)
+            .WithDescription("Get all active promo codes")
+            .WithName(nameof(GetActivePromoCodesController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapCosmeticRoutes(WebApplication app)

@@ -9,20 +9,22 @@ public class User
     public decimal Wallet { get; set; }
     public int PointsBalance { get; set; }
     public int Streak { get; set; }
-    public string Occupation { get; set; }
+    public string? Occupation { get; private set; }
+    public IList<string>? Interests { get; private set; }
     public byte[]? ProfilePicture { get; set; }
     
     public UserSubscription? CurrentSubscription { get; private set; }
+    
+ 
 
     
-    public User(Guid id, string name, decimal wallet, int pointsBalance, int streak, string occupation, byte[]? profilePicture)
+    public User(Guid id, string name, decimal wallet, int pointsBalance, int streak, byte[]? profilePicture)
     {
         AdriaId = id;
         Name = name;
         Wallet = wallet;
         PointsBalance = pointsBalance;
         Streak = streak;
-        Occupation = occupation;
         ProfilePicture = profilePicture;
     }
 
@@ -83,5 +85,32 @@ public class User
             CurrentSubscription = new UserSubscription(subscription, DateTime.UtcNow);
         else
             CurrentSubscription.ChangeSubscription(subscription, DateTime.UtcNow);
+    }
+
+    public void AddOccupation(string occupation) //mogen er spaties zijn in een occupation?
+    {
+        if (string.IsNullOrWhiteSpace(occupation))
+            throw new GenesisException("Occupation cannot be empty.");
+
+        if (occupation.All(char.IsDigit))
+            throw new GenesisException("Occupation cannot be a number.");
+        
+        Occupation = occupation.Trim();
+    }
+
+    public void AddInterests(List<String> interests)
+    {
+        if (interests.Count != 3)
+            throw new GenesisException("A user must have exactly 3 interests.");
+
+        foreach (var interest in interests)
+        {
+            if (string.IsNullOrWhiteSpace(interest))
+            {
+                throw new GenesisException("Interest cannot be empty.");
+            }
+        }
+        
+        Interests = interests;
     }
 }
