@@ -33,6 +33,9 @@ public static class UseCases
             .AddScoped<IUseCase<SearchCourseByIdInput, Task<CourseData>>, SearchCourseById>()
             .AddScoped<IUseCase<GetCourseModulesInput, Task<IEnumerable<CourseModuleData>>>, GetCourseModules>()
             
-            .AddScoped<IUseCase<Task<IEnumerable<string>>>, GetActivePromoCodes>();
+            .AddScoped<IUseCase<Task<IEnumerable<string>>>, GetActivePromoCodes>()
+            
+            .AddScoped<IUseCase<Task<IReadOnlyCollection<string>>>, GetAllOccupations>();
+
     }
 }

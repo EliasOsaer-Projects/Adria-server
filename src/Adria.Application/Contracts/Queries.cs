@@ -46,3 +46,8 @@ public interface IActivePromoCodesQuery
 {
     Task<IEnumerable<string>> Fetch();
 }
+
+public interface IAllOccupationsQuery
+{
+    Task<IReadOnlyCollection<string>> Fetch();
+}
