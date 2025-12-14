@@ -151,6 +151,14 @@ public static class PersistenceModule
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<CourseModulesByCourseIdQuery>>()
                 );
+            })
+            .AddScoped<IAllCosmeticsQuery, AllCosmeticsQuery>(serviceProvider =>
+            {
+                return new AllCosmeticsQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AllCosmeticsQuery>>()
+                    );
             });
     }
 
