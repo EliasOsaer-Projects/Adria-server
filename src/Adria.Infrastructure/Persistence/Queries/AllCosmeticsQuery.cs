@@ -6,13 +6,13 @@ namespace Adria.Infrastructure;
 
 public class AllCosmeticsQuery : IAllCosmeticsQuery
 {
-    private readonly ILogger<IAllCosmeticsQuery> _logger;
+    private readonly ILogger<AllCosmeticsQuery> _logger;
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
 
     private readonly string query = "select * from CosmeticItem";
 
-    public AllCosmeticsQuery(DbProviderFactory factory, string connectionString, ILogger<IAllCosmeticsQuery> logger)
+    public AllCosmeticsQuery(DbProviderFactory factory, string connectionString, ILogger<AllCosmeticsQuery> logger)
     {
         _factory = factory;
         _connectionString = connectionString;
