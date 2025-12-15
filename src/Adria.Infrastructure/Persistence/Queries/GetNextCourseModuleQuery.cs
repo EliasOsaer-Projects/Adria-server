@@ -12,10 +12,24 @@ public sealed class GetNextCourseModuleQuery
         SELECT DISTINCT m.ModuleID, m.Position, m.Content
         FROM Module m
         INNER JOIN QuestionAnswer qa ON m.ModuleID = qa.ModuleID
-        INNER JOIN UserQuestionAnswer uqa ON qa.QAID = uqa.QAID
         WHERE m.CourseID = @courseId
-          AND uqa.AdriaID = @adriaId
-          AND uqa.IsCorrectlyAnswered = FALSE
+          AND EXISTS (
+              -- User has answered this question wrong
+              SELECT 1 
+              FROM UserQuestionAnswer uqa 
+              WHERE uqa.QAID = qa.QAID 
+                AND uqa.AdriaID = @adriaId
+                AND uqa.IsCorrectlyAnswered = FALSE
+          )
+          AND NOT EXISTS (
+              -- User has NEVER answered this question correctly
+              SELECT 1
+              FROM QuestionAnswer qa2
+              INNER JOIN UserQuestionAnswer uqa2 ON qa2.QAID = uqa2.QAID
+              WHERE qa2.QuestionID = qa.QuestionID
+                AND uqa2.AdriaID = @adriaId
+                AND uqa2.IsCorrectlyAnswered = TRUE
+          )
         ORDER BY m.Position ASC
         LIMIT 1;
     ";

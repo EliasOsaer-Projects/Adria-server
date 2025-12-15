@@ -32,8 +32,8 @@ public class AdoUserQARepository
     
     public AdoUserQARepository(
         DbProviderFactory factory, 
-        string? connectionString,
-        ILogger<AdoUserQARepository>? logger
+        string connectionString,
+        ILogger<AdoUserQARepository> logger
     ) : base(factory, connectionString)
     {
         _logger = logger;   
