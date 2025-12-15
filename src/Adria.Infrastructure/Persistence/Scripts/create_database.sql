@@ -7,8 +7,8 @@ DROP TABLE IF EXISTS `Module`;
 DROP TABLE IF EXISTS `UserCourse`;
 DROP TABLE IF EXISTS `UserSubscription`;
 DROP TABLE IF EXISTS `Payment`;
-DROP TABLE IF EXISTS `CosmeticItem`;
 DROP TABLE IF EXISTS `UserCosmeticItem`;
+DROP TABLE IF EXISTS `CosmeticItem`;
 
 DROP TABLE IF EXISTS `Course`;
 DROP TABLE IF EXISTS `CoverImage`;
