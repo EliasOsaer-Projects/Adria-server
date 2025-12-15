@@ -1,5 +1,6 @@
 ﻿using Taskly.Infrastructure.Persistence.Shared;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
 using System.Data.Common;
 
@@ -20,8 +21,6 @@ public sealed class CheckValidSubscription
         _conn = _configuration["Persistence:ConnectionString"]!;
     }
 
-
-
     public async Task Check()
     {
         try
@@ -39,3 +38,23 @@ public sealed class CheckValidSubscription
         }
     }
 }
+
+public class SubscriptionCheckService : BackgroundService
+{
+    private readonly CheckValidSubscription _checker;
+
+    public SubscriptionCheckService(CheckValidSubscription checker)
+    {
+        _checker = checker;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await _checker.Check();
+            await Task.Delay(TimeSpan.FromDays(30), stoppingToken);
+        }
+    }
+}
+
