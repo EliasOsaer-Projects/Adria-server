@@ -186,6 +186,18 @@ public static class Routes
           .WithName(nameof(SearchSubscriptionTypeByIdController))
           .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
           .WithOpenApi();
+
+        subscriptionRoutes.MapGet("/promocodes", GetActivePromoCodesController.Invoke)
+            .WithDescription("Get all active promo codes")
+            .WithName(nameof(GetActivePromoCodesController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        subscriptionRoutes.MapGet("/{PromoCode}/discount", GetDiscountByPromoCodeController.Invoke)
+            .WithDescription("Get the discount for a promo code")
+            .WithName(nameof(GetDiscountByPromoCodeController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapCosmeticRoutes(WebApplication app)

@@ -1,7 +1,9 @@
 ﻿using System.Data.Common;
+using System.Threading.Tasks;
 using Adria.Domain;
 using Adria.Domain.Subscriptions;
 using Adria.Domain.Users;
+using Adria.Domain.Shared.Exceptions;
 using Adria.Infrastructure.Persistence.Shared;
 using Microsoft.Extensions.Logging;
 using Taskly.Infrastructure.Persistence.Shared;
@@ -14,6 +16,10 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     private readonly ISubscriptionRepository _subscriptionRepository;
 
     private static readonly string TABLE_USER_SUBS = "UserSubscription";
+    private static readonly string TABLE_USER = "User";
+    private static readonly string TABLE_SUB = "Subscription";
+    private static readonly string COL_WALLET = "Wallet";
+    private static readonly string COL_PRICE = "Price";
     private static readonly string COL_ID = "UserSubscriptionID";
     private static readonly string COL_USER_ID = "AdriaID";
     private static readonly string COL_SUBS_ID = "SubscriptionID";
@@ -38,6 +44,14 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         WHERE {COL_USER_ID} = @UserId;
     ";
 
+    private static readonly string PAY_SUBSCRIPTION = $@"
+      UPDATE {TABLE_USER} u
+      JOIN {TABLE_SUB} s ON s.{COL_SUBS_ID} = @SubsId
+      SET u.{COL_WALLET} = u.{COL_WALLET} - s.{COL_PRICE}
+      WHERE u.{COL_USER_ID} = @UserId
+      AND u.{COL_WALLET} >= s.{COL_PRICE};
+      ";
+
     public AdoUserSubscriptionRepository(
         DbProviderFactory factory,
         string connectionString,
@@ -47,6 +61,13 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     {
         _logger = logger;
         _subscriptionRepository = subscriptionRepository;
+    }
+
+    public async Task Payment(Guid userId, Guid subId)
+    {
+        var param = CreateParameter("@UserId", userId.ToString());
+        var param2 = CreateParameter("@SubsId", subId.ToString());
+        await ExecuteNonQueryAsync(PAY_SUBSCRIPTION, new[] { param, param2 });
     }
 
     public async Task<UserSubscription?> ById(Guid userId)
@@ -83,6 +104,8 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     {
         var exists = await ById(user.AdriaId);
         var query = exists == null ? INSERT_SUBSCRIPTION : UPDATE_SUBSCRIPTION;
+
+        await Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
 
         try
         {

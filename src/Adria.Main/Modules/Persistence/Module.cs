@@ -198,6 +198,14 @@ public static class PersistenceModule
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<GetNextCourseModuleQuery>>()
                 );
+            })
+            .AddScoped<IDiscountByPromoCodeQuery, DiscountByPromoCodeQuery>(serviceProvider =>
+            {
+                return new DiscountByPromoCodeQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<DiscountByPromoCodeQuery>>()
+                );
             });
     }
 

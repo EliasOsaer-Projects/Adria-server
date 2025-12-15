@@ -1,4 +1,5 @@
 using Adria.Application.Contracts.Data;
+using Adria.Application.Subscriptions;
 
 namespace Adria.Application.Contracts;
 
@@ -65,3 +66,8 @@ public interface IGetNextCourseModuleQuery
 {
     Task<CourseModuleData?> Fetch(Guid courseId, Guid userId);
 }
+public interface IDiscountByPromoCodeQuery
+{
+    Task<decimal> Fetch(string  promoCode);
+}
+

@@ -39,6 +39,9 @@ public static class UseCases
 
             .AddScoped<IUseCase<Task<IEnumerable<string>>>, GetActivePromoCodes>()
 
+            .AddScoped<IUseCase<GetDiscountByPromoCodeInput, Task<decimal>>, GetDiscountByPromoCode>()
+
+            
             .AddScoped<IUseCase<Task<IReadOnlyCollection<OccupationData>>>, GetAllOccupations>()
             .AddScoped<IUseCase<Task<IReadOnlyCollection<InterestData>>>, GetAllInterests>()
             .AddScoped<IUseCase<GetNextCourseModuleInput, Task<CourseModuleData>>, GetNextCourseModule>()
