@@ -11,9 +11,9 @@ public sealed record GetDiscountByPromoCodeInput(
 public sealed class GetDiscountByPromoCode : IUseCase<GetDiscountByPromoCodeInput, Task<decimal>>
 {
     private readonly IDiscountByPromoCodeQuery _DiscountByPromoCode;
-    private readonly ILogger<GetActivePromoCodes> _logger;
+    private readonly ILogger<GetDiscountByPromoCode> _logger;
 
-    public GetDiscountByPromoCode(IDiscountByPromoCodeQuery query, ILogger<GetActivePromoCodes> logger)
+    public GetDiscountByPromoCode(IDiscountByPromoCodeQuery query, ILogger<GetDiscountByPromoCode> logger)
     {
         _DiscountByPromoCode = query;
         _logger = logger;
