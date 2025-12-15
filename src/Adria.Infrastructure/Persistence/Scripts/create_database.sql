@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS `Module`;
 DROP TABLE IF EXISTS `UserCourse`;
 DROP TABLE IF EXISTS `UserSubscription`;
 DROP TABLE IF EXISTS `Payment`;
+DROP TABLE IF EXISTS `UserCosmeticItem`;
 DROP TABLE IF EXISTS `CosmeticItem`;
 
 DROP TABLE IF EXISTS `Course`;
@@ -157,6 +158,16 @@ CREATE TABLE `CosmeticItem` (
                                 `ItemName` VARCHAR(100) NOT NULL,
                                 `ItemType` VARCHAR(50) NOT NULL,
                                 `PointsCost` INT NOT NULL
+);
+
+CREATE TABLE UserCosmeticItem (
+                                `AdriaID` VARCHAR(36) NOT NULL,
+                                `CosmeticItemID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                                `ItemName` VARCHAR(100) NOT NULL,
+                                `ItemType` VARCHAR(50) NOT NULL,
+
+                                FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE,
+                                FOREIGN KEY (`CosmeticItemID`) REFERENCES `CosmeticItem`(`CosmeticItemID`) ON DELETE CASCADE
 );
 
 -- POINT PAYMENTS
