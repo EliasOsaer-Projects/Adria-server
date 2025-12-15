@@ -45,13 +45,12 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     ";
 
     private static readonly string PAY_SUBSCRIPTION = $@"
-      UPDATE u
-      SET u.{COL_WALLET} = u.{COL_WALLET} - s.{COL_PRICE}
-      FROM {TABLE_USER} u
+      UPDATE {TABLE_USER} u
       JOIN {TABLE_USER_SUBS} us
         ON us.{COL_USER_ID} = u.{COL_USER_ID}
       JOIN {TABLE_SUB} s
         ON s.{COL_SUBS_ID} = us.{COL_SUBS_ID}
+      SET u.{COL_WALLET} = u.{COL_WALLET} - s.{COL_PRICE}
       WHERE u.{COL_USER_ID} = @UserId
         AND s.{COL_SUBS_ID} = @SubsId
         AND u.{COL_WALLET} >= s.{COL_PRICE};
@@ -68,18 +67,19 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         _subscriptionRepository = subscriptionRepository;
     }
 
-    public async Task<bool> Payment(Guid userId, Guid subId)
+    public async void Payment(Guid userId, Guid subId)
     {
         var param = CreateParameter("@UserId", userId.ToString());
         var param2 = CreateParameter("@SubsId", subId.ToString());
         await using var reader = await ExecuteReaderAsync(PAY_SUBSCRIPTION, new[] { param, param2 });
 
-        if (!await reader.ReadAsync()) return false;
-
         try
         {
             _logger.LogInformation("Payment succedded");
-            return true;
+        }
+        catch (DbException ex)
+        {
+            throw new GenesisException($"DatabaseError:\n{ex}");
         }
         finally
         {
@@ -121,31 +121,8 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     {
         var exists = await ById(user.AdriaId);
         var query = exists == null ? INSERT_SUBSCRIPTION : UPDATE_SUBSCRIPTION;
-        var payment = await Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
 
-        if (payment == true)
-        {
-            try
-            {
-                var parameters = new[]
-                {
-                CreateParameter("@Id", Guid.NewGuid().ToString()), // for insert only
-                CreateParameter("@UserId", user.AdriaId.ToString()),
-                CreateParameter("@SubsId", userSubscription.CurrentSubscription.SubscriptionId),
-                CreateParameter("@Start", userSubscription.StartDate),
-                CreateParameter("@End", userSubscription.EndDate),
-                CreateParameter("@Status", userSubscription.Status)
-            };
-
-                await ExecuteNonQueryAsync(query, parameters);
-                _logger.LogInformation("Saved subscription for user {UserId}", user.AdriaId);
-            }
-            catch (DbException ex)
-            {
-                _logger.LogError(ex, "Failed to save subscription for user {UserId}", user.AdriaId);
-                throw new AdriaDatabaseException("Failed to save user subscription.", ex);
-            }
-        }
+        Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
 
         try
         {
