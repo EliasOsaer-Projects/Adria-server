@@ -2,6 +2,5 @@
 
 public sealed record QuestionAnswerData(
     Guid AnswerId,
-    string Answer,
-    bool IsCorrect
+    string Answer
 );

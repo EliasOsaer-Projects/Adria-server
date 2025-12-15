@@ -182,6 +182,14 @@ public static class PersistenceModule
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AllInterestsQuery>>()
                 );
+            })
+            .AddScoped<IGetNextCourseModuleQuery, GetNextCourseModuleQuery>(serviceProvider =>
+            {
+                return new GetNextCourseModuleQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<GetNextCourseModuleQuery>>()
+                );
             });
     }
 

@@ -19,8 +19,8 @@ namespace UnitTests.Adria.Application.Courses
                 "What is 2+2?",
                 new List<QuestionAnswerData>
                 {
-                    new QuestionAnswerData(Guid.NewGuid(), "3", false),
-                    new QuestionAnswerData(Guid.NewGuid(), "4", true)
+                    new QuestionAnswerData(Guid.NewGuid(), "3"),
+                    new QuestionAnswerData(Guid.NewGuid(), "4")
                 }
             );
 
@@ -52,8 +52,8 @@ namespace UnitTests.Adria.Application.Courses
             Assert.Equal("What is 2+2?", questions.Question);
 
             var answers = questions.Answers;
-            Assert.Contains(answers, a => a.Answer == "4" && a.IsCorrect);
-            Assert.Contains(answers, a => a.Answer == "3" && !a.IsCorrect);
+            Assert.Contains(answers, a => a.Answer == "4");
+            Assert.Contains(answers, a => a.Answer == "3");
         }
     }
 }

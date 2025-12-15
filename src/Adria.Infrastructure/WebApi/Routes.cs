@@ -54,9 +54,16 @@ public static class Routes
             .WithOpenApi();
 
         courseRoutes
-            .MapGet("/courses/{courseId}/modules", GetCourseModulesController.Invoke)
-            .WithDescription("Get modules linked to a course by its ID")
-            .WithName(nameof(GetCourseModulesController))
+            .MapGet("/courses/{courseId}/modules/{userId}", GetNextCourseModuleController.Invoke)
+            .WithDescription("Get's the next module for a course for a certain user")
+            .WithName(nameof(GetNextCourseModuleController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        courseRoutes
+            .MapPost("/question/{questionId}/answer/{answerId}/{userId}", CheckAnswerController.Invoke)
+            .WithDescription("Checks the user's answer for a question, returns id of correct answer")
+            .WithName(nameof(CheckAnswerController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
     }
@@ -133,28 +140,28 @@ public static class Routes
             .WithOpenApi();
         
         userRoutes
-            .MapPost("/{userId}/addOccupation/{occupation}", AddOccupationController.Invoke)
+            .MapPost("/{userId}/occupation/{occupation}", AddOccupationController.Invoke)
             .WithDescription("Add the users occupation and interests to the user")
             .WithName(nameof(AddOccupationController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
         
         userRoutes
-            .MapPost("/{userId}/addInterests/{interests}", AddInterestsController.Invoke)
+            .MapPost("/{userId}/interests/{interests}", AddInterestsController.Invoke)
             .WithDescription("Add the users interests to the user")
             .WithName(nameof(AddInterestsController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
         
         userRoutes
-            .MapPost("/PossibleOccupations", GetAllOccupationsController.Invoke)
+            .MapPost("/occupations", GetAllOccupationsController.Invoke)
             .WithDescription("Get all possible occupations")
             .WithName(nameof(GetAllOccupationsController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
         
         userRoutes
-            .MapPost("/PossibleInterests", GetAllInterestsController.Invoke)
+            .MapPost("/interests", GetAllInterestsController.Invoke)
             .WithDescription("Get all possible interests")
             .WithName(nameof(GetAllInterestsController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
@@ -179,12 +186,6 @@ public static class Routes
           .WithName(nameof(SearchSubscriptionTypeByIdController))
           .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
           .WithOpenApi();
-
-        subscriptionRoutes.MapGet("/promocodes", GetActivePromoCodesController.Invoke)
-            .WithDescription("Get all active promo codes")
-            .WithName(nameof(GetActivePromoCodesController))
-            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
-            .WithOpenApi();
     }
 
     private static void MapCosmeticRoutes(WebApplication app)
