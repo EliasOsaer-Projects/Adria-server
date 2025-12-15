@@ -22,16 +22,16 @@ public sealed class CheckValidSubscription
 
 
 
-    public void Check()
+    public async Task Check()
     {
         try
         {
-            using var conn = new MySqlConnection(_conn);
-            conn.Open();
+            await using var conn = new MySqlConnection(_conn);
+            await conn.OpenAsync();
 
-            var command = conn.CreateCommand();
+            await using var command = conn.CreateCommand();
             command.CommandText = _query;
-            command.ExecuteNonQuery();
+            await command.ExecuteNonQueryAsync();
         }
         catch (DbException ex)
         {
