@@ -14,10 +14,11 @@ public class CheckAnswerController
         [FromRoute] Guid questionId,
         [FromRoute] Guid answerId,
         [FromRoute] Guid userId,
+        [FromRoute] Guid courseId,
         [FromServices] IUseCase<CheckAnswerInput, Task<Guid>> checkAnswer
     )
     {
-        Guid correctAnswer =  await checkAnswer.Execute(new CheckAnswerInput(questionId, answerId, userId));
+        Guid correctAnswer =  await checkAnswer.Execute(new CheckAnswerInput(questionId, answerId, userId, courseId));
         return TypedResults.Ok(correctAnswer);
     }
 }

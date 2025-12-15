@@ -30,6 +30,22 @@ public class AdoUserQARepository
         LIMIT 1;
     ";
     
+    private static readonly string sql_calculateProgress = @"
+    SELECT 
+        (SELECT COUNT(DISTINCT qa.QuestionID)
+         FROM QuestionAnswer qa
+         INNER JOIN Module m ON qa.ModuleID = m.ModuleID
+         WHERE m.CourseID = @courseId) as TotalQuestions,
+        
+        (SELECT COUNT(DISTINCT qa.QuestionID)
+         FROM QuestionAnswer qa
+         INNER JOIN Module m ON qa.ModuleID = m.ModuleID
+         INNER JOIN UserQuestionAnswer uqa ON qa.QAID = uqa.QAID
+         WHERE m.CourseID = @courseId
+           AND uqa.AdriaID = @adriaId
+           AND uqa.IsCorrectlyAnswered = TRUE) as CorrectQuestions;
+";
+    
     public AdoUserQARepository(
         DbProviderFactory factory, 
         string connectionString,
@@ -89,6 +105,47 @@ public class AdoUserQARepository
         
         return Guid.Empty;
     }
+    
+    public async Task<int> GetProgress(Guid adriaId, Guid courseId)
+    {
+        DbParameter adriaIdParam = CreateParameter("@adriaId", adriaId);
+        DbParameter courseIdParam = CreateParameter("@courseId", courseId);
+    
+        DbDataReader dbDataReader = await ExecuteReaderAsync(sql_calculateProgress, [adriaIdParam, courseIdParam]);
+        try
+        {
+            if (await dbDataReader.ReadAsync())
+            {
+                int totalQuestions = dbDataReader.GetInt32(0);
+                int correctQuestions = dbDataReader.GetInt32(1);
+            
+                _logger.LogWarning(
+                    "DEBUG PROGRESS: Correct={Correct}, Total={Total}, CourseId={CourseId}, UserId={UserId}",
+                    correctQuestions, totalQuestions, courseId, adriaId
+                );
+            
+                if (totalQuestions == 0) return 0;
+            
+                var progress = (int)Math.Round((double)correctQuestions / totalQuestions * 100);
+            
+                _logger.LogWarning("DEBUG PROGRESS: Calculated={Progress}%", progress);
+            
+                return progress;
+            }
+        }
+        catch (DbException e)
+        {
+            _logger.LogError(e, "Failed to calculate progress");
+            throw new AdriaDatabaseException("Failed to calculate progress from database.", e);
+        }
+        finally
+        {
+            await dbDataReader.DisposeAsync();
+        }
+
+        return 0;
+    }
+
     
     public async Task<Guid> Save(Guid userId, Guid aid, Guid qid)
     {

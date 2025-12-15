@@ -61,7 +61,7 @@ public static class Routes
             .WithOpenApi();
         
         courseRoutes
-            .MapPost("/question/{questionId}/answer/{answerId}/{userId}", CheckAnswerController.Invoke)
+            .MapPost("courses/{courseId}/question/{questionId}/answer/{answerId}/{userId}", CheckAnswerController.Invoke)
             .WithDescription("Checks the user's answer for a question, returns id of correct answer")
             .WithName(nameof(CheckAnswerController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
