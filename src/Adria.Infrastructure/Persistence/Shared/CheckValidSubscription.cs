@@ -18,7 +18,8 @@ public sealed class CheckValidSubscription
     public CheckValidSubscription(IConfiguration configuration)
     {
         _configuration = configuration;
-        _conn = _configuration["Persistence:ConnectionString"]!;
+        _conn = _configuration["Persistence:ConnectionString"]! ??
+          throw new InvalidOperationException("Persistence:ConnectionString is missing from configuration.");
     }
 
     public async Task Check()
@@ -43,6 +44,9 @@ public class SubscriptionCheckService : BackgroundService
 {
     private readonly CheckValidSubscription _checker;
 
+    // Tracks when the last check happened
+    private DateTime _lastCheck = DateTime.MinValue;
+
     public SubscriptionCheckService(CheckValidSubscription checker)
     {
         _checker = checker;
@@ -52,8 +56,22 @@ public class SubscriptionCheckService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await _checker.Check();
-            await Task.Delay(TimeSpan.FromDays(30), stoppingToken);
+            try
+            {
+                // Check if 30 days have passed since last run
+                if (_lastCheck == DateTime.MinValue || (DateTime.UtcNow - _lastCheck).TotalDays >= 30)
+                {
+                    await _checker.Check(); // running our query.
+                    _lastCheck = DateTime.UtcNow;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new AdriaDatabaseException($"Error in subscription check: {ex.Message}", ex);
+            }
+
+            // Sleep for a shorter interval, e.g., 1 day
+            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
         }
     }
 }
