@@ -26,13 +26,15 @@ public static class UseCases
             .AddScoped<IUseCase<Task<IEnumerable<LeaderBoardData>>>, Top10Users>()
             .AddScoped<IUseCase<AddOccupationInput, Task>, AddOccupation>()
             .AddScoped<IUseCase<AddInterestsInput, Task>, AddInterests>()
-            
+
 
             .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
             .AddScoped<IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>, SearchUserCoursesByUser>()
             .AddScoped<IUseCase<SearchCourseByIdInput, Task<CourseData>>, SearchCourseById>()
             .AddScoped<IUseCase<GetCourseModulesInput, Task<IEnumerable<CourseModuleData>>>, GetCourseModules>()
-            
+
+            .AddScoped<IUseCase<Task<IReadOnlyCollection<CosmeticItemData>>>, AllCosmetics>()
+
             .AddScoped<IUseCase<Task<IEnumerable<string>>>, GetActivePromoCodes>();
     }
 }
