@@ -1,7 +1,9 @@
 ﻿using System.Data.Common;
+using System.Threading.Tasks;
 using Adria.Domain;
 using Adria.Domain.Subscriptions;
 using Adria.Domain.Users;
+using Adria.Domain.Shared.Exceptions;
 using Adria.Infrastructure.Persistence.Shared;
 using Microsoft.Extensions.Logging;
 using Taskly.Infrastructure.Persistence.Shared;
@@ -42,7 +44,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         WHERE {COL_USER_ID} = @UserId;
     ";
 
-    private static readonly string Pay_Subscription = $@"
+    private static readonly string PAY_SUBSCRIPTION = $@"
       UPDATE u
       SET u.{COL_WALLET} = u.{COL_WALLET} - s.{COL_PRICE}
       FROM {TABLE_USER} u
@@ -64,6 +66,25 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     {
         _logger = logger;
         _subscriptionRepository = subscriptionRepository;
+    }
+
+    public async Task<bool> Payment(Guid userId, Guid subId)
+    {
+        var param = CreateParameter("@UserId", userId.ToString());
+        var param2 = CreateParameter("@SubsId", subId.ToString());
+        await using var reader = await ExecuteReaderAsync(PAY_SUBSCRIPTION, new[] { param, param2 });
+
+        if (!await reader.ReadAsync()) return false;
+
+        try
+        {
+            _logger.LogInformation("Payment succedded");
+            return true;
+        }
+        finally
+        {
+            await reader.DisposeAsync();
+        }
     }
 
     public async Task<UserSubscription?> ById(Guid userId)
@@ -100,6 +121,31 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     {
         var exists = await ById(user.AdriaId);
         var query = exists == null ? INSERT_SUBSCRIPTION : UPDATE_SUBSCRIPTION;
+        var payment = await Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
+
+        if (payment == true)
+        {
+            try
+            {
+                var parameters = new[]
+                {
+                CreateParameter("@Id", Guid.NewGuid().ToString()), // for insert only
+                CreateParameter("@UserId", user.AdriaId.ToString()),
+                CreateParameter("@SubsId", userSubscription.CurrentSubscription.SubscriptionId),
+                CreateParameter("@Start", userSubscription.StartDate),
+                CreateParameter("@End", userSubscription.EndDate),
+                CreateParameter("@Status", userSubscription.Status)
+            };
+
+                await ExecuteNonQueryAsync(query, parameters);
+                _logger.LogInformation("Saved subscription for user {UserId}", user.AdriaId);
+            }
+            catch (DbException ex)
+            {
+                _logger.LogError(ex, "Failed to save subscription for user {UserId}", user.AdriaId);
+                throw new AdriaDatabaseException("Failed to save user subscription.", ex);
+            }
+        }
 
         try
         {
