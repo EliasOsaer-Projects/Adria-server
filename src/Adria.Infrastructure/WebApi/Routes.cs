@@ -185,6 +185,12 @@ public static class Routes
             .WithName(nameof(GetActivePromoCodesController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+        
+        subscriptionRoutes.MapGet("/{PromoCode}/discount", GetDiscountByPromoCodeController.Invoke)
+            .WithDescription("Get the discount for a promo code")
+            .WithName(nameof(GetDiscountByPromoCodeController))
+            .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapCosmeticRoutes(WebApplication app)

@@ -1,4 +1,5 @@
 using Adria.Application.Contracts.Data;
+using Adria.Application.Subscriptions;
 
 namespace Adria.Application.Contracts;
 
@@ -60,3 +61,9 @@ public interface IAllInterestsQuery
 {
     Task<IReadOnlyCollection<InterestData>> Fetch();
 }
+
+public interface IDiscountByPromoCodeQuery
+{
+    Task<decimal> Fetch(string  promoCode);
+}
+
