@@ -58,7 +58,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
     private static readonly string UPDATE_PROGRESS = @$"
       update {TABLE_USER_SUBS}
-      set {COL_PROGRESS} = {COL_PROGRESS} + @amount
+      set {COL_PROGRESS} = @amount
       where {COL_SUBS_ID} = @courseId and {COL_USER_ID} = @userId";
 
     public async Task<UserCourse?> ById(Guid id, Guid courseId)
@@ -92,6 +92,8 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
     public async Task Save(UserCourse course, int progress)
     {
+        Console.WriteLine(course.ProgressPercentage);
+        Console.WriteLine(progress);
         UserCourse futureStatus = course;
         futureStatus.UpdateProgress(progress);
         var query = futureStatus.CompletionStatus == true ? UPDATE_COMPLETION : UPDATE_PROGRESS;

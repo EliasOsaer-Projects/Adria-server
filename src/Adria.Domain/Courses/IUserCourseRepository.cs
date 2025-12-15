@@ -4,7 +4,7 @@ namespace Adria.Domain;
 
 public interface IUserCourseRepository
 {
-    Task<UserCourse?> ById(Guid userId, Guid userCourseId);
+    Task<UserCourse?> ById(Guid userId, Guid courseId);
     Task Save(UserCourse userCourse, int progress);
     Task<UserCourseRepoData> Save(Guid userId, Guid courseId);
 }
