@@ -166,3 +166,22 @@ public class MockAllInterestsQuery : IAllInterestsQuery
     public Task<IReadOnlyCollection<InterestData>> Fetch()
         => Task.FromResult(Interests);
 }
+
+public class MockDiscountByPromoCodeQuery : IDiscountByPromoCodeQuery
+{
+    private readonly Dictionary<string, decimal> _promoCodes = new Dictionary<string, decimal>();
+    public void AddPromoCode(string promoCode, decimal discount)
+    {
+        _promoCodes[promoCode] = discount;
+    }
+
+    public Task<decimal> Fetch(string promoCode)
+    {
+        if (_promoCodes.TryGetValue(promoCode, out var discount))
+        {
+            return Task.FromResult(discount);
+        }
+
+        return Task.FromResult(0m);
+    }
+}
