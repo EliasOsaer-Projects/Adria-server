@@ -14,6 +14,10 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     private readonly ISubscriptionRepository _subscriptionRepository;
 
     private static readonly string TABLE_USER_SUBS = "UserSubscription";
+    private static readonly string TABLE_USER = "User";
+    private static readonly string TABLE_SUB = "Subscriptions";
+    private static readonly string COL_WALLET = "Wallet";
+    private static readonly string COL_PRICE = "Price";
     private static readonly string COL_ID = "UserSubscriptionID";
     private static readonly string COL_USER_ID = "AdriaID";
     private static readonly string COL_SUBS_ID = "SubscriptionID";
@@ -37,6 +41,19 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         SET {COL_SUBS_ID} = @SubsId, {COL_START} = @Start, {COL_END} = @End, {COL_STATUS} = @Status
         WHERE {COL_USER_ID} = @UserId;
     ";
+
+    private static readonly string Pay_Subscription = $@"
+      UPDATE u
+      SET u.{COL_WALLET} = u.{COL_WALLET} - s.{COL_PRICE}
+      FROM {TABLE_USER} u
+      JOIN {TABLE_USER_SUBS} us
+        ON us.{COL_USER_ID} = u.{COL_USER_ID}
+      JOIN {TABLE_SUB} s
+        ON s.{COL_SUBS_ID} = us.{COL_SUBS_ID}
+      WHERE u.{COL_USER_ID} = @UserId
+        AND s.{COL_SUBS_ID} = @SubsId
+        AND u.{COL_WALLET} >= s.{COL_PRICE};
+      ";
 
     public AdoUserSubscriptionRepository(
         DbProviderFactory factory,
