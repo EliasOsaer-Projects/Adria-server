@@ -15,6 +15,11 @@ DROP TABLE IF EXISTS `BannerImage`;
 DROP TABLE IF EXISTS `Subscription`;
 DROP TABLE IF EXISTS `User`;
 
+DROP TABLE IF EXISTS `PromoCode`;
+DROP TABLE IF EXISTS `Occupation`;
+DROP TABLE IF EXISTS `Interest`;
+
+
 /* CREATE TABLES */
 
 -- USERS
@@ -170,6 +175,18 @@ CREATE TABLE PromoCode (
                                `PromoCodeID` VARCHAR(36) PRIMARY KEY NOT NULL,
                                `Code` VARCHAR(50) NOT NULL,
                                `Active` BOOLEAN NOT NULL
+);
+
+-- OCCUPATIONS
+CREATE TABLE `Occupation` (
+                              `OccupationID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                              `OccupationName` VARCHAR(100) NOT NULL
+);
+
+-- INTERESTS
+CREATE TABLE `Interest` (
+                            `InterestID` VARCHAR(36) PRIMARY KEY NOT NULL,
+                            `InterestName` VARCHAR(100) NOT NULL
 );
 
 -- SEED DATA
@@ -3173,3 +3190,31 @@ INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALU
 
 -- ===== PROMO CODES =====
 INSERT INTO `PromoCode` (PromoCodeID, Code, Active) VALUES ('985fd5bc-1c75-43e2-afa5-7d990e6cd728', 'AdriaNightHotel15', 1);
+
+-- ===== OCCUPATIONS =====
+INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('a1b2c3d4-1111-2222-3333-aaaaaaaaaaaa', 'Software Developer');
+INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('b2c3d4e5-2222-3333-4444-bbbbbbbbbbbb', 'Data Scientist');
+INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('c3d4e5f6-3333-4444-5555-cccccccccccc', 'Student');
+INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('d4e5f6g7-4444-5555-6666-dddddddddddd', 'Teacher');
+INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('e5f6g7h8-5555-6666-7777-eeeeeeeeeeee', 'Engineer');
+INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('f6g7h8i9-6666-7777-8888-ffffffffffff', 'Doctor');
+INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('07h8i9j0-7777-8888-9999-000000000000', 'Nurse');
+INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('18i9j0k1-8888-9999-aaaa-111111111111', 'Designer');
+INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('29j0k1l2-9999-aaaa-bbbb-222222222222', 'Entrepreneur');
+
+
+-- ===== INTERESTS =====
+
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('aa111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Hunting');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('bb222222-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'History');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('cc333333-cccc-cccc-cccc-cccccccccccc', 'Gaming');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('dd444444-dddd-dddd-dddd-dddddddddddd', 'Fitness');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('ee555555-eeee-eeee-eeee-eeeeeeeeeeee', 'Mining');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('ff666666-ffff-ffff-ffff-ffffffffffff', 'Art');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('11777777-1111-7777-7777-777777777777', 'Fishing');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('22888888-2222-8888-8888-888888888888', 'Nature');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('33999999-3333-9999-9999-999999999999', 'Music');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('44aaaaaa-4444-aaaa-aaaa-aaaaaaaaaaaa', 'Photography');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('55bbbbbb-5555-bbbb-bbbb-bbbbbbbbbbbb', 'Medicine');
+INSERT INTO `Interest` (`InterestID`, `InterestName`)VALUES ('66cccccc-6666-cccc-cccc-cccccccccccc', 'Survival');
+

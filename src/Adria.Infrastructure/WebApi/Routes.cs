@@ -145,6 +145,20 @@ public static class Routes
             .WithName(nameof(AddInterestsController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/PossibleOccupations", GetAllOccupationsController.Invoke)
+            .WithDescription("Get all possible occupations")
+            .WithName(nameof(GetAllOccupationsController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+        
+        userRoutes
+            .MapPost("/PossibleInterests", GetAllInterestsController.Invoke)
+            .WithDescription("Get all possible interests")
+            .WithName(nameof(GetAllInterestsController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)

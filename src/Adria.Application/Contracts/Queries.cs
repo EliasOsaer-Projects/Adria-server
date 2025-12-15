@@ -50,3 +50,13 @@ public interface IActivePromoCodesQuery
 {
     Task<IEnumerable<string>> Fetch();
 }
+
+public interface IAllOccupationsQuery
+{
+    Task<IReadOnlyCollection<OccupationData>> Fetch();
+}
+
+public interface IAllInterestsQuery
+{
+    Task<IReadOnlyCollection<InterestData>> Fetch();
+}
