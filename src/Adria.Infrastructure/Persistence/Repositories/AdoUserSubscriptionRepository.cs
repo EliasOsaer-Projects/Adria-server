@@ -17,7 +17,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
 
     private static readonly string TABLE_USER_SUBS = "UserSubscription";
     private static readonly string TABLE_USER = "User";
-    private static readonly string TABLE_SUB = "Subscriptions";
+    private static readonly string TABLE_SUB = "Subscription";
     private static readonly string COL_WALLET = "Wallet";
     private static readonly string COL_PRICE = "Price";
     private static readonly string COL_ID = "UserSubscriptionID";
