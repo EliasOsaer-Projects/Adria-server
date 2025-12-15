@@ -46,14 +46,10 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
 
     private static readonly string PAY_SUBSCRIPTION = $@"
       UPDATE {TABLE_USER} u
-      JOIN {TABLE_USER_SUBS} us
-        ON us.{COL_USER_ID} = u.{COL_USER_ID}
-      JOIN {TABLE_SUB} s
-        ON s.{COL_SUBS_ID} = us.{COL_SUBS_ID}
+      JOIN {TABLE_SUB} s ON s.{COL_SUBS_ID} = @SubsId
       SET u.{COL_WALLET} = u.{COL_WALLET} - s.{COL_PRICE}
       WHERE u.{COL_USER_ID} = @UserId
-        AND s.{COL_SUBS_ID} = @SubsId
-        AND u.{COL_WALLET} >= s.{COL_PRICE};
+      AND u.{COL_WALLET} >= s.{COL_PRICE};
       ";
 
     public AdoUserSubscriptionRepository(
@@ -67,24 +63,11 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         _subscriptionRepository = subscriptionRepository;
     }
 
-    public async void Payment(Guid userId, Guid subId)
+    public async Task Payment(Guid userId, Guid subId)
     {
         var param = CreateParameter("@UserId", userId.ToString());
         var param2 = CreateParameter("@SubsId", subId.ToString());
-        await using var reader = await ExecuteReaderAsync(PAY_SUBSCRIPTION, new[] { param, param2 });
-
-        try
-        {
-            _logger.LogInformation("Payment succedded");
-        }
-        catch (DbException ex)
-        {
-            throw new GenesisException($"DatabaseError:\n{ex}");
-        }
-        finally
-        {
-            await reader.DisposeAsync();
-        }
+        await ExecuteNonQueryAsync(PAY_SUBSCRIPTION, new[] { param, param2 });
     }
 
     public async Task<UserSubscription?> ById(Guid userId)
@@ -122,7 +105,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         var exists = await ById(user.AdriaId);
         var query = exists == null ? INSERT_SUBSCRIPTION : UPDATE_SUBSCRIPTION;
 
-        Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
+        await Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
 
         try
         {
