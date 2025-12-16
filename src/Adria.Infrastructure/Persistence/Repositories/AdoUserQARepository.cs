@@ -106,9 +106,9 @@ public class AdoUserQARepository
         return Guid.Empty;
     }
     
-    public async Task<int> GetProgress(Guid adriaId, Guid courseId)
+    public async Task<int> GetProgress(Guid userId, Guid courseId)
     {
-        DbParameter adriaIdParam = CreateParameter("@adriaId", adriaId);
+        DbParameter adriaIdParam = CreateParameter("@adriaId", userId);
         DbParameter courseIdParam = CreateParameter("@courseId", courseId);
     
         DbDataReader dbDataReader = await ExecuteReaderAsync(sql_calculateProgress, [adriaIdParam, courseIdParam]);
@@ -121,7 +121,7 @@ public class AdoUserQARepository
             
                 _logger.LogWarning(
                     "DEBUG PROGRESS: Correct={Correct}, Total={Total}, CourseId={CourseId}, UserId={UserId}",
-                    correctQuestions, totalQuestions, courseId, adriaId
+                    correctQuestions, totalQuestions, courseId, userId
                 );
             
                 if (totalQuestions == 0) return 0;
