@@ -61,49 +61,42 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
       set {COL_PROGRESS} = @amount
       where {COL_SUBS_ID} = @courseId and {COL_USER_ID} = @userId";
 
-    public async Task<UserCourse?> ById(Guid id, Guid courseId)
+    public async Task<UserCourse?> ById(Guid userId, Guid courseId)
     {
-        var param = CreateParameter("@userId", id);
+        var param = CreateParameter("@userId", userId);
         var param2 = CreateParameter("@courseId", courseId);
 
         await using var reader = await ExecuteReaderAsync(SELECT_COURSE_BY_USER_AND_COURSE_ID, [param, param2]);
 
         if (!await reader.ReadAsync())
             return null;
+        
+        var id = reader.GetGuid(reader.GetOrdinal(COL_USER_ID));
+        var chosenCourseId = reader.GetGuid(reader.GetOrdinal(COL_SUBS_ID));
+        var completion = reader.GetBoolean(reader.GetOrdinal(COL_COMPLETION));
+        var progress = reader.GetInt16(reader.GetOrdinal(COL_PROGRESS));
+        var startDate = reader.GetDateTime(reader.GetOrdinal(COL_START_DATE));
+        DateTime? endDate = await reader.IsDBNullAsync(reader.GetOrdinal(COL_END_DATE)) ? null : reader.GetDateTime(reader.GetOrdinal(COL_END_DATE));
 
-        try
-        {
-            var userId = reader.GetGuid(reader.GetOrdinal(COL_USER_ID));
-            var chosenCourseId = reader.GetGuid(reader.GetOrdinal(COL_SUBS_ID));
-            var completion = reader.GetBoolean(reader.GetOrdinal(COL_COMPLETION));
-            var progress = reader.GetInt16(reader.GetOrdinal(COL_PROGRESS));
-            var startDate = reader.GetDateTime(reader.GetOrdinal(COL_START_DATE));
-            DateTime? endDate = reader.IsDBNull(reader.GetOrdinal(COL_END_DATE)) ? null : reader.GetDateTime(reader.GetOrdinal(COL_END_DATE));
+        UserCourse userCourse = new(id, chosenCourseId, startDate, endDate, progress, completion);
 
-            UserCourse userCourse = new(userId, chosenCourseId, startDate, endDate, progress, completion);
-
-            return userCourse;
-        }
-        finally
-        {
-            await reader.DisposeAsync();
-        }
+        return userCourse;
     }
 
-    public async Task Save(UserCourse course, int progress)
+    public async Task Save(UserCourse userCourse, int progress)
     {
-        Console.WriteLine(course.ProgressPercentage);
+        Console.WriteLine(userCourse.ProgressPercentage);
         Console.WriteLine(progress);
-        UserCourse futureStatus = course;
+        UserCourse futureStatus = userCourse;
         futureStatus.UpdateProgress(progress);
-        var query = futureStatus.CompletionStatus == true ? UPDATE_COMPLETION : UPDATE_PROGRESS;
+        var query = futureStatus.CompletionStatus ? UPDATE_COMPLETION : UPDATE_PROGRESS;
 
         try
         {
             var parameters = new[]
             {
-              CreateParameter("@userId", course.AdriaId),
-              CreateParameter("@courseId", course.CourseId),
+              CreateParameter("@userId", userCourse.AdriaId),
+              CreateParameter("@courseId", userCourse.CourseId),
               CreateParameter("@amount", progress)
             };
 
@@ -112,7 +105,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         }
         catch (DbException ex)
         {
-            _logger.LogError(ex, "Failed to update for course for user {UserId}", course.AdriaId);
+            _logger.LogError(ex, "Failed to update for course for user {UserId}", userCourse.AdriaId);
             throw new AdriaDatabaseException("Failed to update course.", ex);
         }
     }
@@ -134,7 +127,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         catch (Exception e)
         {
             _logger.LogError(e, "Failed to save user course for user {UserId} and course {CourseId}", userId, courseId);
-            throw;
+            throw new GenesisException("Failed to save user course");
         }
     }
 
@@ -167,7 +160,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         catch (Exception e)
         {
             _logger.LogError(e, "Error mapping UserCourse for user {UserId} and course {CourseId}", userId, courseId);
-            throw;
+            throw new GenesisException("Error mapping UserCourse");
         }
     }
 }

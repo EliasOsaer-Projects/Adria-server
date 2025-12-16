@@ -8,11 +8,11 @@ namespace Adria.Application.Users;
 public class DeleteUserProfilePicture
     :IUseCase<Guid, Task>
 {
-    private readonly ILogger<UpdateUserProfilePicture> _logger;
+    private readonly ILogger<DeleteUserProfilePicture> _logger;
     private readonly IUserRepository _userRepository;
 
     public DeleteUserProfilePicture(
-        ILogger<UpdateUserProfilePicture> logger,
+        ILogger<DeleteUserProfilePicture> logger,
         IUserRepository userRepository
     )
     {
@@ -22,6 +22,7 @@ public class DeleteUserProfilePicture
     
     public async Task Execute(Guid userId)
     {
+        _logger.LogInformation("Deleting profile picture for user {UserId}", userId);
         User? user = await _userRepository.ById(userId)
                      ?? throw new ArgumentException($"User {userId} not found.");
         

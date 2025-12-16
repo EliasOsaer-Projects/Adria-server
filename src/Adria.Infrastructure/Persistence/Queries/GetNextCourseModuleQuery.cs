@@ -107,11 +107,11 @@ public sealed class GetNextCourseModuleQuery
         _logger = logger;
     }
     
-    public async Task<CourseModuleData?> Fetch(Guid courseId, Guid adriaId)
+    public async Task<CourseModuleData?> Fetch(Guid courseId, Guid userId)
 {
     _logger.LogInformation(
-        "Fetching next module for user {AdriaId} in course {CourseId}", 
-        adriaId, 
+        "Fetching next module for user {UserId} in course {CourseId}", 
+        userId, 
         courseId
     );
 
@@ -133,7 +133,7 @@ public sealed class GetNextCourseModuleQuery
         
         var adriaIdParam = command.CreateParameter();
         adriaIdParam.ParameterName = "@adriaId";
-        adriaIdParam.Value = adriaId.ToString();
+        adriaIdParam.Value = userId.ToString();
         command.Parameters.Add(adriaIdParam);
         
         var courseIdParam = command.CreateParameter();
@@ -159,7 +159,7 @@ public sealed class GetNextCourseModuleQuery
         
         var adriaIdParam = command.CreateParameter();
         adriaIdParam.ParameterName = "@adriaId";
-        adriaIdParam.Value = adriaId.ToString();
+        adriaIdParam.Value = userId.ToString();
         command.Parameters.Add(adriaIdParam);
         
         var courseIdParam = command.CreateParameter();
@@ -179,8 +179,8 @@ public sealed class GetNextCourseModuleQuery
     // Step 3: No modules left? Return null
     if (moduleId == null)
     {
-        _logger.LogInformation("No more modules to complete for user {AdriaId} in course {CourseId}", 
-            adriaId, courseId);
+        _logger.LogInformation("No more modules to complete for user {UserId} in course {CourseId}", 
+            userId, courseId);
         return null;
     }
 
@@ -201,7 +201,7 @@ public sealed class GetNextCourseModuleQuery
         {
             var adriaIdParam = command.CreateParameter();
             adriaIdParam.ParameterName = "@adriaId";
-            adriaIdParam.Value = adriaId.ToString();
+            adriaIdParam.Value = userId.ToString();
             command.Parameters.Add(adriaIdParam);
         }
 

@@ -29,7 +29,7 @@ public class DiscountByPromoCodeQuery : IDiscountByPromoCodeQuery
 
     public async Task<decimal> Fetch(string promoCode)
     {
-        _logger.LogInformation("Starting to Check if the promocode {promoCode} is correct and Fetching the discount",
+        _logger.LogInformation("Starting to Check if the promocode {PromoCode} is correct and Fetching the discount",
             promoCode);
 
         using var connection = _factory.CreateConnection()!;
@@ -48,13 +48,13 @@ public class DiscountByPromoCodeQuery : IDiscountByPromoCodeQuery
 
         if (!await reader.ReadAsync())
         {
-            _logger.LogInformation("Discount for PromoCode {promoCode} not found", promoCode);
+            _logger.LogInformation("Discount for PromoCode {PromoCode} not found", promoCode);
             return new decimal(0.00);
         }
         
         var result = reader.GetDecimal(reader.GetOrdinal("Discount"));
         
-        _logger.LogInformation("Discount for promocode {promoCode} found", promoCode);
+        _logger.LogInformation("Discount for promocode {PromoCode} found", promoCode);
         return result;
     }
 }
