@@ -26,6 +26,7 @@ public class CheckAnswer
     
     public async Task<Guid> Execute(CheckAnswerInput input)
     {
+        _logger.LogInformation("Checking answer");
         var correctAnswerId = await _userQARepository.Save(
                                                         input.UserId,
                                                         input.AnswerId,
