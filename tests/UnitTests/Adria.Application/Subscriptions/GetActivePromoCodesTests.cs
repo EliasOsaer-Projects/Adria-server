@@ -19,7 +19,7 @@ public class GetActivePromoCodesTests
         var result = await useCase.Execute();
         var list = result.ToList();
 
-        Assert.Equal(2, list.Count());
+        Assert.Equal(2, list.Count);
         Assert.Contains("TEST1", list);
         Assert.Contains("TEST2", list);
     }
