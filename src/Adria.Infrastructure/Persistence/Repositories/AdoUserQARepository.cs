@@ -143,8 +143,6 @@ public class AdoUserQARepository
     public async Task<Guid> Save(Guid userId, Guid aid, Guid qid)
     {
         DbParameter userIdParam = CreateParameter("@UserID", userId);
-        DbParameter answerIdParam = CreateParameter("@AnswerID", aid);
-        DbParameter questionIdParam = CreateParameter("@QuestionID", qid);
 
         var qaid = await GetQAID(qid, aid);
         bool correctlyAnswered = await GetCorrectAnswerId(qid) == aid;
