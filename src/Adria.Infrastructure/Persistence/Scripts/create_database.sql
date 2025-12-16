@@ -163,10 +163,9 @@ CREATE TABLE `CosmeticItem` (
 
 CREATE TABLE UserCosmeticItem (
     `AdriaID` VARCHAR(36) NOT NULL,
-    `CosmeticItemID` VARCHAR(36) PRIMARY KEY NOT NULL,
-    `ItemName` VARCHAR(100) NOT NULL,
-    `ItemType` VARCHAR(50) NOT NULL,
-
+    `CosmeticItemID` VARCHAR(36) NOT NULL,
+    `PurchaseDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
     FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE,
     FOREIGN KEY (`CosmeticItemID`) REFERENCES `CosmeticItem`(`CosmeticItemID`) ON DELETE CASCADE
 );

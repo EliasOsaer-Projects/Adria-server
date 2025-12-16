@@ -92,6 +92,14 @@ public static class PersistenceModule
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AdoUserQARepository>>()
                 );
+            })
+            .AddScoped<ICosmeticRepository, AdoCosmeticRepository>(serviceProvider =>
+            {
+                return new AdoCosmeticRepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoCosmeticRepository>>()
+                );
             });
     }
 

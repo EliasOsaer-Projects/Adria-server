@@ -210,8 +210,14 @@ public static class Routes
           .WithOpenApi();
 
         cosmeticRoute.MapGet("/all-cosmetics/{userId}", AllCosmeticsController.Invoke)
-          .WithDescription("Query for all cosmetics")
+          .WithDescription("Gets all cosmetics available")
           .WithName(nameof(AllCosmeticsController))
+          .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+          .WithOpenApi();
+        
+        cosmeticRoute.MapPost("/purchase/{cosmeticId}/{userId}", PurchaseCosmeticController.Invoke)
+          .WithDescription("Purchase a cosmetic for a user")
+          .WithName(nameof(PurchaseCosmeticController))
           .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
           .WithOpenApi();
     }
