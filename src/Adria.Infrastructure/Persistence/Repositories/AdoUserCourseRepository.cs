@@ -83,11 +83,11 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         return userCourse;
     }
 
-    public async Task Save(UserCourse course, int progress)
+    public async Task Save(UserCourse userCourse, int progress)
     {
-        Console.WriteLine(course.ProgressPercentage);
+        Console.WriteLine(userCourse.ProgressPercentage);
         Console.WriteLine(progress);
-        UserCourse futureStatus = course;
+        UserCourse futureStatus = userCourse;
         futureStatus.UpdateProgress(progress);
         var query = futureStatus.CompletionStatus == true ? UPDATE_COMPLETION : UPDATE_PROGRESS;
 
@@ -95,8 +95,8 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         {
             var parameters = new[]
             {
-              CreateParameter("@userId", course.AdriaId),
-              CreateParameter("@courseId", course.CourseId),
+              CreateParameter("@userId", userCourse.AdriaId),
+              CreateParameter("@courseId", userCourse.CourseId),
               CreateParameter("@amount", progress)
             };
 
@@ -105,7 +105,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         }
         catch (DbException ex)
         {
-            _logger.LogError(ex, "Failed to update for course for user {UserId}", course.AdriaId);
+            _logger.LogError(ex, "Failed to update for course for user {UserId}", userCourse.AdriaId);
             throw new AdriaDatabaseException("Failed to update course.", ex);
         }
     }
