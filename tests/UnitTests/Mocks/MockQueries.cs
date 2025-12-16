@@ -200,3 +200,19 @@ public class MockAllCosmeticsQuery : IAllCosmeticsQuery
         _cosmeticItems.Add(item);
     }
 }
+
+public class MockGetNextCourseModuleQuery : IGetNextCourseModuleQuery
+{
+    private readonly Dictionary<(Guid courseId, Guid userId), CourseModuleData> _modules = new();
+
+    public Task<CourseModuleData?> Fetch(Guid courseId, Guid userId)
+    {
+        _modules.TryGetValue((courseId, userId), out var module);
+        return Task.FromResult(module);
+    }
+
+    public void AddModule(Guid courseId, Guid userId, CourseModuleData module)
+    {
+        _modules[(courseId, userId)] = module;
+    }
+}
