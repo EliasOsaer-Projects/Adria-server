@@ -64,7 +64,7 @@ public class SubscriptionCheckService : BackgroundService
         {
             try
             {
-                // Check if 30 days have passed since last run
+                // Check if day has passed since last run.
                 if (_lastCheck < DateTime.Today)
                 {
                     await _checker.Check(); // running our query.
