@@ -89,7 +89,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         Console.WriteLine(progress);
         UserCourse futureStatus = userCourse;
         futureStatus.UpdateProgress(progress);
-        var query = futureStatus.CompletionStatus == true ? UPDATE_COMPLETION : UPDATE_PROGRESS;
+        var query = futureStatus.CompletionStatus ? UPDATE_COMPLETION : UPDATE_PROGRESS;
 
         try
         {
