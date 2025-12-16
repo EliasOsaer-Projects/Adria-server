@@ -119,17 +119,10 @@ public class AdoUserQARepository
                 int totalQuestions = dbDataReader.GetInt32(0);
                 int correctQuestions = dbDataReader.GetInt32(1);
             
-                _logger.LogWarning(
-                    "DEBUG PROGRESS: Correct={Correct}, Total={Total}, CourseId={CourseId}, UserId={UserId}",
-                    correctQuestions, totalQuestions, courseId, userId
-                );
-            
                 if (totalQuestions == 0) return 0;
             
                 var progress = (int)Math.Round((double)correctQuestions / totalQuestions * 100);
-            
-                _logger.LogWarning("DEBUG PROGRESS: Calculated={Progress}%", progress);
-            
+                
                 return progress;
             }
         }
