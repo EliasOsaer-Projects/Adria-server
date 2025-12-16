@@ -11,8 +11,8 @@ public sealed record AddProgressToCourseInput(Guid userId, Guid courseId, int pr
 
 public sealed class AddProgressToCourse : IUseCase<AddProgressToCourseInput, Task>
 {
-    IUserCourseRepository _userCourseRepository;
-    ILogger<AddProgressToCourse> _logger;
+    private readonly IUserCourseRepository _userCourseRepository;
+    private readonly ILogger<AddProgressToCourse> _logger;
 
     public AddProgressToCourse(IUserCourseRepository userCourse, ILogger<AddProgressToCourse> logger)
     {
