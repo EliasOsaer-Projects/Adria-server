@@ -24,7 +24,7 @@ public sealed class AddProgressToCourse : IUseCase<AddProgressToCourseInput, Tas
     {
         UserCourse? userCourse = (await _userCourseRepository.ById(input.userId, input.courseId)) ?? throw new ElementNotFoundException($"userCourse with id {input.courseId} not found");
 
-        _logger.LogInformation("vhanging data");
+        _logger.LogInformation("changing data");
         await _userCourseRepository.Save(userCourse, input.progress);
     }
 }
