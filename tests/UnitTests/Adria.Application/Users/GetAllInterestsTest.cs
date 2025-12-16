@@ -20,7 +20,7 @@ public class GetAllInterestsTest
         var result = await useCase.Execute();
         var list = result.ToList();
 
-        Assert.Equal(3, list.Count());
+        Assert.Equal(3, list.Count);
         Assert.Contains(new InterestData("gaming"), list);
         Assert.Contains(new InterestData("hunting"), list);
         Assert.Contains(new InterestData("mining"), list);
