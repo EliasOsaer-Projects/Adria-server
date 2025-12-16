@@ -250,10 +250,52 @@ public static class PersistenceModule
 
         SeedCoverAndBannerImages(connection);
         SeedProfilePictures(connection);
+        SeedCosmetics(connection);
 
         return app;
     }
+    
+    private static void SeedCosmetics(DbConnection connection)
+    {
+        var cosmetics = new List<string>();
+        using (DbCommand selectCmd = connection.CreateCommand())
+        {
+            selectCmd.CommandText = "SELECT ItemName FROM CosmeticItem";
+            using (var reader = selectCmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    cosmetics.Add(reader.GetString(0));
+                }
+            }
+        }
 
+        foreach (var cosmetic in cosmetics)
+        {
+            Console.WriteLine($"Cosmetic {cosmetic}");
+
+            string imgPath = Path.Combine(
+                AppContext.BaseDirectory,
+                "Persistence/Scripts/SeedImages/Cosmetics",
+                $"{cosmetic}.png"
+            );
+
+            using (var imageCommand = connection.CreateCommand())
+            {
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@name", cosmetic));
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@img", File.ReadAllBytes(imgPath)));
+
+                imageCommand.CommandText = @"
+                    UPDATE CosmeticItem 
+                    SET CosmeticImage = @img
+                    WHERE ItemName = @name                
+                ";
+
+                imageCommand.ExecuteNonQuery();
+            }
+        }
+    }
+    
     private static void SeedProfilePictures(DbConnection connection)
     {
         var users = new List<(string AdriaID, string Name)>();
