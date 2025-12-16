@@ -7,7 +7,7 @@ public class MockUserRepository : IUserRepository
 {
     private readonly Dictionary<Guid, User> _users = new();
 
-    public Task<User> ById(Guid adriaId)
+    public Task<User?> ById(Guid adriaId)
     {
         _users.TryGetValue(adriaId, out User? user);
         return Task.FromResult(user);
@@ -23,7 +23,7 @@ public class MockUserRepository : IUserRepository
     {
         _users[user.AdriaId] = user;
         return Task.CompletedTask;
-    }//Ben niet zeker of dit hier zo moet maar heb het hier gewoon gezet zodat alles nog werkte.
+    }
 
     public Task SaveInterests(User user)
     {
