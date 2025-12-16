@@ -24,6 +24,7 @@ public class UpdateUserProfilePicture
     
     public async Task Execute(UpdateUserProfilePictureInput input)
     {
+        _logger.LogInformation("Updating user profile picture");
         User? user = await _userRepository.ById(input.UserId)
             ?? throw new ArgumentException($"User {input.UserId} not found.");
 

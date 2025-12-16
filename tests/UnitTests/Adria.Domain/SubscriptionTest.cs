@@ -1,5 +1,4 @@
-﻿using Adria.Application.Contracts.Data;
-using Adria.Domain;
+﻿using Adria.Domain;
 
 namespace UnitTests.Adria.Domain;
 

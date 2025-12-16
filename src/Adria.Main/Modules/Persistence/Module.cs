@@ -244,10 +244,6 @@ public static class PersistenceModule
         command.CommandText = File.ReadAllText(scriptPath);
         command.ExecuteNonQuery();
 
-        //There would be something called SeedImages, I don't know if it important.
-        //SeedImages(connection);
-
-
         SeedCoverAndBannerImages(connection);
         SeedProfilePictures(connection);
 

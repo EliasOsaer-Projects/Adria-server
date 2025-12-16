@@ -1,6 +1,5 @@
 ﻿using Adria.Application.Contracts.Data;
 using Adria.Application.Users;
-using Adria.Domain;
 using Adria.Domain.Shared.Exceptions;
 using UnitTests.Mocks;
 

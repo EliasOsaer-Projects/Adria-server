@@ -1,8 +1,6 @@
 ﻿using Adria.Application.Contracts.Data;
 using Adria.Application.Users;
-using Adria.Domain;
 using UnitTests.Mocks;
-using Xunit.Sdk;
 
 namespace UnitTests.Adria.Application.Users;
 

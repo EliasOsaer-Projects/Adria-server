@@ -21,6 +21,8 @@ public class AllCosmeticsQuery : IAllCosmeticsQuery
 
     public async Task<IReadOnlyCollection<CosmeticItemData>> Fetch()
     {
+        _logger.LogInformation("Fetching all cosmetics");
+        
         using var connection = _factory.CreateConnection() ?? throw new InvalidOperationException("DbProviderFactory provided a null connection string");
 
         connection.ConnectionString = _connectionString;
@@ -50,11 +52,5 @@ public class AllCosmeticsQuery : IAllCosmeticsQuery
             }
             return data.AsReadOnly();
         }
-
-
-
-
-
     }
-
 }

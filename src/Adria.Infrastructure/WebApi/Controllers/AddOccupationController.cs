@@ -8,6 +8,7 @@ namespace Adria.Infrastructure.WebApi.Controllers;
 
 public class AddOccupationController
 {
+    private AddOccupationController(){}
     public static async Task<IResult> Invoke(
         [FromRoute] Guid userId,
         [FromRoute] string? occupation,
