@@ -11,16 +11,17 @@ public sealed class CheckValidSubscription
 {
     private static readonly string DEACTIVATE_USERSUBSCRIPTION = @"Update UserSubscription
     SET Status = 'Inactive'
-    Where Enddate < CURDATE() + INTERVAL 31 DAY
+    Where Enddate < CURDATE()
     AND Status = 'Active'";
 
-    private static readonly string MONTLHY_PAYMENT = @"UPDATE User u
+    private static readonly string MONTHLY_PAYMENT = @"UPDATE User u
     JOIN UserSubscription us ON u.AdriaID = us.AdriaID
     JOIN Subscription s ON s.SubscriptionID = us.SubscriptionID
     SET u.Wallet = u.Wallet - s.Price,
       us.EndDate = DATE_ADD(us.EndDate, INTERVAL 1 MONTH)
     WHERE us.Status = 'Active'
-      AND us.EndDate <= CURDATE()";
+      AND u.Wallet >= s.Price
+      AND us.EndDate <= CURDATE();";
 
     private readonly IConfiguration _configuration;
     private readonly string _conn;
@@ -42,10 +43,9 @@ public sealed class CheckValidSubscription
 
         try
         {
-
             await using var command = conn.CreateCommand();
             command.Transaction = tran;
-            command.CommandText = MONTLHY_PAYMENT;
+            command.CommandText = MONTHLY_PAYMENT;
             await command.ExecuteNonQueryAsync();
 
             await using var command2 = conn.CreateCommand();
@@ -88,7 +88,7 @@ public class SubscriptionCheckService : BackgroundService
             try
             {
                 // Check if day has passed since last run
-                if (_lastCheck == DateTime.MinValue || (DateTime.UtcNow - _lastCheck).TotalSeconds >= 30)
+                if (_lastCheck < DateTime.UtcNow.Date)
                 {
                     await _checker.Check(); // running our query.
                     _lastCheck = DateTime.UtcNow;
@@ -100,7 +100,7 @@ public class SubscriptionCheckService : BackgroundService
             }
 
             // Sleep for a shorter interval, e.g., 1 day
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
         }
     }
 }
