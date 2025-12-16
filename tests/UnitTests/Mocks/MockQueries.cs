@@ -1,7 +1,5 @@
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
-using Adria.Application.Subscriptions;
-using Adria.Domain;
 
 namespace UnitTests.Mocks;
 

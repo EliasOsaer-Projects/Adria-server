@@ -1,7 +1,4 @@
-﻿using System;
-using Xunit;
-using Adria.Domain;
-using Adria.Domain.Shared.Exceptions;
+﻿using Adria.Domain;
 
 namespace UnitTests.Adria.Domain
 {

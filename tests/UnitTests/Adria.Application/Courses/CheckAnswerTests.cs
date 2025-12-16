@@ -1,10 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using Xunit;
-using Adria.Application.Courses;
+﻿using Adria.Application.Courses;
 using Adria.Domain;
 using UnitTests.Mocks;
-using Adria.Domain.Shared.Exceptions;
 
 namespace UnitTests.Adria.Application.Courses
 {

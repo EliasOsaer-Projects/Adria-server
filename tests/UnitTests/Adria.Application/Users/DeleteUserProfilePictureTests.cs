@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Xunit;
-using Adria.Application.Users;
+﻿using Adria.Application.Users;
 using Adria.Domain;
 using UnitTests.Mocks;
 using Microsoft.Extensions.Logging.Abstractions;

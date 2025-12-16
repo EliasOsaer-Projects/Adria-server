@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Adria.Domain;
+﻿using Adria.Domain;
 
 namespace UnitTests.Mocks
 {

@@ -1,7 +1,5 @@
-﻿using Adria.Application.Subscriptions;
-using Adria.Application.Users;
+﻿using Adria.Application.Users;
 using Adria.Domain;
-using Adria.Domain.Users;
 using UnitTests.Mocks;
 
 namespace UnitTests.Adria.Application.Subscriptions;

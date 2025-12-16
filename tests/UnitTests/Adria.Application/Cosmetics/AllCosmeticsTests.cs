@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Microsoft.Extensions.Logging;
-using Adria.Application;
-using Adria.Application.Contracts;
+﻿using Adria.Application;
 using Adria.Application.Contracts.Data;
 using UnitTests.Mocks;
 

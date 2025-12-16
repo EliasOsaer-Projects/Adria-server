@@ -1,5 +1,4 @@
-﻿using Adria.Application.Courses;
-using Adria.Application.Users;
+﻿using Adria.Application.Users;
 using Adria.Domain;
 using UnitTests.Mocks;
 
