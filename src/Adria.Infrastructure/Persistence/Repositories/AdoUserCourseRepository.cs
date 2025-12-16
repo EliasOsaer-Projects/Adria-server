@@ -127,7 +127,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         catch (Exception e)
         {
             _logger.LogError(e, "Failed to save user course for user {UserId} and course {CourseId}", userId, courseId);
-            throw;
+            throw new GenesisException("Failed to save user course");
         }
     }
 
@@ -160,7 +160,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
         catch (Exception e)
         {
             _logger.LogError(e, "Error mapping UserCourse for user {UserId} and course {CourseId}", userId, courseId);
-            throw;
+            throw new GenesisException("Error mapping UserCourse");
         }
     }
 }
