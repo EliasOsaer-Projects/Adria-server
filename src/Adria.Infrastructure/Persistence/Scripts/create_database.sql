@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `PromoCode`;
 DROP TABLE IF EXISTS `Occupation`;
 DROP TABLE IF EXISTS `Interest`;
+DROP TABLE IF EXISTS `PushSubscriptions`;
 
 
 /* CREATE TABLES */
@@ -199,6 +200,12 @@ CREATE TABLE `Occupation` (
 CREATE TABLE `Interest` (
 `InterestID` VARCHAR(36) PRIMARY KEY NOT NULL,
 `InterestName` VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE `PushSubscriptions` (
+    `Endpoint` VARCHAR(512) PRIMARY KEY NOT NULL,
+    `P256dh` VARCHAR(255) NOT NULL,
+    `Auth` VARCHAR(255) NOT NULL
 );
 
 -- SEED DATA

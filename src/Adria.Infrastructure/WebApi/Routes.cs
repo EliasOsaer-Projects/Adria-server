@@ -28,6 +28,7 @@ public static class Routes
         MapSubscriptionRoutes(app);
         MapCourseRoutes(app);
         MapCosmeticRoutes(app);
+        MapPushRoutes(app);
 
         return app;
     }
@@ -197,6 +198,22 @@ public static class Routes
             .WithDescription("Get the discount for a promo code")
             .WithName(nameof(GetDiscountByPromoCodeController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+    }
+
+    private static void MapPushRoutes(WebApplication app)
+    {
+        var pushRoutes = app
+            .MapGroup("api/push")
+            .WithTags("Push Notifications")
+            .WithDescription("Endpoints for push subscription management")
+            .WithOpenApi();
+
+        pushRoutes
+            .MapPost("/subscribe", PushSubscriptionController.Invoke)
+            .WithDescription("Register a browser push subscription")
+            .WithName(nameof(PushSubscriptionController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
     }
 

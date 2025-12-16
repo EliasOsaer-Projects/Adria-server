@@ -5,6 +5,7 @@ using Adria.Application.Courses;
 using Adria.Application.Users;
 using Adria.Application.Subscriptions;
 using Mysqlx.Crud;
+using Adria.Application.PushNotifications;
 
 namespace Adria.Main.Modules.UseCases;
 
@@ -40,6 +41,8 @@ public static class UseCases
             .AddScoped<IUseCase<Task<IEnumerable<string>>>, GetActivePromoCodes>()
 
             .AddScoped<IUseCase<GetDiscountByPromoCodeInput, Task<decimal>>, GetDiscountByPromoCode>()
+
+            .AddScoped<IUseCase<SubscribeToPushNotificationsInput, Task>, SubscribeToPushNotifications>()
 
             
             .AddScoped<IUseCase<Task<IReadOnlyCollection<OccupationData>>>, GetAllOccupations>()
