@@ -8,11 +8,11 @@ namespace Adria.Application.Users;
 public class DeleteUserProfilePicture
     :IUseCase<Guid, Task>
 {
-    private readonly ILogger<UpdateUserProfilePicture> _logger;
+    private readonly ILogger<DeleteUserProfilePicture> _logger;
     private readonly IUserRepository _userRepository;
 
     public DeleteUserProfilePicture(
-        ILogger<UpdateUserProfilePicture> logger,
+        ILogger<DeleteUserProfilePicture> logger,
         IUserRepository userRepository
     )
     {
