@@ -1,5 +1,6 @@
 ﻿using Taskly.Infrastructure.Persistence.Shared;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
 using System.Data.Common;
@@ -11,7 +12,7 @@ public sealed class CheckValidSubscription
     private static readonly string _query = @"Update UserSubscription
     SET Status = 'Inactive'
     Where Enddate < CURDATE()
-    AND Status = 'Active";
+    AND Status = 'Active'";
 
     private readonly IConfiguration _configuration;
     private readonly string _conn;
@@ -44,13 +45,17 @@ public sealed class CheckValidSubscription
 public class SubscriptionCheckService : BackgroundService
 {
     private readonly CheckValidSubscription _checker;
+    private readonly ILogger<SubscriptionCheckService> _logger;
 
     // Tracks when the last check happened
     private DateTime _lastCheck = DateTime.MinValue;
 
-    public SubscriptionCheckService(CheckValidSubscription checker)
+
+    public SubscriptionCheckService(CheckValidSubscription checker, ILogger<SubscriptionCheckService> logger)
     {
         _checker = checker;
+        _logger = logger;
+
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -60,7 +65,7 @@ public class SubscriptionCheckService : BackgroundService
             try
             {
                 // Check if 30 days have passed since last run
-                if (_lastCheck == DateTime.MinValue || (DateTime.UtcNow - _lastCheck).TotalDays >= 1)
+                if (_lastCheck < DateTime.Today)
                 {
                     await _checker.Check(); // running our query.
                     _lastCheck = DateTime.UtcNow;
@@ -68,7 +73,7 @@ public class SubscriptionCheckService : BackgroundService
             }
             catch (Exception ex)
             {
-                throw new AdriaDatabaseException($"Error in subscription check: {ex.Message}", ex);
+                _logger.LogWarning(ex, "Error occurd during subscription check");
             }
 
             // Sleep for a shorter interval, e.g., 1 day

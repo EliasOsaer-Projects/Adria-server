@@ -12,6 +12,8 @@ builder
         .AddWebApiModule(configuration)
         .AddUseCases();
 
+//Added service for SubscriptionCheckService.
+//ILogger get automaticly added.
 builder
     .Services
         .AddSingleton<CheckValidSubscription>();
