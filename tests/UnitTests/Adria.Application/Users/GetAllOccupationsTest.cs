@@ -20,7 +20,7 @@ public class GetAllOccupationsTest
         var result = await useCase.Execute();
         var list = result.ToList();
 
-        Assert.Equal(3, list.Count());
+        Assert.Equal(3, list.Count);
         Assert.Contains(new OccupationData("cop"), list);
         Assert.Contains(new OccupationData("chef"), list);
         Assert.Contains(new OccupationData("surgeon"), list);
