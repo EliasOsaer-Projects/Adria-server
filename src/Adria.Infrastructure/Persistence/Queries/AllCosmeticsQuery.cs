@@ -1,6 +1,7 @@
 ﻿using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
 using System.Data.Common;
+using Adria.Domain.Shared.Helpers;
 using Microsoft.Extensions.Logging;
 namespace Adria.Infrastructure;
 
@@ -40,21 +41,18 @@ public class AllCosmeticsQuery : IAllCosmeticsQuery
                 var name = reader.GetOrdinal("ItemName");
                 var type = reader.GetOrdinal("ItemType");
                 var points = reader.GetOrdinal("PointsCost");
+                var image = await Helper.ReadBlobAsync(reader, reader.GetOrdinal("CosmeticImage"));
 
                 data.Add(new CosmeticItemData(
                     reader.GetGuid(id),
                     reader.GetString(name),
                     reader.GetString(type),
-                    reader.GetDecimal(points)
+                    reader.GetDecimal(points),
+                    image
                     ));
             }
             return data.AsReadOnly();
         }
-
-
-
-
-
     }
 
 }

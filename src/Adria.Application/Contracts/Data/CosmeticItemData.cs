@@ -5,6 +5,7 @@ public sealed record CosmeticItemData(
     Guid cosmeticId,
     string itemName,
     string itemType,
-    decimal points
+    decimal points,
+    byte[] image
 );
 

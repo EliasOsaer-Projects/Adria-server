@@ -10,6 +10,7 @@ namespace Adria.Infrastructure;
 public class AllCosmeticsController
 {
     public static async Task<Results<Ok<List<CosmeticItemData>>, NotFound>> Invoke(
+        [FromRoute] Guid userId,
         [FromServices] IUseCase<Task<IReadOnlyCollection<CosmeticItemData>>> AllCosmetics
     )
     {

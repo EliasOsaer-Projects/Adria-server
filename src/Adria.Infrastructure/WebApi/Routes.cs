@@ -209,7 +209,7 @@ public static class Routes
           .WithDescription("All endpoints to cosmetics")
           .WithOpenApi();
 
-        cosmeticRoute.MapGet("/all-cosmetics", AllCosmeticsController.Invoke)
+        cosmeticRoute.MapGet("/all-cosmetics/{userId}", AllCosmeticsController.Invoke)
           .WithDescription("Query for all cosmetics")
           .WithName(nameof(AllCosmeticsController))
           .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
