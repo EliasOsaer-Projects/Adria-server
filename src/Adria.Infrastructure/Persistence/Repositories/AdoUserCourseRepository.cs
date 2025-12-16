@@ -61,9 +61,9 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
       set {COL_PROGRESS} = @amount
       where {COL_SUBS_ID} = @courseId and {COL_USER_ID} = @userId";
 
-    public async Task<UserCourse?> ById(Guid id, Guid courseId)
+    public async Task<UserCourse?> ById(Guid userId, Guid courseId)
     {
-        var param = CreateParameter("@userId", id);
+        var param = CreateParameter("@userId", userId);
         var param2 = CreateParameter("@courseId", courseId);
 
         await using var reader = await ExecuteReaderAsync(SELECT_COURSE_BY_USER_AND_COURSE_ID, [param, param2]);
@@ -73,14 +73,14 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
         try
         {
-            var userId = reader.GetGuid(reader.GetOrdinal(COL_USER_ID));
+            var id = reader.GetGuid(reader.GetOrdinal(COL_USER_ID));
             var chosenCourseId = reader.GetGuid(reader.GetOrdinal(COL_SUBS_ID));
             var completion = reader.GetBoolean(reader.GetOrdinal(COL_COMPLETION));
             var progress = reader.GetInt16(reader.GetOrdinal(COL_PROGRESS));
             var startDate = reader.GetDateTime(reader.GetOrdinal(COL_START_DATE));
             DateTime? endDate = reader.IsDBNull(reader.GetOrdinal(COL_END_DATE)) ? null : reader.GetDateTime(reader.GetOrdinal(COL_END_DATE));
 
-            UserCourse userCourse = new(userId, chosenCourseId, startDate, endDate, progress, completion);
+            UserCourse userCourse = new(id, chosenCourseId, startDate, endDate, progress, completion);
 
             return userCourse;
         }
