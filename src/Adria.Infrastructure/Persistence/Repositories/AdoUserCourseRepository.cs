@@ -78,7 +78,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
             var completion = reader.GetBoolean(reader.GetOrdinal(COL_COMPLETION));
             var progress = reader.GetInt16(reader.GetOrdinal(COL_PROGRESS));
             var startDate = reader.GetDateTime(reader.GetOrdinal(COL_START_DATE));
-            DateTime? endDate = reader.IsDBNull(reader.GetOrdinal(COL_END_DATE)) ? null : reader.GetDateTime(reader.GetOrdinal(COL_END_DATE));
+            DateTime? endDate = await reader.IsDBNullAsync(reader.GetOrdinal(COL_END_DATE)) ? null : reader.GetDateTime(reader.GetOrdinal(COL_END_DATE));
 
             UserCourse userCourse = new(id, chosenCourseId, startDate, endDate, progress, completion);
 
