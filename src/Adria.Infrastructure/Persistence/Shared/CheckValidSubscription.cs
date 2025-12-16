@@ -11,7 +11,7 @@ public sealed class CheckValidSubscription
     private static readonly string _query = @"Update UserSubscription
     SET Status = 'Inactive'
     Where Enddate < CURDATE()
-    AND Status = 'Active'";
+    AND Status = 'Active";
 
     private readonly IConfiguration _configuration;
     private readonly string _conn;
@@ -60,7 +60,7 @@ public class SubscriptionCheckService : BackgroundService
             try
             {
                 // Check if 30 days have passed since last run
-                if (_lastCheck == DateTime.MinValue || (DateTime.UtcNow - _lastCheck).TotalSeconds >= 10)
+                if (_lastCheck == DateTime.MinValue || (DateTime.UtcNow - _lastCheck).TotalDays >= 1)
                 {
                     await _checker.Check(); // running our query.
                     _lastCheck = DateTime.UtcNow;
@@ -72,7 +72,7 @@ public class SubscriptionCheckService : BackgroundService
             }
 
             // Sleep for a shorter interval, e.g., 1 day
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
         }
     }
 }
