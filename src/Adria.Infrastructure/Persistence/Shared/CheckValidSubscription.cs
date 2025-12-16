@@ -9,10 +9,18 @@ namespace Adria.Infrastructure;
 
 public sealed class CheckValidSubscription
 {
-    private static readonly string _query = @"Update UserSubscription
+    private static readonly string DEACTIVATE_USERSUBSCRIPTION = @"Update UserSubscription
     SET Status = 'Inactive'
-    Where Enddate < CURDATE()
+    Where Enddate < CURDATE() + INTERVAL 31 DAY
     AND Status = 'Active'";
+
+    private static readonly string MONTLHY_PAYMENT = @"UPDATE User u
+    JOIN UserSubscription us ON u.AdriaID = us.AdriaID
+    JOIN Subscription s ON s.SubscriptionID = us.SubscriptionID
+    SET u.Wallet = u.Wallet - s.Price,
+      us.EndDate = DATE_ADD(us.EndDate, INTERVAL 1 MONTH)
+    WHERE us.Status = 'Active'
+      AND us.EndDate <= CURDATE()";
 
     private readonly IConfiguration _configuration;
     private readonly string _conn;
@@ -26,17 +34,32 @@ public sealed class CheckValidSubscription
 
     public async Task Check()
     {
+        await using var conn = new MySqlConnection(_conn);
+        await conn.OpenAsync();
+        //All changes in here first
+        //Think of this as a apart database of sorts
+        await using var tran = await conn.BeginTransactionAsync();
+
         try
         {
-            await using var conn = new MySqlConnection(_conn);
-            await conn.OpenAsync();
 
             await using var command = conn.CreateCommand();
-            command.CommandText = _query;
+            command.Transaction = tran;
+            command.CommandText = MONTLHY_PAYMENT;
             await command.ExecuteNonQueryAsync();
+
+            await using var command2 = conn.CreateCommand();
+            command2.Transaction = tran;
+            command2.CommandText = DEACTIVATE_USERSUBSCRIPTION;
+            await command2.ExecuteNonQueryAsync();
+
+            //If everything succeed it is committed to the "real" database.
+            await tran.CommitAsync();
         }
         catch (DbException ex)
         {
+            //If one fails reset everything and no changes.
+            await tran.RollbackAsync();
             throw new AdriaDatabaseException("We got a database error", ex);
         }
     }
@@ -64,8 +87,8 @@ public class SubscriptionCheckService : BackgroundService
         {
             try
             {
-                // Check if day has passed since last run.
-                if (_lastCheck < DateTime.Today)
+                // Check if day has passed since last run
+                if (_lastCheck == DateTime.MinValue || (DateTime.UtcNow - _lastCheck).TotalSeconds >= 30)
                 {
                     await _checker.Check(); // running our query.
                     _lastCheck = DateTime.UtcNow;
@@ -77,7 +100,7 @@ public class SubscriptionCheckService : BackgroundService
             }
 
             // Sleep for a shorter interval, e.g., 1 day
-            await Task.Delay(TimeSpan.FromDays(1), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
         }
     }
 }
