@@ -22,6 +22,7 @@ public class DeleteUserProfilePicture
     
     public async Task Execute(Guid userId)
     {
+        _logger.LogInformation("Deleting profile picture for user {UserId}", userId);
         User? user = await _userRepository.ById(userId)
                      ?? throw new ArgumentException($"User {userId} not found.");
         
