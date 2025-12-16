@@ -70,24 +70,17 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
         if (!await reader.ReadAsync())
             return null;
+        
+        var id = reader.GetGuid(reader.GetOrdinal(COL_USER_ID));
+        var chosenCourseId = reader.GetGuid(reader.GetOrdinal(COL_SUBS_ID));
+        var completion = reader.GetBoolean(reader.GetOrdinal(COL_COMPLETION));
+        var progress = reader.GetInt16(reader.GetOrdinal(COL_PROGRESS));
+        var startDate = reader.GetDateTime(reader.GetOrdinal(COL_START_DATE));
+        DateTime? endDate = await reader.IsDBNullAsync(reader.GetOrdinal(COL_END_DATE)) ? null : reader.GetDateTime(reader.GetOrdinal(COL_END_DATE));
 
-        try
-        {
-            var id = reader.GetGuid(reader.GetOrdinal(COL_USER_ID));
-            var chosenCourseId = reader.GetGuid(reader.GetOrdinal(COL_SUBS_ID));
-            var completion = reader.GetBoolean(reader.GetOrdinal(COL_COMPLETION));
-            var progress = reader.GetInt16(reader.GetOrdinal(COL_PROGRESS));
-            var startDate = reader.GetDateTime(reader.GetOrdinal(COL_START_DATE));
-            DateTime? endDate = await reader.IsDBNullAsync(reader.GetOrdinal(COL_END_DATE)) ? null : reader.GetDateTime(reader.GetOrdinal(COL_END_DATE));
+        UserCourse userCourse = new(id, chosenCourseId, startDate, endDate, progress, completion);
 
-            UserCourse userCourse = new(id, chosenCourseId, startDate, endDate, progress, completion);
-
-            return userCourse;
-        }
-        finally
-        {
-            await reader.DisposeAsync();
-        }
+        return userCourse;
     }
 
     public async Task Save(UserCourse course, int progress)
