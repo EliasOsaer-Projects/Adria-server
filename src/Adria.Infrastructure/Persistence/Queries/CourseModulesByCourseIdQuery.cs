@@ -79,8 +79,7 @@ public sealed class CourseModulesByCourseIdQuery : ICourseModulesByCourseIdQuery
                 {
                     answers.Add(new QuestionAnswerData(
                         AnswerId: reader.GetGuid(reader.GetOrdinal("AnswerID")),
-                        Answer: reader.GetString(reader.GetOrdinal("Answer")),
-                        IsCorrect: reader.GetBoolean(reader.GetOrdinal("IsCorrect"))
+                        Answer: reader.GetString(reader.GetOrdinal("Answer"))
                     ));
                 }
 

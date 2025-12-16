@@ -84,6 +84,14 @@ public static class PersistenceModule
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AdoUserRepository>>()
                 );
+            })
+            .AddScoped<IUserQARepository, AdoUserQARepository>(serviceProvider =>
+            {
+                return new AdoUserQARepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoUserQARepository>>()
+                );
             });
     }
 
@@ -181,6 +189,14 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AllInterestsQuery>>()
+                );
+            })
+            .AddScoped<IGetNextCourseModuleQuery, GetNextCourseModuleQuery>(serviceProvider =>
+            {
+                return new GetNextCourseModuleQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<GetNextCourseModuleQuery>>()
                 );
             })
             .AddScoped<IDiscountByPromoCodeQuery, DiscountByPromoCodeQuery>(serviceProvider =>

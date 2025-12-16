@@ -15,7 +15,8 @@ public static class UseCases
         return services
             .AddScoped<IUseCase<SearchSubscriptionTypeByIdInput, Task<SubscriptionData>>, SearchSubscriptionTypeById>()
             .AddScoped<IUseCase<Task<IReadOnlyCollection<SubscriptionData>>>, AllSubscriptionTypes>()
-            .AddScoped<IUseCase<EnrollUserInCourseInput, Task<Domain.Contracts.UserCourseRepoData>>, EnrollUserInCourse>()
+            .AddScoped<IUseCase<EnrollUserInCourseInput, Task<Domain.Contracts.UserCourseRepoData>>,
+                EnrollUserInCourse>()
             .AddScoped<IUseCase<SubscribeUserInput, Task>, SubscribeUser>()
             .AddScoped<IUseCase<AddProgressToCourseInput, Task>, AddProgressToCourse>()
 
@@ -29,19 +30,22 @@ public static class UseCases
 
 
             .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
-            .AddScoped<IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>, SearchUserCoursesByUser>()
+            .AddScoped<IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>,
+                SearchUserCoursesByUser>()
             .AddScoped<IUseCase<SearchCourseByIdInput, Task<CourseData>>, SearchCourseById>()
             .AddScoped<IUseCase<GetCourseModulesInput, Task<IEnumerable<CourseModuleData>>>, GetCourseModules>()
 
             .AddScoped<IUseCase<Task<IReadOnlyCollection<CosmeticItemData>>>, AllCosmetics>()
 
             .AddScoped<IUseCase<Task<IEnumerable<string>>>, GetActivePromoCodes>()
+
             .AddScoped<IUseCase<GetDiscountByPromoCodeInput, Task<decimal>>, GetDiscountByPromoCode>()
 
             
             .AddScoped<IUseCase<Task<IReadOnlyCollection<OccupationData>>>, GetAllOccupations>()
-            .AddScoped<IUseCase<Task<IReadOnlyCollection<InterestData>>>, GetAllInterests>();
-
+            .AddScoped<IUseCase<Task<IReadOnlyCollection<InterestData>>>, GetAllInterests>()
+            .AddScoped<IUseCase<GetNextCourseModuleInput, Task<CourseModuleData>>, GetNextCourseModule>()
+            .AddScoped<IUseCase<CheckAnswerInput, Task<Guid>>, CheckAnswer>();
 
     }
 }

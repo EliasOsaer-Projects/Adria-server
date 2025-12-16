@@ -62,6 +62,10 @@ public interface IAllInterestsQuery
     Task<IReadOnlyCollection<InterestData>> Fetch();
 }
 
+public interface IGetNextCourseModuleQuery
+{
+    Task<CourseModuleData?> Fetch(Guid courseId, Guid userId);
+}
 public interface IDiscountByPromoCodeQuery
 {
     Task<decimal> Fetch(string  promoCode);
