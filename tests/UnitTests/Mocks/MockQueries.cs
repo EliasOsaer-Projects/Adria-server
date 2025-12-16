@@ -185,3 +185,18 @@ public class MockDiscountByPromoCodeQuery : IDiscountByPromoCodeQuery
         return Task.FromResult(0m);
     }
 }
+
+public class MockAllCosmeticsQuery : IAllCosmeticsQuery
+{
+    private readonly List<CosmeticItemData> _cosmeticItems = new();
+
+    public Task<IReadOnlyCollection<CosmeticItemData>> Fetch()
+    {
+        return Task.FromResult((IReadOnlyCollection<CosmeticItemData>)_cosmeticItems);
+    }
+
+    public void AddCosmeticItem(CosmeticItemData item)
+    {
+        _cosmeticItems.Add(item);
+    }
+}
