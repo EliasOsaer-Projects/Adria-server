@@ -7,6 +7,8 @@ using Adria.Domain.Users;
 using Adria.Infrastructure.Persistence.Queries;
 using Adria.Infrastructure.Persistence.Repositories;
 using Taskly.Infrastructure.Persistence.Queries;
+using Adria.Domain.PushNotifications;
+using Adria.Main.Modules.PushNotifications;
 
 namespace Adria.Main.Modules.Persistence;
 
@@ -22,7 +24,8 @@ public static class PersistenceModule
         return services
             .AddAdoServices(configuration)
             .AddRepositories()
-            .AddQueries();
+            .AddQueries()
+            .AddPushNotifications(configuration);
     }
 
     public static WebApplication UsePersistenceModule(this WebApplication app)
@@ -99,6 +102,14 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AdoCosmeticRepository>>()
+                );
+            })
+            .AddScoped<IPushSubscriptionRepository, AdoPushSubscriptionRepository>(serviceProvider =>
+            {
+                return new AdoPushSubscriptionRepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoPushSubscriptionRepository>>()
                 );
             });
     }
@@ -251,10 +262,6 @@ public static class PersistenceModule
         using DbCommand command = connection.CreateCommand();
         command.CommandText = File.ReadAllText(scriptPath);
         command.ExecuteNonQuery();
-
-        //There would be something called SeedImages, I don't know if it important.
-        //SeedImages(connection);
-
 
         SeedCoverAndBannerImages(connection);
         SeedProfilePictures(connection);

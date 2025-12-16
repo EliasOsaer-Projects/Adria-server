@@ -1,11 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-using Adria.Application.Users;
+﻿using Adria.Application.Users;
 using Adria.Domain;
-using Adria.Domain.Subscriptions;
-using Adria.Domain.Users;
 using UnitTests.Mocks;
-using Xunit;
 
 namespace UnitTests.Subscriptions
 {

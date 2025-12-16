@@ -1,6 +1,6 @@
-﻿using Adria.Application.Courses;
-using Adria.Application.Users;
+﻿using Adria.Application.Users;
 using Adria.Domain;
+    using Adria.Domain.PushNotifications;
 using UnitTests.Mocks;
 
 namespace UnitTests.Adria.Application.Users;
@@ -38,9 +38,12 @@ public class EnrollUserInCourseTest
         // Act
         var mockRepo = new MockUserCourseRepository();
         var mockLogger = new MockLogger<EnrollUserInCourse>();
-        var useCase = new EnrollUserInCourse(mockLogger, mockRepo);
+        var mockPushRepository = new MockPushSubscriptionRepository();
+        var mockPushSender = new MockPushNotificationSender();
+        var useCase = new EnrollUserInCourse(mockLogger, mockRepo, mockPushRepository, mockPushSender);
         
         await mockRepo.Save(user.AdriaId, courseId);
+        await mockPushRepository.SaveSubscription(new PushSubscription("https://example.com/endpoint", "p256dh-key", "auth-key"));
         var result = await useCase.Execute(new EnrollUserInCourseInput(userId, courseId));
 
         // Assert
@@ -48,5 +51,7 @@ public class EnrollUserInCourseTest
         Assert.Equal(courseId, result.CourseId);
         Assert.Single(mockLogger.LoggedMessages);
         Assert.Contains($"Enrolling user {userId} in course {courseId}", mockLogger.LoggedMessages[0]);
+        Assert.Single(mockPushSender.SentNotifications);
+        Assert.Equal("/courses/" + courseId, mockPushSender.SentNotifications[0].Url);
     }
 }

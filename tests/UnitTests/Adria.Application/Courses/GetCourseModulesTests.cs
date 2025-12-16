@@ -1,7 +1,6 @@
 ﻿using Adria.Application.Courses;
 using Adria.Application.Contracts.Data;
 using UnitTests.Mocks;
-using Xunit;
 
 namespace UnitTests.Adria.Application.Courses
 {

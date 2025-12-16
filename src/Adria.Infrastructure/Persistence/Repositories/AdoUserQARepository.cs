@@ -106,9 +106,9 @@ public class AdoUserQARepository
         return Guid.Empty;
     }
     
-    public async Task<int> GetProgress(Guid adriaId, Guid courseId)
+    public async Task<int> GetProgress(Guid userId, Guid courseId)
     {
-        DbParameter adriaIdParam = CreateParameter("@adriaId", adriaId);
+        DbParameter adriaIdParam = CreateParameter("@adriaId", userId);
         DbParameter courseIdParam = CreateParameter("@courseId", courseId);
     
         DbDataReader dbDataReader = await ExecuteReaderAsync(sql_calculateProgress, [adriaIdParam, courseIdParam]);
@@ -119,17 +119,10 @@ public class AdoUserQARepository
                 int totalQuestions = dbDataReader.GetInt32(0);
                 int correctQuestions = dbDataReader.GetInt32(1);
             
-                _logger.LogWarning(
-                    "DEBUG PROGRESS: Correct={Correct}, Total={Total}, CourseId={CourseId}, UserId={UserId}",
-                    correctQuestions, totalQuestions, courseId, adriaId
-                );
-            
                 if (totalQuestions == 0) return 0;
             
                 var progress = (int)Math.Round((double)correctQuestions / totalQuestions * 100);
-            
-                _logger.LogWarning("DEBUG PROGRESS: Calculated={Progress}%", progress);
-            
+                
                 return progress;
             }
         }
@@ -150,8 +143,6 @@ public class AdoUserQARepository
     public async Task<Guid> Save(Guid userId, Guid aid, Guid qid)
     {
         DbParameter userIdParam = CreateParameter("@UserID", userId);
-        DbParameter answerIdParam = CreateParameter("@AnswerID", aid);
-        DbParameter questionIdParam = CreateParameter("@QuestionID", qid);
 
         var qaid = await GetQAID(qid, aid);
         bool correctlyAnswered = await GetCorrectAnswerId(qid) == aid;

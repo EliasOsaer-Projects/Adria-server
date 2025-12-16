@@ -1,7 +1,5 @@
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
-using Adria.Application.Subscriptions;
-using Adria.Domain;
 
 namespace UnitTests.Mocks;
 
@@ -183,5 +181,36 @@ public class MockDiscountByPromoCodeQuery : IDiscountByPromoCodeQuery
         }
 
         return Task.FromResult(0m);
+    }
+}
+
+public class MockAllCosmeticsQuery : IAllCosmeticsQuery
+{
+    private readonly List<CosmeticItemData> _cosmeticItems = new();
+
+    public Task<IReadOnlyCollection<CosmeticItemData>> Fetch()
+    {
+        return Task.FromResult((IReadOnlyCollection<CosmeticItemData>)_cosmeticItems);
+    }
+
+    public void AddCosmeticItem(CosmeticItemData item)
+    {
+        _cosmeticItems.Add(item);
+    }
+}
+
+public class MockGetNextCourseModuleQuery : IGetNextCourseModuleQuery
+{
+    private readonly Dictionary<(Guid courseId, Guid userId), CourseModuleData> _modules = new();
+
+    public Task<CourseModuleData?> Fetch(Guid courseId, Guid userId)
+    {
+        _modules.TryGetValue((courseId, userId), out var module);
+        return Task.FromResult(module);
+    }
+
+    public void AddModule(Guid courseId, Guid userId, CourseModuleData module)
+    {
+        _modules[(courseId, userId)] = module;
     }
 }

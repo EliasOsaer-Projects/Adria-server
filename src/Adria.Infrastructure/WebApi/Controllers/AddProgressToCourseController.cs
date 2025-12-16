@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace Adria.Infrastructure;
+namespace Adria.Infrastructure.WebApi.Controllers;
 
 public class AddProgressToCourseController
 {
+    private AddProgressToCourseController(){}
     public static async Task<IResult> Invoke(
         [FromRoute] Guid userId,
         [FromRoute] Guid courseId,

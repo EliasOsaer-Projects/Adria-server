@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS `User`;
 DROP TABLE IF EXISTS `PromoCode`;
 DROP TABLE IF EXISTS `Occupation`;
 DROP TABLE IF EXISTS `Interest`;
+DROP TABLE IF EXISTS `PushSubscriptions`;
 
 
 /* CREATE TABLES */
@@ -185,6 +186,7 @@ CREATE TABLE `PointsPayment` (
 CREATE TABLE PromoCode (
    `PromoCodeID` VARCHAR(36) PRIMARY KEY NOT NULL,
    `Code` VARCHAR(50) NOT NULL,
+   `Discount` DECIMAL(5,2) NOT NULL,
    `Active` BOOLEAN NOT NULL
 );
 
@@ -198,6 +200,12 @@ CREATE TABLE `Occupation` (
 CREATE TABLE `Interest` (
 `InterestID` VARCHAR(36) PRIMARY KEY NOT NULL,
 `InterestName` VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE `PushSubscriptions` (
+    `Endpoint` VARCHAR(512) PRIMARY KEY NOT NULL,
+    `P256dh` VARCHAR(255) NOT NULL,
+    `Auth` VARCHAR(255) NOT NULL
 );
 
 -- SEED DATA
@@ -3200,7 +3208,9 @@ INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALU
 INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALUES ('ef0e6193-713c-4b90-9894-651906b56ef1', 'a8b8abef-668e-42ba-b687-526d3ba77399', '4f0489d4-c8cb-4ab9-a7c7-5df964b403bb', '5ca60788-a22f-487f-9db7-1d4f70c0af6c');
 
 -- ===== PROMO CODES =====
-INSERT INTO `PromoCode` (PromoCodeID, Code, Active) VALUES ('985fd5bc-1c75-43e2-afa5-7d990e6cd728', 'AdriaNightHotel15', 1);
+INSERT INTO `PromoCode` (PromoCodeID, Code, Discount, Active) VALUES ('985fd5bc-1c75-43e2-afa5-7d990e6cd728', 'AdriaNightHotel15', 15.00, 1);
+INSERT INTO `PromoCode` (PromoCodeID, Code, Discount, Active) VALUES ('b3c7c6a2-4e9f-4f6a-9b6e-2a8f9a1c4d21', 'L3ErManFan5', 53.43, 1);
+INSERT INTO `PromoCode` (PromoCodeID, Code, Discount, Active) VALUES ('4a2e1f8b-9d3f-4b6a-a7c9-8c6f2e5b1a44', 'SUPERSTEVENFANCLUB', 20.00, 0);
 
 -- ===== OCCUPATIONS =====
 INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('a1b2c3d4-1111-2222-3333-aaaaaaaaaaaa', 'Software Developer');

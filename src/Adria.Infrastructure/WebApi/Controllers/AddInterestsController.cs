@@ -8,6 +8,7 @@ namespace Adria.Infrastructure.WebApi.Controllers;
 
 public class AddInterestsController
 {
+    private AddInterestsController(){}
     public static async Task<IResult> Invoke(
         [FromRoute] Guid userId,
         [FromRoute] string? interests,

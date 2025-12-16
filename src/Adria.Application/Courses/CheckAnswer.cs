@@ -26,6 +26,7 @@ public class CheckAnswer
     
     public async Task<Guid> Execute(CheckAnswerInput input)
     {
+        _logger.LogInformation("Checking answer");
         var correctAnswerId = await _userQARepository.Save(
                                                         input.UserId,
                                                         input.AnswerId,
@@ -33,6 +34,12 @@ public class CheckAnswer
                                                     );
         var progress = await _userQARepository.GetProgress(input.UserId, input.CourseId);
         var userCourse = await _userCourseRepository.ById(input.UserId, input.CourseId);
+
+        if (userCourse is null)
+        {
+            _logger.LogError("UserCourse not found");
+            throw new GenesisException("UserCourse not found");
+        }
         
         await _userCourseRepository.Save(userCourse, progress);
         

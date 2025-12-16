@@ -15,9 +15,6 @@ public class User
     
     public UserSubscription? CurrentSubscription { get; private set; }
     
- 
-
-    
     public User(Guid id, string name, decimal wallet, int pointsBalance, int streak, byte[]? profilePicture)
     {
         AdriaId = id;
@@ -98,19 +95,14 @@ public class User
         Occupation = occupation.Trim();
     }
 
-    public void AddInterests(List<String> interests)
+    public void AddInterests(List<string> interests)
     {
         if (interests.Count != 3)
             throw new GenesisException("A user must have exactly 3 interests.");
 
-        foreach (var interest in interests)
-        {
-            if (string.IsNullOrWhiteSpace(interest))
-            {
-                throw new GenesisException("Interest cannot be empty.");
-            }
-        }
-        
+        if (interests.Any(string.IsNullOrWhiteSpace))
+            throw new GenesisException("Interest cannot be empty.");
+
         Interests = interests;
     }
 }
