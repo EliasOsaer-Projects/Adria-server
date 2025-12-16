@@ -20,7 +20,7 @@ public class PointsPayment
         TransactionDate = DateTime.Today;
     }
 
-    public void EnsureValidTransaction(CosmeticItem item, User user)
+    public static void EnsureValidTransaction(CosmeticItem item, User user)
     {
         if (item.Points < user.PointsBalance)
             throw new GenesisException("User could not afford item.");
