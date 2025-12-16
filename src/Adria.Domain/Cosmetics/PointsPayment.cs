@@ -22,7 +22,7 @@ public class PointsPayment
 
     public static void EnsureValidTransaction(CosmeticItem item, User user)
     {
-        if (item.Points < user.PointsBalance)
+        if (item.Points > user.PointsBalance)
             throw new GenesisException("User could not afford item.");
     }
 }
