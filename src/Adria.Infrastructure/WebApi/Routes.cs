@@ -226,9 +226,21 @@ public static class Routes
           .WithDescription("All endpoints to cosmetics")
           .WithOpenApi();
 
-        cosmeticRoute.MapGet("/all-cosmetics", AllCosmeticsController.Invoke)
-          .WithDescription("Query for all cosmetics")
+        cosmeticRoute.MapGet("/all-cosmetics/{userId}", AllCosmeticsController.Invoke)
+          .WithDescription("Gets all cosmetics available")
           .WithName(nameof(AllCosmeticsController))
+          .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+          .WithOpenApi();
+        
+        cosmeticRoute.MapGet("/{userId}", GetUserCosmeticsController.Invoke)
+          .WithDescription("Gets all cosmetics owned by a user")
+          .WithName(nameof(GetUserCosmeticsController))
+          .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+          .WithOpenApi();
+        
+        cosmeticRoute.MapPost("/purchase/{cosmeticId}/{userId}", PurchaseCosmeticController.Invoke)
+          .WithDescription("Purchase a cosmetic for a user")
+          .WithName(nameof(PurchaseCosmeticController))
           .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
           .WithOpenApi();
     }

@@ -188,7 +188,7 @@ public class MockAllCosmeticsQuery : IAllCosmeticsQuery
 {
     private readonly List<CosmeticItemData> _cosmeticItems = new();
 
-    public Task<IReadOnlyCollection<CosmeticItemData>> Fetch()
+    public Task<IReadOnlyCollection<CosmeticItemData>> Fetch(Guid userId)
     {
         return Task.FromResult((IReadOnlyCollection<CosmeticItemData>)_cosmeticItems);
     }

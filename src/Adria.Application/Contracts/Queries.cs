@@ -45,7 +45,7 @@ public interface ICourseModulesByCourseIdQuery
 
 public interface IAllCosmeticsQuery
 {
-    Task<IReadOnlyCollection<CosmeticItemData>> Fetch();
+    Task<IReadOnlyCollection<CosmeticItemData>> Fetch(Guid userId);
 }
 public interface IActivePromoCodesQuery
 {
@@ -71,3 +71,7 @@ public interface IDiscountByPromoCodeQuery
     Task<decimal> Fetch(string  promoCode);
 }
 
+public interface IGetUserCosmeticsQuery
+{
+    Task<IReadOnlyCollection<CosmeticItemData>> Fetch(Guid userId);
+}

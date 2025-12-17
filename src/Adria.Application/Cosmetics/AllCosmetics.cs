@@ -4,7 +4,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Adria.Application;
 
-public sealed class AllCosmetics : IUseCase<Task<IReadOnlyCollection<CosmeticItemData>>>
+public sealed record AllCosmeticsInput(
+    Guid UserId
+);
+
+public sealed class AllCosmetics : IUseCase<AllCosmeticsInput, Task<IReadOnlyCollection<CosmeticItemData>>>
 {
     private readonly IAllCosmeticsQuery _allCosmetics;
     private readonly ILogger<AllCosmetics> _logger;
@@ -15,10 +19,10 @@ public sealed class AllCosmetics : IUseCase<Task<IReadOnlyCollection<CosmeticIte
         _logger = logger;
     }
 
-    public async Task<IReadOnlyCollection<CosmeticItemData>> Execute()
+    public async Task<IReadOnlyCollection<CosmeticItemData>> Execute(AllCosmeticsInput input)
     {
         _logger.LogInformation("Fetching all Cosmetics");
 
-        return await _allCosmetics.Fetch();
+        return await _allCosmetics.Fetch(input.UserId);
     }
 }
