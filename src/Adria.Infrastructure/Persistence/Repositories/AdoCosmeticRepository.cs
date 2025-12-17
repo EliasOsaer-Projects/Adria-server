@@ -25,6 +25,12 @@ public class AdoCosmeticRepository
         WHERE AdriaID = @UserId;
     ";
     
+    private static readonly string CHECK_USER_OWNED_COSMETIC = @"
+        SELECT COUNT(*) 
+        FROM UserCosmeticItem 
+        WHERE AdriaID = @UserId AND CosmeticItemID = @CosmeticId;
+    ";
+    
     private readonly ILogger<AdoCosmeticRepository> _logger;
 
     public AdoCosmeticRepository(
@@ -68,10 +74,23 @@ public class AdoCosmeticRepository
             }
         }
     }
-    public async Task Save(CosmeticItem cosmeticItem, User user)
+
+    public async Task CheckOwnedCosmetic(CosmeticItem cosmeticItem, User user)
     {
-        _logger.LogInformation("Saving cosmetic item {CosmeticId} for user {UserId}\n Cost={cost} XP={xp}", cosmeticItem.CosmeticItemID, user.AdriaId, cosmeticItem.Points, user.PointsBalance);
-        
+        using (DbDataReader dbDataReader = await ExecuteReaderAsync(CHECK_USER_OWNED_COSMETIC, [
+                   CreateParameter("@UserId", user.AdriaId.ToString()),
+                   CreateParameter("@CosmeticId", cosmeticItem.CosmeticItemID.ToString())
+               ]))
+        {
+            if (dbDataReader.HasRows)
+            {
+                throw new GenesisException("You already own this cosmetic item.");
+            }
+        }
+    }
+    
+    public async Task ProcessCosmeticPurchase(CosmeticItem cosmeticItem, User user)
+    {
         if (user.PointsBalance < cosmeticItem.Points)
         {
             throw new GenesisException("Insufficient points to purchase this cosmetic item.");
@@ -81,14 +100,20 @@ public class AdoCosmeticRepository
         DbParameter cosmeticIdParam = CreateParameter("@CosmeticId", cosmeticItem.CosmeticItemID.ToString());
         
         await ExecuteNonQueryAsync(INSERT_USER_COSMETIC, [userIdParam, cosmeticIdParam]);
-        
-        _logger.LogInformation("Cosmetic item {CosmeticId} successfully saved for user {UserId}", cosmeticItem.CosmeticItemID, user.AdriaId);
-        
         await ExecuteNonQueryAsync(UPDATE_USER_POINTS, [
             CreateParameter("@PointsBalance", user.PointsBalance - cosmeticItem.Points),
             CreateParameter("@UserId", user.AdriaId.ToString())
         ]);
         
         _logger.LogInformation("User {UserId} points updated to {PointsBalance}", user.AdriaId, user.PointsBalance - cosmeticItem.Points);
+    }
+    
+    public async Task Save(CosmeticItem cosmeticItem, User user)
+    {
+        _logger.LogInformation("Checking if user {UserId} already owns cosmetic item {CosmeticId}", user.AdriaId, cosmeticItem.CosmeticItemID);
+        await CheckOwnedCosmetic(cosmeticItem, user);
+        _logger.LogInformation("Processing purchase of cosmetic item {CosmeticId} for user {UserId}", cosmeticItem.CosmeticItemID, user.AdriaId);
+        await ProcessCosmeticPurchase(cosmeticItem, user);
+        _logger.LogInformation("Saving cosmetic item {CosmeticId} for user {UserId}\n Cost={cost} XP={xp}", cosmeticItem.CosmeticItemID, user.AdriaId, cosmeticItem.Points, user.PointsBalance);
     }
 }

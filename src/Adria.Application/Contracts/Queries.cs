@@ -71,3 +71,7 @@ public interface IDiscountByPromoCodeQuery
     Task<decimal> Fetch(string  promoCode);
 }
 
+public interface IGetUserCosmeticsQuery
+{
+    Task<IReadOnlyCollection<CosmeticItemData>> Fetch(Guid userId);
+}

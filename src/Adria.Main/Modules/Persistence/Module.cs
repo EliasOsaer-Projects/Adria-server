@@ -192,7 +192,7 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AllCosmeticsQuery>>()
-                    );
+                );
             })
             .AddScoped<IAllOccupationsQuery, AllOccupationsQuery>(serviceProvider =>
             {
@@ -224,6 +224,14 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<DiscountByPromoCodeQuery>>()
+                );
+            })
+            .AddScoped<IGetUserCosmeticsQuery, GetUserCosmeticsQuery>(serviceProvider =>
+            {
+                return new GetUserCosmeticsQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<GetUserCosmeticsQuery>>()
                 );
             });
     }

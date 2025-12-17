@@ -22,10 +22,12 @@ public static class UseCases
             .AddScoped<IUseCase<GetDiscountByPromoCodeInput, Task<decimal>>, GetDiscountByPromoCode>()
 
             // Course Use Cases
-            .AddScoped<IUseCase<EnrollUserInCourseInput, Task<Domain.Contracts.UserCourseRepoData>>, EnrollUserInCourse>()
+            .AddScoped<IUseCase<EnrollUserInCourseInput, Task<Domain.Contracts.UserCourseRepoData>>,
+                EnrollUserInCourse>()
             .AddScoped<IUseCase<AddProgressToCourseInput, Task>, AddProgressToCourse>()
             .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
-            .AddScoped<IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>, SearchUserCoursesByUser>()
+            .AddScoped<IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>,
+                SearchUserCoursesByUser>()
             .AddScoped<IUseCase<SearchCourseByIdInput, Task<CourseData>>, SearchCourseById>()
             .AddScoped<IUseCase<GetCourseModulesInput, Task<IEnumerable<CourseModuleData>>>, GetCourseModules>()
             .AddScoped<IUseCase<GetNextCourseModuleInput, Task<CourseModuleData>>, GetNextCourseModule>()
@@ -44,7 +46,8 @@ public static class UseCases
 
             // Cosmetic Use Cases
             .AddScoped<IUseCase<Task<IReadOnlyCollection<CosmeticItemData>>>, AllCosmetics>()
-            .AddScoped<IUseCase<PurchaseCosmeticInput, Task>, PurchaseCosmetic>();
+            .AddScoped<IUseCase<PurchaseCosmeticInput, Task>, PurchaseCosmetic>()
+            .AddScoped<IUseCase<GetUserCosmeticsInput, Task<IReadOnlyCollection<CosmeticItemData>>>, GetUserCosmetics>();
 
     }
 }

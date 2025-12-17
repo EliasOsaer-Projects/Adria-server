@@ -232,6 +232,12 @@ public static class Routes
           .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
           .WithOpenApi();
         
+        cosmeticRoute.MapGet("/{userId}", GetUserCosmeticsController.Invoke)
+          .WithDescription("Gets all cosmetics owned by a user")
+          .WithName(nameof(GetUserCosmeticsController))
+          .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+          .WithOpenApi();
+        
         cosmeticRoute.MapPost("/purchase/{cosmeticId}/{userId}", PurchaseCosmeticController.Invoke)
           .WithDescription("Purchase a cosmetic for a user")
           .WithName(nameof(PurchaseCosmeticController))
