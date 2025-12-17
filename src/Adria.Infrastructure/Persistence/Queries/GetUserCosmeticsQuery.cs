@@ -38,7 +38,7 @@ public class GetUserCosmeticsQuery
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
     private readonly ILogger<GetUserCosmeticsQuery> _logger;
-    private List<CosmeticItemData> _cosmetics;
+    private readonly List<CosmeticItemData> _cosmetics;
     
     public GetUserCosmeticsQuery(
         DbProviderFactory factory,
