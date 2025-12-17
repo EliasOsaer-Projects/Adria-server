@@ -3,6 +3,7 @@ using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
 using Adria.Domain.Shared.Helpers;
 using Microsoft.Extensions.Logging;
+using Taskly.Infrastructure.Persistence.Shared;
 
 namespace Adria.Infrastructure.Persistence.Queries;
 
@@ -38,7 +39,7 @@ public class GetUserCosmeticsQuery
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
     private readonly ILogger<GetUserCosmeticsQuery> _logger;
-    private List<CosmeticItemData> _cosmetics;
+    private readonly List<CosmeticItemData> _cosmetics;
     
     public GetUserCosmeticsQuery(
         DbProviderFactory factory,
@@ -55,7 +56,7 @@ public class GetUserCosmeticsQuery
     public async Task GetUserCosmetics(Guid userId)
     {
         using var connection = _factory.CreateConnection()
-                               ?? throw new NullReferenceException("connection is null");
+                               ?? throw new AdriaDatabaseException("connection is null");
         connection.ConnectionString = _connectionString;
         await connection.OpenAsync();
 
@@ -89,7 +90,7 @@ public class GetUserCosmeticsQuery
     public async Task CheckForUltraMaxCosmetic(Guid userId)
     {
         using var connection = _factory.CreateConnection()
-                               ?? throw new NullReferenceException("connection is null");
+                               ?? throw new AdriaDatabaseException("connection is null");
         connection.ConnectionString = _connectionString;
         await connection.OpenAsync();
 

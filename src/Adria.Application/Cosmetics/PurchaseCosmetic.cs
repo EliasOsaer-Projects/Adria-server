@@ -31,6 +31,7 @@ public class PurchaseCosmetic
     
     public async Task Execute(PurchaseCosmeticInput input)
     {
+        _logger.LogInformation("Starting the purchase of a cosmetic");
         User user = await _userRepository.ById(input.UserId)
                      ?? throw new GenesisException($"User {input.UserId} not found.");
         

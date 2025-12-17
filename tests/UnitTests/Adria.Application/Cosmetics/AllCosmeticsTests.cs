@@ -13,8 +13,8 @@ namespace UnitTests.Adria.Application.Cosmetics
             var mockLogger = new MockLogger<AllCosmetics>();
             var mockQuery = new MockAllCosmeticsQuery();
 
-            mockQuery.AddCosmeticItem(new CosmeticItemData(Guid.NewGuid(), "Hat", "Head", 100m, new byte[0]));
-            mockQuery.AddCosmeticItem(new CosmeticItemData(Guid.NewGuid(), "Gloves", "Hands", 50m, new byte[0]));
+            mockQuery.AddCosmeticItem(new CosmeticItemData(Guid.NewGuid(), "Hat", "Head", 100m, Array.Empty<byte>()));
+            mockQuery.AddCosmeticItem(new CosmeticItemData(Guid.NewGuid(), "Gloves", "Hands", 50m, Array.Empty<byte>()));
 
             var useCase = new AllCosmetics(mockQuery, mockLogger);
 

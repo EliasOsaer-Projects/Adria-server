@@ -120,8 +120,7 @@ public class AdoCosmeticRepository
     {
         _logger.LogInformation("Checking if user {UserId} already owns cosmetic item {CosmeticId}", user.AdriaId, cosmeticItem.CosmeticItemID);
         await CheckOwnedCosmetic(cosmeticItem, user);
-        _logger.LogInformation("Processing purchase of cosmetic item {CosmeticId} for user {UserId}", cosmeticItem.CosmeticItemID, user.AdriaId);
         await ProcessCosmeticPurchase(cosmeticItem, user);
-        _logger.LogInformation("Saving cosmetic item {CosmeticId} for user {UserId}\n Cost={cost} XP={xp}", cosmeticItem.CosmeticItemID, user.AdriaId, cosmeticItem.Points, user.PointsBalance);
+        _logger.LogInformation("Saving cosmetic item {CosmeticId} for user {UserId}\n Cost={Cost} XP={Xp}", cosmeticItem.CosmeticItemID, user.AdriaId, cosmeticItem.Points, user.PointsBalance);
     }
 }
