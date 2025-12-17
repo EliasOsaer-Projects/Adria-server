@@ -278,8 +278,6 @@ public static class PersistenceModule
 
         foreach (var user in users)
         {
-            Console.WriteLine($"User {user.AdriaID} ({user.Name})");
-
             string coverImgPath = Path.Combine(
                 AppContext.BaseDirectory,
                 "Persistence/Scripts/SeedImages/ProfilePictures",
@@ -320,7 +318,6 @@ public static class PersistenceModule
 
         foreach (var course in courseIds)
         {
-            Console.WriteLine($"Course {course.CourseName} ({course.CourseId})");
             string coverImageId = Guid.NewGuid().ToString();
             string bannerImageId = Guid.NewGuid().ToString();
 
