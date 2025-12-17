@@ -71,7 +71,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
     private static readonly string UPDATE_PROGRESS = @$"
       update {TABLE_USER_SUBS}
-      set {COL_PROGRESS} = @amount
+      set {COL_PROGRESS} + @amount
       where {COL_SUBS_ID} = @courseId and {COL_USER_ID} = @userId";
 
     public async Task<UserCourse?> ById(Guid userId, Guid courseId)
