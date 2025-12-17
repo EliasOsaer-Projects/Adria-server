@@ -45,7 +45,7 @@ public static class UseCases
             .AddScoped<IUseCase<Task<IReadOnlyCollection<InterestData>>>, GetAllInterests>()
 
             // Cosmetic Use Cases
-            .AddScoped<IUseCase<Task<IReadOnlyCollection<CosmeticItemData>>>, AllCosmetics>()
+            .AddScoped<IUseCase<AllCosmeticsInput, Task<IReadOnlyCollection<CosmeticItemData>>>, AllCosmetics>()
             .AddScoped<IUseCase<PurchaseCosmeticInput, Task>, PurchaseCosmetic>()
             .AddScoped<IUseCase<GetUserCosmeticsInput, Task<IReadOnlyCollection<CosmeticItemData>>>, GetUserCosmetics>();
 

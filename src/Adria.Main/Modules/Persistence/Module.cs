@@ -55,14 +55,6 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<AdoSubscriptionRepository>>()
                 );
             })
-            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(serviceProvider =>
-            {
-                return new AdoUserCourseRepository(
-                    serviceProvider.GetRequiredService<DbProviderFactory>(),
-                    _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
-                );
-            })
             .AddScoped<IUserSubscriptionRepository, AdoUserSubscriptionRepository>(serviceProvider =>
             {
                 return new AdoUserSubscriptionRepository(
@@ -72,21 +64,13 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ISubscriptionRepository>()
                 );
             })
-            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(ServiceProvider =>
+            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(serviceProvider =>
             {
                 return new AdoUserCourseRepository(
-                    ServiceProvider.GetRequiredService<DbProviderFactory>(),
-                    _connectionString,
-                    ServiceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
-                    );
-            })
-            .AddScoped<IUserRepository, AdoUserRepository>(serviceProvider =>
-            {
-                return new AdoUserRepository(
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<AdoUserRepository>>()
-                );
+                    serviceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
+                    );
             })
             .AddScoped<IUserQARepository, AdoUserQARepository>(serviceProvider =>
             {
@@ -269,6 +253,7 @@ public static class PersistenceModule
 
         using DbCommand command = connection.CreateCommand();
         command.CommandText = File.ReadAllText(scriptPath);
+        command.CommandTimeout = 300;
         command.ExecuteNonQuery();
 
         SeedCoverAndBannerImages(connection);

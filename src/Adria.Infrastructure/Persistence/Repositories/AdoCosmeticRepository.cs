@@ -82,9 +82,17 @@ public class AdoCosmeticRepository
                    CreateParameter("@CosmeticId", cosmeticItem.CosmeticItemID.ToString())
                ]))
         {
-            if (dbDataReader.HasRows)
+            if (await dbDataReader.ReadAsync())
             {
-                throw new GenesisException("You already own this cosmetic item.");
+                int count = dbDataReader.GetInt32(0);
+                if (count > 0)
+                {
+                    _logger.LogWarning("User already owns this cosmetic item.");
+                    throw new GenesisException("User already owns this cosmetic item.");
+                }
+
+                _logger.LogInformation("User {UserId} does not own cosmetic item {CosmeticId}", user.AdriaId,
+                    cosmeticItem.CosmeticItemID);
             }
         }
     }

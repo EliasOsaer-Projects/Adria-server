@@ -19,7 +19,7 @@ namespace UnitTests.Adria.Application.Cosmetics
             var useCase = new AllCosmetics(mockQuery, mockLogger);
 
             // Act
-            var result = await useCase.Execute();
+            var result = await useCase.Execute(new AllCosmeticsInput(Guid.NewGuid()));
             var list = result.ToList();
 
             // Assert
@@ -41,7 +41,7 @@ namespace UnitTests.Adria.Application.Cosmetics
             var useCase = new AllCosmetics(mockQuery, mockLogger);
 
             // Act
-            var result = await useCase.Execute();
+            var result = await useCase.Execute(new AllCosmeticsInput(Guid.NewGuid()));
 
             // Assert
             Assert.Empty(result);

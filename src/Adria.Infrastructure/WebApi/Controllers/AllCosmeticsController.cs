@@ -11,10 +11,10 @@ public class AllCosmeticsController
 {
     public static async Task<Results<Ok<List<CosmeticItemData>>, NotFound>> Invoke(
         [FromRoute] Guid userId,
-        [FromServices] IUseCase<Task<IReadOnlyCollection<CosmeticItemData>>> AllCosmetics
+        [FromServices] IUseCase<AllCosmeticsInput, Task<IReadOnlyCollection<CosmeticItemData>>> AllCosmetics
     )
     {
-        IReadOnlyCollection<CosmeticItemData> cosmetics = await AllCosmetics.Execute();
+        IReadOnlyCollection<CosmeticItemData> cosmetics = await AllCosmetics.Execute(new AllCosmeticsInput(userId));
 
         if (cosmetics == null)
             return TypedResults.NotFound();
