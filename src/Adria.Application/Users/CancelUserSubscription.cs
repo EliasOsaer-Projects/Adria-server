@@ -31,6 +31,6 @@ public sealed class CancelUserSubscription : IUseCase<CancelUserSubscriptionInpu
 
         userSubscription.Cancel();
 
-        await _userSubscriptionRepository.Save(user, userSubscription);
+        await _userSubscriptionRepository.Save(user, userSubscription, null);
     }
 }

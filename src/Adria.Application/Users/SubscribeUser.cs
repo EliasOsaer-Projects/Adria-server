@@ -8,7 +8,8 @@ namespace Adria.Application.Users;
 
 public sealed record SubscribeUserInput(
     Guid AdriaId,
-    Guid SubscriptionId
+    Guid SubscriptionId,
+    string? PromoCode
 );
 
 public sealed class SubscribeUser : IUseCase<SubscribeUserInput, Task>
@@ -17,25 +18,37 @@ public sealed class SubscribeUser : IUseCase<SubscribeUserInput, Task>
     private readonly IUserSubscriptionRepository _userSubscriptionRepository;
     private readonly ISubscriptionRepository _subscriptionRepository;
     private readonly ILogger<SubscribeUser> _logger;
+    private readonly IDiscountByPromoCodeQuery _promoQuery;
     public SubscribeUser(
         IUserRepository userRepository,
         IUserSubscriptionRepository userSubscriptionRepository,
         ISubscriptionRepository subscriptionRepository,
-        ILogger<SubscribeUser> logger)
+        ILogger<SubscribeUser> logger,
+        IDiscountByPromoCodeQuery promoQuery)
     {
         _userRepository = userRepository;
         _userSubscriptionRepository = userSubscriptionRepository;
         _subscriptionRepository = subscriptionRepository;
         _logger = logger;
+        _promoQuery = promoQuery;
     }
 
     public async Task Execute(SubscribeUserInput input)
     {
-        User? user = await _userRepository.ById(input.AdriaId)
-            ?? throw new ArgumentException($"User {input.AdriaId} not found.");
+        User user = await _userRepository.ById(input.AdriaId)
+                    ?? throw new ArgumentException($"User {input.AdriaId} not found.");
 
-        Subscription? subscription = await _subscriptionRepository.ById(input.SubscriptionId)
-            ?? throw new ArgumentException($"Subscription {input.SubscriptionId} not found.");
+        Subscription subscription = await _subscriptionRepository.ById(input.SubscriptionId)
+                                    ?? throw new ArgumentException($"Subscription {input.SubscriptionId} not found.");
+
+        decimal? discount = null;
+
+        if (!string.IsNullOrWhiteSpace(input.PromoCode))
+        {
+            discount = await _promoQuery.Fetch(input.PromoCode);
+            if (discount is null)
+                throw new ArgumentException("Invalid or inactive promo code.");
+        }
 
         UserSubscription? current = await _userSubscriptionRepository.ById(user.AdriaId);
 
@@ -50,6 +63,6 @@ public sealed class SubscribeUser : IUseCase<SubscribeUserInput, Task>
             _logger.LogInformation("User subscribed successfully: {UserId}", user.AdriaId);
         }
 
-        await _userSubscriptionRepository.Save(user, current);
+        await _userSubscriptionRepository.Save(user, current, input.PromoCode);
     }
 }

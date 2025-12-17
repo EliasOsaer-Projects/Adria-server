@@ -79,6 +79,18 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         var param2 = CreateParameter("@SubsId", subId.ToString());
         await ExecuteNonQueryAsync(PAY_SUBSCRIPTION, new[] { param, param2 });
     }
+    
+    public async Task PaymentWithPromo(Guid userId, Guid subId, string promoCode)
+    {
+        var parameters = new[]
+        {
+            CreateParameter("@UserId", userId.ToString()),
+            CreateParameter("@SubsId", subId.ToString()),
+            CreateParameter("@Code", promoCode)
+        };
+
+        await ExecuteNonQueryAsync(PAY_SUBSCRIPTION_WITH_PROMO, parameters);
+    }
 
     public async Task<UserSubscription?> ById(Guid userId)
     {
@@ -110,13 +122,24 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         }
     }
 
-    public async Task Save(User user, UserSubscription userSubscription)
+    public async Task Save(User user, UserSubscription userSubscription, string? promoCode)
     {
         var exists = await ById(user.AdriaId);
         var query = exists == null ? INSERT_SUBSCRIPTION : UPDATE_SUBSCRIPTION;
 
-        await Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
-
+        if (promoCode is null)
+        {
+            await Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
+        }
+        else
+        {
+            await PaymentWithPromo(
+                user.AdriaId,
+                userSubscription.CurrentSubscription.SubscriptionId,
+                promoCode
+            );
+        }
+        
         try
         {
             var parameters = new[]
