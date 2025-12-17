@@ -32,7 +32,7 @@ public class UserCourse
 
     public void UpdateProgress(int progressPercentage)
     {
-        EnsureNoNegativeProgress(ProgressPercentage, progressPercentage);
+        EnsureNoNegativeProgress(this.ProgressPercentage, progressPercentage);
         ProgressPercentage = progressPercentage;
         if (ProgressPercentage >= 100)
         {
