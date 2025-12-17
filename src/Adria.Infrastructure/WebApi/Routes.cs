@@ -142,7 +142,7 @@ public static class Routes
         
         userRoutes
             .MapPost("/{userId}/occupation/{occupation}", AddOccupationController.Invoke)
-            .WithDescription("Add the users occupation and interests to the user")
+            .WithDescription("Add the users occupation to the user")
             .WithName(nameof(AddOccupationController))
             .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
