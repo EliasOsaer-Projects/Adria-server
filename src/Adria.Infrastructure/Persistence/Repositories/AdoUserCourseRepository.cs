@@ -15,12 +15,16 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
     private readonly ILogger<AdoUserCourseRepository> _logger;
 
     private static readonly string TABLE_USER_SUBS = "UserCourse";
+    private static readonly string TABLE_USER = "User";
+    private static readonly string TABLE_COURSE = "Course";
     private static readonly string COL_SUBS_ID = "CourseID";
     private static readonly string COL_USER_ID = "AdriaID";
     private static readonly string COL_COMPLETION = "CompletionStatus";
     private static readonly string COL_PROGRESS = "ProgressPercentage";
     private static readonly string COL_START_DATE = "StartDate";
     private static readonly string COL_END_DATE = "EndDate";
+    private static readonly string COL_POINTBALANCE = "PointsBalance";
+    private static readonly string COL_POINTS_ON_COMPLETION = "PointsOnCompletion";
 
     private static readonly string INSERT_USERCOURSE = $@"
         INSERT INTO {TABLE_USER_SUBS} ({COL_USER_ID}, {COL_SUBS_ID})
@@ -56,6 +60,15 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
       set {COL_COMPLETION} = 1, {COL_PROGRESS} = 100
       where {COL_SUBS_ID} = @courseId and {COL_USER_ID} = @userId";
 
+    private static readonly string UPDATE_POINTS = @$"
+      update {TABLE_USER} u
+      join {TABLE_USER_SUBS} uc on u.{COL_USER_ID} = uc.{COL_USER_ID}
+      join {TABLE_COURSE} c on uc.{COL_SUBS_ID} = c.{COL_SUBS_ID}
+      set u.{COL_POINTBALANCE} = u.{COL_POINTBALANCE} + c.{COL_POINTS_ON_COMPLETION}
+      where u.{COL_USER_ID} = @userId
+      and uc.{COL_COMPLETION};
+      ";
+
     private static readonly string UPDATE_PROGRESS = @$"
       update {TABLE_USER_SUBS}
       set {COL_PROGRESS} = @amount
@@ -85,27 +98,31 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
     public async Task Save(UserCourse userCourse, int progress)
     {
-        UserCourse futureStatus = userCourse;
-        futureStatus.UpdateProgress(progress);
-        var query = futureStatus.CompletionStatus ? UPDATE_COMPLETION : UPDATE_PROGRESS;
-
-        try
+        if (!userCourse.CompletionStatus)
         {
-            var parameters = new[]
+            UserCourse futureStatus = userCourse;
+            futureStatus.UpdateProgress(progress);
+            var query = futureStatus.CompletionStatus ? UPDATE_COMPLETION : UPDATE_PROGRESS;
+
+            try
             {
+                var parameters = new[]
+                {
               CreateParameter("@userId", userCourse.AdriaId),
               CreateParameter("@courseId", userCourse.CourseId),
               CreateParameter("@amount", progress)
             };
 
-            await ExecuteNonQueryAsync(query, parameters);
-            _logger.LogInformation("Progress Updated");
+                await ExecuteNonQueryAsync(query, parameters);
+                _logger.LogInformation("Progress Updated");
+            }
+            catch (DbException ex)
+            {
+                _logger.LogError(ex, "Failed to update for course for user {UserId}", userCourse.AdriaId);
+                throw new AdriaDatabaseException("Failed to update course.", ex);
+            }
         }
-        catch (DbException ex)
-        {
-            _logger.LogError(ex, "Failed to update for course for user {UserId}", userCourse.AdriaId);
-            throw new AdriaDatabaseException("Failed to update course.", ex);
-        }
+
     }
     public async Task<UserCourseRepoData> Save(Guid userId, Guid courseId)
     {
