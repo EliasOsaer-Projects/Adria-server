@@ -53,7 +53,7 @@ public class IsActiveUserQuery
             _logger.LogInformation("User {UserId} has subscription status: {Status}", userId, status);
             return status.Equals("Active", StringComparison.OrdinalIgnoreCase);
         }
-        
-        throw new GenesisException("No active subscription found for user.");
+
+        return false;
     }
 }
