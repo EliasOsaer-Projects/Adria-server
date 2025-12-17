@@ -98,6 +98,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
     public async Task Save(UserCourse userCourse, int progress)
     {
+        //Zorgt dat het niet meer verandert als het 100% geraakt.
         if (!userCourse.CompletionStatus)
         {
             UserCourse futureStatus = userCourse;
