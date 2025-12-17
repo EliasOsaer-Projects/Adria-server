@@ -23,13 +23,11 @@ public sealed class CheckValidSubscription
       AND u.Wallet >= s.Price
       AND us.EndDate <= CURDATE();";
 
-    private readonly IConfiguration _configuration;
     private readonly string _conn;
 
     public CheckValidSubscription(IConfiguration configuration)
     {
-        _configuration = configuration;
-        _conn = _configuration["Persistence:ConnectionString"]! ??
+        _conn = configuration["Persistence:ConnectionString"]! ??
           throw new InvalidOperationException("Persistence:ConnectionString is missing from configuration.");
     }
 
