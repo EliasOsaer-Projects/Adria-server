@@ -108,13 +108,19 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
             {
                 var parameters = new[]
                 {
-              CreateParameter("@userId", userCourse.AdriaId),
-              CreateParameter("@courseId", userCourse.CourseId),
-              CreateParameter("@amount", progress)
-            };
+                  CreateParameter("@userId", userCourse.AdriaId),
+                  CreateParameter("@courseId", userCourse.CourseId),
+                  CreateParameter("@amount", progress)
+                };
 
                 await ExecuteNonQueryAsync(query, parameters);
                 _logger.LogInformation("Progress Updated");
+
+                if (query == UPDATE_COMPLETION)
+                {
+                    await ExecuteNonQueryAsync(UPDATE_POINTS, parameters);
+                    _logger.LogInformation("Added points to user");
+                }
             }
             catch (DbException ex)
             {
