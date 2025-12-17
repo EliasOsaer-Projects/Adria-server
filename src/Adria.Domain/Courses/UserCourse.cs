@@ -50,7 +50,7 @@ public class UserCourse
 
     private static void EnsureNoNegativeProgress(int currentProgress, int progress)
     {
-        if (currentProgress < progress)
+        if (currentProgress > progress)
             throw new GenesisException("The update doesn't match");
     }
 }
