@@ -51,6 +51,16 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
       WHERE u.{COL_USER_ID} = @UserId
       AND u.{COL_WALLET} >= s.{COL_PRICE};
       ";
+    
+    private static readonly string PAY_SUBSCRIPTION_WITH_PROMO = $@"
+    UPDATE {TABLE_USER} u
+    JOIN {TABLE_SUB} s ON s.{COL_SUBS_ID} = @SubsId
+    JOIN PromoCode p ON p.Code = @Code
+    SET u.{COL_WALLET} = u.{COL_WALLET} - (s.{COL_PRICE} * (1 - (p.Discount / 100)))
+    WHERE u.{COL_USER_ID} = @UserId
+      AND p.Active = TRUE
+      AND u.{COL_WALLET} >= (s.{COL_PRICE} * (1 - (p.Discount / 100)));
+      ";
 
     public AdoUserSubscriptionRepository(
         DbProviderFactory factory,
