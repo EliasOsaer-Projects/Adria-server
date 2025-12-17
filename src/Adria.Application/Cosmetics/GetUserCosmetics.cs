@@ -11,12 +11,12 @@ public sealed record GetUserCosmeticsInput(
 public class GetUserCosmetics
     : IUseCase<GetUserCosmeticsInput, Task<IReadOnlyCollection<CosmeticItemData>>>
 {
-    private readonly ILogger<GetUserCosmeticsInput> _logger;
+    private readonly ILogger<GetUserCosmetics> _logger;
     private readonly IGetUserCosmeticsQuery _query;
 
 
     public GetUserCosmetics(
-        ILogger<GetUserCosmeticsInput> logger,
+        ILogger<GetUserCosmetics> logger,
         IGetUserCosmeticsQuery query
     )
     {
