@@ -32,7 +32,8 @@ public class UserCourse
 
     public void UpdateProgress(int progressPercentage)
     {
-        ProgressPercentage += progressPercentage;
+        EnsureNoNegativeProgress(this.ProgressPercentage, progressPercentage);
+        ProgressPercentage = progressPercentage;
         if (ProgressPercentage >= 100)
         {
             CompletionStatus = true;
@@ -45,5 +46,11 @@ public class UserCourse
     {
         if (complete && progress < 100 || !complete && progress == 100)
             throw new GenesisException("The progress and completion status do not match");
+    }
+
+    private static void EnsureNoNegativeProgress(int currentProgress, int progress)
+    {
+        if (currentProgress > progress)
+            throw new GenesisException("The update doesn't match");
     }
 }
