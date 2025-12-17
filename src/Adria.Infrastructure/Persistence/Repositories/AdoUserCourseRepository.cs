@@ -70,7 +70,7 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
         if (!await reader.ReadAsync())
             return null;
-        
+
         var id = reader.GetGuid(reader.GetOrdinal(COL_USER_ID));
         var chosenCourseId = reader.GetGuid(reader.GetOrdinal(COL_SUBS_ID));
         var completion = reader.GetBoolean(reader.GetOrdinal(COL_COMPLETION));
@@ -85,8 +85,6 @@ public class AdoUserCourseRepository : AbstractAdoRepository, IUserCourseReposit
 
     public async Task Save(UserCourse userCourse, int progress)
     {
-        Console.WriteLine(userCourse.ProgressPercentage);
-        Console.WriteLine(progress);
         UserCourse futureStatus = userCourse;
         futureStatus.UpdateProgress(progress);
         var query = futureStatus.CompletionStatus ? UPDATE_COMPLETION : UPDATE_PROGRESS;
