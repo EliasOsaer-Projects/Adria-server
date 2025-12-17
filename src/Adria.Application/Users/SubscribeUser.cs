@@ -46,7 +46,7 @@ public sealed class SubscribeUser : IUseCase<SubscribeUserInput, Task>
         if (!string.IsNullOrWhiteSpace(input.PromoCode))
         {
             discount = await _promoQuery.Fetch(input.PromoCode);
-            if (discount is null)
+            if (discount == 0)
                 throw new ArgumentException("Invalid or inactive promo code.");
         }
 
