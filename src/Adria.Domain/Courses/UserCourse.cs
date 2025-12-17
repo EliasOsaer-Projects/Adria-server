@@ -32,7 +32,7 @@ public class UserCourse
 
     public void UpdateProgress(int progressPercentage)
     {
-        ProgressPercentage += progressPercentage;
+        ProgressPercentage = progressPercentage;
         if (ProgressPercentage >= 100)
         {
             CompletionStatus = true;
