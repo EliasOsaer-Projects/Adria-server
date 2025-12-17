@@ -9,7 +9,7 @@ namespace Adria.Infrastructure.Persistence.Queries;
 public sealed class TopUsersByPointsQuery : ITopUsersByPointsQuery
 {
     private static readonly string QRY = @"
-        SELECT Name, PointsBalance, ProfilePicture
+        SELECT AdriaId, Name, PointsBalance, ProfilePicture
         FROM `User`
         ORDER BY PointsBalance DESC
         LIMIT 10;
@@ -51,6 +51,7 @@ public sealed class TopUsersByPointsQuery : ITopUsersByPointsQuery
                 ? null
                 : await Helper.ReadBlobAsync(reader, reader.GetOrdinal("ProfilePicture"));
             users.Add(new LeaderBoardData(
+                UserId: reader.GetGuid(reader.GetOrdinal("AdriaId")),
                 Name: reader.GetString(reader.GetOrdinal("Name")),
                 PointsBalance: reader.GetInt32(reader.GetOrdinal("PointsBalance")),
                 ProfilePicture: profilePicture

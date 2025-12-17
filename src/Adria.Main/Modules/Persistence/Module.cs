@@ -217,6 +217,14 @@ public static class PersistenceModule
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<GetUserCosmeticsQuery>>()
                 );
+            })
+            .AddScoped<IIsActiveUserQuery, IsActiveUserQuery>(serviceProvider =>
+            {
+                return new IsActiveUserQuery(
+                    serviceProvider.GetRequiredService<ILogger<IsActiveUserQuery>>(),
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString
+                );
             });
     }
 
