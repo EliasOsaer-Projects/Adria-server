@@ -13,13 +13,13 @@ namespace UnitTests.Adria.Application.Cosmetics
             var mockLogger = new MockLogger<AllCosmetics>();
             var mockQuery = new MockAllCosmeticsQuery();
 
-            mockQuery.AddCosmeticItem(new CosmeticItemData(Guid.NewGuid(), "Hat", "Head", 100m));
-            mockQuery.AddCosmeticItem(new CosmeticItemData(Guid.NewGuid(), "Gloves", "Hands", 50m));
+            mockQuery.AddCosmeticItem(new CosmeticItemData(Guid.NewGuid(), "Hat", "Head", 100m, new byte[0]));
+            mockQuery.AddCosmeticItem(new CosmeticItemData(Guid.NewGuid(), "Gloves", "Hands", 50m, new byte[0]));
 
             var useCase = new AllCosmetics(mockQuery, mockLogger);
 
             // Act
-            var result = await useCase.Execute();
+            var result = await useCase.Execute(new AllCosmeticsInput(Guid.NewGuid()));
             var list = result.ToList();
 
             // Assert
@@ -41,7 +41,7 @@ namespace UnitTests.Adria.Application.Cosmetics
             var useCase = new AllCosmetics(mockQuery, mockLogger);
 
             // Act
-            var result = await useCase.Execute();
+            var result = await useCase.Execute(new AllCosmeticsInput(Guid.NewGuid()));
 
             // Assert
             Assert.Empty(result);

@@ -158,15 +158,15 @@ CREATE TABLE `CosmeticItem` (
     `CosmeticItemID` VARCHAR(36) PRIMARY KEY NOT NULL,
     `ItemName` VARCHAR(100) NOT NULL,
     `ItemType` VARCHAR(50) NOT NULL,
-    `PointsCost` INT NOT NULL
+    `PointsCost` INT NOT NULL,
+    `CosmeticImage` LONGBLOB
 );
 
 CREATE TABLE UserCosmeticItem (
     `AdriaID` VARCHAR(36) NOT NULL,
-    `CosmeticItemID` VARCHAR(36) PRIMARY KEY NOT NULL,
-    `ItemName` VARCHAR(100) NOT NULL,
-    `ItemType` VARCHAR(50) NOT NULL,
-
+    `CosmeticItemID` VARCHAR(36) NOT NULL,
+    `PurchaseDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
     FOREIGN KEY (`AdriaID`) REFERENCES `User`(`AdriaID`) ON DELETE CASCADE,
     FOREIGN KEY (`CosmeticItemID`) REFERENCES `CosmeticItem`(`CosmeticItemID`) ON DELETE CASCADE
 );
@@ -252,11 +252,11 @@ INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `A
 INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `AdriaID`) VALUES ('35c18dfd-cf4f-448e-9a87-d4f4796e0ad3', 25.25, '2084-09-01 14:15:00', 'db5b29f6-7078-48cf-94e8-f491096482be');
 
 -- ===== COSMETIC ITEMS =====
-INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('9d2ef6f2-88c6-4cc3-a268-e94a208b5616', 'Pioneer Badge', 'Badge', 100);
-INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('578cb38c-418e-4460-91ed-bc034c0deb99', 'Scholar Badge', 'Badge', 250);
-INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('ff1c72ac-8781-4d63-b404-6763d1e20d79', 'Master Badge', 'Badge', 500);
-INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('b95f5e95-c46b-4b95-b671-cfe23b3930fc', 'Golden Frame', 'Frame', 150);
-INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`) VALUES ('051d3efe-97b8-40f6-955c-a3388a39146a', 'Mars Colony Frame', 'Frame', 300);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('9d2ef6f2-88c6-4cc3-a268-e94a208b5616', 'UltraMax', 'Badge', 0, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('578cb38c-418e-4460-91ed-bc034c0deb99', 'Jannaholic', 'Badge', 250, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('ff1c72ac-8781-4d63-b404-6763d1e20d79', 'Holly Jolly Christmas', 'Badge', 500, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('b95f5e95-c46b-4b95-b671-cfe23b3930fc', 'Cat Lover', 'Badge', 150, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('051d3efe-97b8-40f6-955c-a3388a39146a', 'Simon Approved', 'Badge', 300, NULL);
 
 -- ===== COURSES =====
 INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('5fe6e3d1-0a74-4759-9bad-a5f0e48a9340', 'Baking bread for the modern household', 1, 'Learn the fundamentals of bread making from scratch, essential for self-sufficient living in the new Earth.', 'Culinary Arts', 'baking, bread, cooking, food preparation, kitchen skills', 50, 4, NULL, NULL, 'Basic dough preparation, Kneading techniques, Yeast activation, Baking temperatures, Bread storage methods', 0);

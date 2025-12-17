@@ -181,6 +181,21 @@
     <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Sterling Archer.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\Cat lover.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\Holly Jolly Christmas.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\Jannaholic.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\Simon Approved.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\UltraMax.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -55,14 +55,6 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<AdoSubscriptionRepository>>()
                 );
             })
-            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(serviceProvider =>
-            {
-                return new AdoUserCourseRepository(
-                    serviceProvider.GetRequiredService<DbProviderFactory>(),
-                    _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
-                );
-            })
             .AddScoped<IUserSubscriptionRepository, AdoUserSubscriptionRepository>(serviceProvider =>
             {
                 return new AdoUserSubscriptionRepository(
@@ -72,21 +64,13 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ISubscriptionRepository>()
                 );
             })
-            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(ServiceProvider =>
+            .AddScoped<IUserCourseRepository, AdoUserCourseRepository>(serviceProvider =>
             {
                 return new AdoUserCourseRepository(
-                    ServiceProvider.GetRequiredService<DbProviderFactory>(),
-                    _connectionString,
-                    ServiceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
-                    );
-            })
-            .AddScoped<IUserRepository, AdoUserRepository>(serviceProvider =>
-            {
-                return new AdoUserRepository(
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
-                    serviceProvider.GetRequiredService<ILogger<AdoUserRepository>>()
-                );
+                    serviceProvider.GetRequiredService<ILogger<AdoUserCourseRepository>>()
+                    );
             })
             .AddScoped<IUserQARepository, AdoUserQARepository>(serviceProvider =>
             {
@@ -94,6 +78,14 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AdoUserQARepository>>()
+                );
+            })
+            .AddScoped<ICosmeticRepository, AdoCosmeticRepository>(serviceProvider =>
+            {
+                return new AdoCosmeticRepository(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<AdoCosmeticRepository>>()
                 );
             })
             .AddScoped<IPushSubscriptionRepository, AdoPushSubscriptionRepository>(serviceProvider =>
@@ -184,7 +176,7 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<AllCosmeticsQuery>>()
-                    );
+                );
             })
             .AddScoped<IAllOccupationsQuery, AllOccupationsQuery>(serviceProvider =>
             {
@@ -216,6 +208,14 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString,
                     serviceProvider.GetRequiredService<ILogger<DiscountByPromoCodeQuery>>()
+                );
+            })
+            .AddScoped<IGetUserCosmeticsQuery, GetUserCosmeticsQuery>(serviceProvider =>
+            {
+                return new GetUserCosmeticsQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<GetUserCosmeticsQuery>>()
                 );
             });
     }
@@ -253,14 +253,57 @@ public static class PersistenceModule
 
         using DbCommand command = connection.CreateCommand();
         command.CommandText = File.ReadAllText(scriptPath);
+        command.CommandTimeout = 300;
         command.ExecuteNonQuery();
 
         SeedCoverAndBannerImages(connection);
         SeedProfilePictures(connection);
+        SeedCosmetics(connection);
 
         return app;
     }
+    
+    private static void SeedCosmetics(DbConnection connection)
+    {
+        var cosmetics = new List<string>();
+        using (DbCommand selectCmd = connection.CreateCommand())
+        {
+            selectCmd.CommandText = "SELECT ItemName FROM CosmeticItem";
+            using (var reader = selectCmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    cosmetics.Add(reader.GetString(0));
+                }
+            }
+        }
 
+        foreach (var cosmetic in cosmetics)
+        {
+            Console.WriteLine($"Cosmetic {cosmetic}");
+
+            string imgPath = Path.Combine(
+                AppContext.BaseDirectory,
+                "Persistence/Scripts/SeedImages/Cosmetics",
+                $"{cosmetic}.png"
+            );
+
+            using (var imageCommand = connection.CreateCommand())
+            {
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@name", cosmetic));
+                imageCommand.Parameters.Add(CreateParam(imageCommand, "@img", File.ReadAllBytes(imgPath)));
+
+                imageCommand.CommandText = @"
+                    UPDATE CosmeticItem 
+                    SET CosmeticImage = @img
+                    WHERE ItemName = @name                
+                ";
+
+                imageCommand.ExecuteNonQuery();
+            }
+        }
+    }
+    
     private static void SeedProfilePictures(DbConnection connection)
     {
         var users = new List<(string AdriaID, string Name)>();
