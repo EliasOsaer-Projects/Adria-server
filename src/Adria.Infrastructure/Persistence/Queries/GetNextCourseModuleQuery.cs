@@ -213,12 +213,13 @@ public sealed class GetNextCourseModuleQuery
             var answerId = Guid.Parse(reader.GetString(2));
             var answerText = reader.GetString(3);
 
-            if (!questions.ContainsKey(questionId))
+            if (!questions.TryGetValue(questionId, out var entry))
             {
-                questions[questionId] = (questionText, new List<QuestionAnswerData>());
+                entry = (questionText, new List<QuestionAnswerData>());
+                questions[questionId] = entry;
             }
 
-            questions[questionId].Answers.Add(new QuestionAnswerData(answerId, answerText));
+            entry.Answers.Add(new QuestionAnswerData(answerId, answerText));
         }
     }
 
