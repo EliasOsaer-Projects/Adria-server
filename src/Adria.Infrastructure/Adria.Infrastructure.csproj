@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -181,7 +181,7 @@
     <None Update="Persistence\Scripts\SeedImages\ProfilePictures\Sterling Archer.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Persistence\Scripts\SeedImages\Cosmetics\Cat lover.png">
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\Cat Lover.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Persistence\Scripts\SeedImages\Cosmetics\Holly Jolly Christmas.png">
@@ -194,6 +194,21 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Persistence\Scripts\SeedImages\Cosmetics\UltraMax.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\Ik hou van koekjes.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\J1201 Gordijnen.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\My First Course.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\Nature Freak.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Persistence\Scripts\SeedImages\Cosmetics\Wijsneus.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
