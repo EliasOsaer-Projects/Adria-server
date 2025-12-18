@@ -41,7 +41,7 @@ public static class Routes
             .WithDescription("All endpoints todo with courses")
             .WithOpenApi();
 
-        courseRoutes.MapGet("/courses", SearchAllCoursesController.Invoke)
+        courseRoutes.MapGet("/courses/all/{userId}", SearchAllCoursesController.Invoke)
             .WithDescription("Get all courses")
             .WithName(nameof(SearchAllCoursesController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))

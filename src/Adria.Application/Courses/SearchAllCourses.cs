@@ -4,8 +4,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Adria.Application.Courses;
 
+public sealed record SearchAllCoursesInput(
+    Guid UserId    
+);
 
-public sealed class SearchAllCourses : IUseCase<Task<IReadOnlyCollection<CourseData>>>
+public sealed class SearchAllCourses : IUseCase<SearchAllCoursesInput, Task<IReadOnlyCollection<CourseData>>>
 {
     private readonly IAllCoursesQuery _allCoursesQuery;
     private readonly ILogger<SearchAllCourses> _logger;
@@ -19,13 +22,13 @@ public sealed class SearchAllCourses : IUseCase<Task<IReadOnlyCollection<CourseD
         _logger = logger;
     }
 
-    public async Task<IReadOnlyCollection<CourseData>> Execute()
+    public async Task<IReadOnlyCollection<CourseData>> Execute(SearchAllCoursesInput input)
     {
         _logger.LogInformation(
             "Fetching all courses"
         );
 
-        return await _allCoursesQuery.Fetch();
+        return await _allCoursesQuery.Fetch(input.UserId);
 
     }
 }

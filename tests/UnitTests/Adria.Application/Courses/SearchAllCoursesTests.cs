@@ -50,7 +50,7 @@ public sealed class SearchAllCoursesTests
     
 
         // Act
-        var result = await useCase.Execute();
+        var result = await useCase.Execute(new SearchAllCoursesInput(Guid.NewGuid()));
 
         // Assert
         Assert.NotNull(result);

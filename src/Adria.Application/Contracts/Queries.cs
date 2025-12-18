@@ -25,7 +25,7 @@ public interface ITopUsersByPointsQuery
 
 public interface IAllCoursesQuery
 {
-    Task<IReadOnlyCollection<CourseData>> Fetch();
+    Task<IReadOnlyCollection<CourseData>> Fetch(Guid userId);
 }
 
 public interface IUserCoursesByUserQuery

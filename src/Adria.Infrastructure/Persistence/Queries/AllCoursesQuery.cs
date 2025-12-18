@@ -10,12 +10,18 @@ namespace Adria.Infrastructure.Persistence.Queries;
 public sealed class AllCoursesQuery : IAllCoursesQuery
 {
     private static readonly string QRY = @"
-        SELECT *
-        From Course
-        JOIN CoverImage ON Course.CoverImageID = CoverImage.CoverImageID
+        SELECT c.*, ci.*
+        FROM Course c
+        JOIN CoverImage ci 
+          ON c.CoverImageID = ci.CoverImageID
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM UserCourse uc
+            WHERE uc.CourseID = c.CourseID
+              AND uc.AdriaID = @UserId
+        );
     ";
-
-
+    
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
     private readonly ILogger<AllCoursesQuery> _logger;
@@ -30,7 +36,7 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
         _logger = logger;
     }
 
-    public async Task<IReadOnlyCollection<CourseData>> Fetch()
+    public async Task<IReadOnlyCollection<CourseData>> Fetch(Guid userId)
     {
         _logger.LogInformation("Starting to fetch all courses");
 
@@ -42,9 +48,13 @@ public sealed class AllCoursesQuery : IAllCoursesQuery
         await connection.OpenAsync();
 
         using var command = connection.CreateCommand();
-
         command.CommandText = QRY;
-
+        
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = "@UserId";
+        parameter.Value = userId.ToString();
+        command.Parameters.Add(parameter);
+        
         using var reader = await command.ExecuteReaderAsync();
 
         var courses = new List<CourseData>();

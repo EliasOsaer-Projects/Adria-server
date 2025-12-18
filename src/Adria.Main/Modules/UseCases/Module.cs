@@ -25,7 +25,7 @@ public static class UseCases
             .AddScoped<IUseCase<EnrollUserInCourseInput, Task<Domain.Contracts.UserCourseRepoData>>,
                 EnrollUserInCourse>()
             .AddScoped<IUseCase<AddProgressToCourseInput, Task>, AddProgressToCourse>()
-            .AddScoped<IUseCase<Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
+            .AddScoped<IUseCase<SearchAllCoursesInput, Task<IReadOnlyCollection<CourseData>>>, SearchAllCourses>()
             .AddScoped<IUseCase<SearchUserCoursesByUserInput, Task<IReadOnlyCollection<UserCourseData>>>,
                 SearchUserCoursesByUser>()
             .AddScoped<IUseCase<SearchCourseByIdInput, Task<CourseData>>, SearchCourseById>()
