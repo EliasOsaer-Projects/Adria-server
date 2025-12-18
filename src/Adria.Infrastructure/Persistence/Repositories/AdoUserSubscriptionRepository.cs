@@ -51,7 +51,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
       WHERE u.{COL_USER_ID} = @UserId
       AND u.{COL_WALLET} >= s.{COL_PRICE};
       ";
-    
+
     private static readonly string PAY_SUBSCRIPTION_WITH_PROMO = $@"
     UPDATE {TABLE_USER} u
     JOIN {TABLE_SUB} s ON s.{COL_SUBS_ID} = @SubsId
@@ -79,7 +79,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         var param2 = CreateParameter("@SubsId", subId.ToString());
         await ExecuteNonQueryAsync(PAY_SUBSCRIPTION, new[] { param, param2 });
     }
-    
+
     public async Task PaymentWithPromo(Guid userId, Guid subId, string promoCode)
     {
         var parameters = new[]
@@ -129,6 +129,8 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
 
         if (promoCode is null)
         {
+            if (user.Wallet < subscription.CurrentSubscription.PriceCycle)
+                throw new GenesisException("You don't have enough funds");
             await Payment(user.AdriaId, subscription.CurrentSubscription.SubscriptionId);
         }
         else
@@ -139,7 +141,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
                 promoCode
             );
         }
-        
+
         try
         {
             var parameters = new[]
