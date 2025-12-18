@@ -3,5 +3,5 @@
 public interface IUserSubscriptionRepository
 {
     Task<UserSubscription?> ById(Guid userId);
-    Task Save(User user, UserSubscription userSubscription);
+    Task Save(User user, UserSubscription subscription, string? promoCode);
 }

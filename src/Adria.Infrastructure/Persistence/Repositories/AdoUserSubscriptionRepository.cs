@@ -51,6 +51,16 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
       WHERE u.{COL_USER_ID} = @UserId
       AND u.{COL_WALLET} >= s.{COL_PRICE};
       ";
+    
+    private static readonly string PAY_SUBSCRIPTION_WITH_PROMO = $@"
+    UPDATE {TABLE_USER} u
+    JOIN {TABLE_SUB} s ON s.{COL_SUBS_ID} = @SubsId
+    JOIN PromoCode p ON p.Code = @Code
+    SET u.{COL_WALLET} = u.{COL_WALLET} - (s.{COL_PRICE} * (1 - (p.Discount / 100)))
+    WHERE u.{COL_USER_ID} = @UserId
+      AND p.Active = TRUE
+      AND u.{COL_WALLET} >= (s.{COL_PRICE} * (1 - (p.Discount / 100)));
+      ";
 
     public AdoUserSubscriptionRepository(
         DbProviderFactory factory,
@@ -68,6 +78,18 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         var param = CreateParameter("@UserId", userId.ToString());
         var param2 = CreateParameter("@SubsId", subId.ToString());
         await ExecuteNonQueryAsync(PAY_SUBSCRIPTION, new[] { param, param2 });
+    }
+    
+    public async Task PaymentWithPromo(Guid userId, Guid subId, string promoCode)
+    {
+        var parameters = new[]
+        {
+            CreateParameter("@UserId", userId.ToString()),
+            CreateParameter("@SubsId", subId.ToString()),
+            CreateParameter("@Code", promoCode)
+        };
+
+        await ExecuteNonQueryAsync(PAY_SUBSCRIPTION_WITH_PROMO, parameters);
     }
 
     public async Task<UserSubscription?> ById(Guid userId)
@@ -100,13 +122,24 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         }
     }
 
-    public async Task Save(User user, UserSubscription userSubscription)
+    public async Task Save(User user, UserSubscription userSubscription, string? promoCode)
     {
         var exists = await ById(user.AdriaId);
         var query = exists == null ? INSERT_SUBSCRIPTION : UPDATE_SUBSCRIPTION;
 
-        await Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
-
+        if (promoCode is null)
+        {
+            await Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
+        }
+        else
+        {
+            await PaymentWithPromo(
+                user.AdriaId,
+                userSubscription.CurrentSubscription.SubscriptionId,
+                promoCode
+            );
+        }
+        
         try
         {
             var parameters = new[]
