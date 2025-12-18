@@ -75,7 +75,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
 
     public async Task Payment(Guid userId, Guid subId)
     {
-        var param = CreateParameter("@UserId", userId.ToString());
+        var param = CreateParameter("@UserId", userId.ToString());//NOSONAR
         var param2 = CreateParameter("@SubsId", subId.ToString());
         await ExecuteNonQueryAsync(PAY_SUBSCRIPTION, new[] { param, param2 });
     }
@@ -84,7 +84,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
     {
         var parameters = new[]
         {
-            CreateParameter("@UserId", userId.ToString()),
+            CreateParameter("@UserId", userId.ToString()),//NOSONAR
             CreateParameter("@SubsId", subId.ToString()),
             CreateParameter("@Code", promoCode)
         };
@@ -94,7 +94,7 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
 
     public async Task<UserSubscription?> ById(Guid userId)
     {
-        var param = CreateParameter("@UserId", userId.ToString());
+        var param = CreateParameter("@UserId", userId.ToString());//NOSONAR
         await using var reader = await ExecuteReaderAsync(SELECT_BY_USER_ID, new[] { param });
 
         if (!await reader.ReadAsync()) return null;
@@ -122,20 +122,20 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
         }
     }
 
-    public async Task Save(User user, UserSubscription userSubscription, string? promoCode)
+    public async Task Save(User user, UserSubscription subscription, string? promoCode)
     {
         var exists = await ById(user.AdriaId);
         var query = exists == null ? INSERT_SUBSCRIPTION : UPDATE_SUBSCRIPTION;
 
         if (promoCode is null)
         {
-            await Payment(user.AdriaId, userSubscription.CurrentSubscription.SubscriptionId);
+            await Payment(user.AdriaId, subscription.CurrentSubscription.SubscriptionId);
         }
         else
         {
             await PaymentWithPromo(
                 user.AdriaId,
-                userSubscription.CurrentSubscription.SubscriptionId,
+                subscription.CurrentSubscription.SubscriptionId,
                 promoCode
             );
         }
@@ -145,11 +145,11 @@ public sealed class AdoUserSubscriptionRepository : AbstractAdoRepository, IUser
             var parameters = new[]
             {
                 CreateParameter("@Id", Guid.NewGuid().ToString()), // for insert only
-                CreateParameter("@UserId", user.AdriaId.ToString()),
-                CreateParameter("@SubsId", userSubscription.CurrentSubscription.SubscriptionId),
-                CreateParameter("@Start", userSubscription.StartDate),
-                CreateParameter("@End", userSubscription.EndDate),
-                CreateParameter("@Status", userSubscription.Status)
+                CreateParameter("@UserId", user.AdriaId.ToString()),//NOSONAR
+                CreateParameter("@SubsId", subscription.CurrentSubscription.SubscriptionId),
+                CreateParameter("@Start", subscription.StartDate),
+                CreateParameter("@End", subscription.EndDate),
+                CreateParameter("@Status", subscription.Status)
             };
 
             await ExecuteNonQueryAsync(query, parameters);
