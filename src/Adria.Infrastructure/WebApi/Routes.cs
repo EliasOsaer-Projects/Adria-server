@@ -67,6 +67,18 @@ public static class Routes
             .WithName(nameof(CheckAnswerController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
             .WithOpenApi();
+
+        courseRoutes
+            .MapGet("/courses/{courseId}/enrollment/count", GetEnrollmentCountController.Invoke)
+            .WithDescription("Gets amount of enrolled users of a course")
+            .WithName(nameof(GetEnrollmentCountController))
+            .WithOpenApi();
+        
+        courseRoutes
+            .MapGet("/courses/{courseId}/lessons/count", GetLessonsCountController.Invoke)
+            .WithDescription("Gets amount of enrolled users of a course")
+            .WithName(nameof(GetLessonsCountController))
+            .WithOpenApi();
     }
 
     private static void MapUserRoutes(WebApplication app)
