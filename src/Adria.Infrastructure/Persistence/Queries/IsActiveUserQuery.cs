@@ -2,6 +2,7 @@
 using Adria.Application.Contracts;
 using Adria.Domain;
 using Microsoft.Extensions.Logging;
+using Taskly.Infrastructure.Persistence.Shared;
 
 namespace Adria.Infrastructure.Persistence.Queries;
 
@@ -34,7 +35,7 @@ public class IsActiveUserQuery
         _logger.LogInformation("Fetching IsActiveUserQuery");
         
         using var connection = _factory.CreateConnection()
-                               ?? throw new Exception("connection is null");
+                               ?? throw new AdriaDatabaseException("connection is null");
         connection.ConnectionString = _connectionString;
         await connection.OpenAsync();
         

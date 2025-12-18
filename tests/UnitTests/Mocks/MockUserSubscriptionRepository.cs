@@ -13,7 +13,7 @@ public class MockUserSubscriptionRepository : IUserSubscriptionRepository
         return Task.FromResult(subscription);
     }
     
-    public Task Save(User user, UserSubscription userSubscription)
+    public Task Save(User user, UserSubscription userSubscription, string? promoCode)
     {
         _userSubscriptions[user.AdriaId] = userSubscription;
         return Task.CompletedTask;
