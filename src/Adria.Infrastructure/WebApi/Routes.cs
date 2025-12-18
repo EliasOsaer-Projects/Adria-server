@@ -114,14 +114,12 @@ public static class Routes
             .MapPost("/{userId}/subscription/cancel", CancelUserSubscriptionController.Invoke)
             .WithDescription("cancels a user's subscription")
             .WithName(nameof(CancelUserSubscriptionController))
-            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
 
         userRoutes
           .MapPatch("/{userId}/userCourses/{courseId}/{progress}", AddProgressToCourseController.Invoke)
           .WithDescription("Adds porgress to the user course")
           .WithName(nameof(AddProgressToCourseController))
-          .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
           .WithOpenApi();
 
         userRoutes
@@ -142,14 +140,12 @@ public static class Routes
             .MapPost("/{userId}/occupation/{occupation}", AddOccupationController.Invoke)
             .WithDescription("Add the users occupation to the user")
             .WithName(nameof(AddOccupationController))
-            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
         
         userRoutes
             .MapPost("/{userId}/interests/{interests}", AddInterestsController.Invoke)
             .WithDescription("Add the users interests to the user")
             .WithName(nameof(AddInterestsController))
-            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
         
         userRoutes
@@ -167,7 +163,6 @@ public static class Routes
         userRoutes.MapGet("/{userId}/active", IsActiveUserController.Invoke)
             .WithDescription("Get whether a user is active or not")
             .WithName(nameof(IsActiveUserController))
-            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
             .WithOpenApi();
     }
 
