@@ -18,7 +18,7 @@ public class AddInterestsTest
             1000m
         );
 
-        String interests = "fun, family, friends";
+        String interests = "fun - family - friends";
 
         // Act
         var mockRepo = new MockUserRepository();

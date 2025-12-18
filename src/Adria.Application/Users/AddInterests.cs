@@ -32,7 +32,7 @@ public sealed class AddInterests : IUseCase<AddInterestsInput, Task>
 
         if (!string.IsNullOrWhiteSpace(input.Interests))
         {
-            user.AddInterests(input.Interests.Split(',', StringSplitOptions.TrimEntries).ToList());
+            user.AddInterests(input.Interests.Split('-', StringSplitOptions.TrimEntries).ToList());
             await _userRepository.SaveInterests(user);
             _logger.LogInformation("Interests added to user {UserId}", user.AdriaId);
         }
