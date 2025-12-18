@@ -14,6 +14,7 @@ public sealed class SubscribeUserTests
         var mockSubscriptionRepo = new MockSubscriptionRepository();
         var mockUserSubscriptionRepo = new MockUserSubscriptionRepository();
         var mockLogger = new MockLogger<SubscribeUser>();
+        var mockpromoQuery = new MockDiscountByPromoCodeQuery();
 
         var user = new User(Guid.NewGuid(), "Alice", 100);
         var subscription = new Subscription(Guid.NewGuid(), "Premium", 50, "Best plan", true);
@@ -25,10 +26,11 @@ public sealed class SubscribeUserTests
             mockUserRepo, 
             mockUserSubscriptionRepo, 
             mockSubscriptionRepo, 
-            mockLogger
+            mockLogger,
+            mockpromoQuery
         );
 
-        var input = new SubscribeUserInput(user.AdriaId, subscription.SubscriptionId);
+        var input = new SubscribeUserInput(user.AdriaId, subscription.SubscriptionId, null);
 
         // Act
         await useCase.Execute(input);
@@ -50,6 +52,7 @@ public sealed class SubscribeUserTests
         var mockSubscriptionRepo = new MockSubscriptionRepository();
         var mockUserSubscriptionRepo = new MockUserSubscriptionRepository();
         var mockLogger = new MockLogger<SubscribeUser>();
+        var mockPromocodeQuery = new MockDiscountByPromoCodeQuery();
 
         var user = new User(Guid.NewGuid(), "Bob", 100);
         var oldSubscription = new Subscription(Guid.NewGuid(), "Basic", 20, "Old plan", false);
@@ -60,16 +63,17 @@ public sealed class SubscribeUserTests
         mockSubscriptionRepo.AddSubscription(newSubscription);
 
         var existingUserSubscription = new UserSubscription(oldSubscription, DateTime.UtcNow.AddDays(-30));
-        await mockUserSubscriptionRepo.Save(user, existingUserSubscription);
+        await mockUserSubscriptionRepo.Save(user, existingUserSubscription, null);
 
         var useCase = new SubscribeUser(
             mockUserRepo, 
             mockUserSubscriptionRepo, 
             mockSubscriptionRepo, 
-            mockLogger
+            mockLogger,
+            mockPromocodeQuery
         );
 
-        var input = new SubscribeUserInput(user.AdriaId, newSubscription.SubscriptionId);
+        var input = new SubscribeUserInput(user.AdriaId, newSubscription.SubscriptionId, null);
 
         // Act
         await useCase.Execute(input);
@@ -92,6 +96,7 @@ public sealed class SubscribeUserTests
         var mockSubscriptionRepo = new MockSubscriptionRepository();
         var mockUserSubscriptionRepo = new MockUserSubscriptionRepository();
         var mockLogger = new MockLogger<SubscribeUser>();
+        var mockPromocodeQuery = new MockDiscountByPromoCodeQuery();
 
         var subscription = new Subscription(Guid.NewGuid(), "Premium", 50, "Best plan", true);
         mockSubscriptionRepo.AddSubscription(subscription);
@@ -100,10 +105,11 @@ public sealed class SubscribeUserTests
             mockUserRepo, 
             mockUserSubscriptionRepo, 
             mockSubscriptionRepo, 
-            mockLogger
+            mockLogger,
+            mockPromocodeQuery
         );
 
-        var input = new SubscribeUserInput(Guid.NewGuid(), subscription.SubscriptionId);
+        var input = new SubscribeUserInput(Guid.NewGuid(), subscription.SubscriptionId, null);
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() => useCase.Execute(input));
@@ -117,6 +123,7 @@ public sealed class SubscribeUserTests
         var mockSubscriptionRepo = new MockSubscriptionRepository();
         var mockUserSubscriptionRepo = new MockUserSubscriptionRepository();
         var mockLogger = new MockLogger<SubscribeUser>();
+        var mockPromocodeQuery = new MockDiscountByPromoCodeQuery();
 
         var user = new User(Guid.NewGuid(), "Charlie", 100);
         mockUserRepo.AddUser(user);
@@ -125,10 +132,11 @@ public sealed class SubscribeUserTests
             mockUserRepo, 
             mockUserSubscriptionRepo, 
             mockSubscriptionRepo, 
-            mockLogger
+            mockLogger,
+            mockPromocodeQuery
         );
 
-        var input = new SubscribeUserInput(user.AdriaId, Guid.NewGuid());
+        var input = new SubscribeUserInput(user.AdriaId, Guid.NewGuid(), null);
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() => useCase.Execute(input));
