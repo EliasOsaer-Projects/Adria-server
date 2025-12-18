@@ -75,33 +75,27 @@ public sealed class GetNextCourseModuleQuery
     private async Task<IReadOnlyCollection<ModuleQuestionData>> GetQuestions(Guid moduleId, Guid userId)
     {
         var questions = new Dictionary<Guid, (string Question, List<QuestionAnswerData> Answers)>();
-        
-        using var connection = _factory.CreateConnection() 
+
+        using var connection = _factory.CreateConnection()
                                ?? throw new AdriaDatabaseException("DbProviderFactory returned a null DbConnection.");
-        
+
         connection.ConnectionString = _connectionString;
         await connection.OpenAsync();
-        
+
         using var command = connection.CreateCommand();
         command.CommandText = GET_NEXT_MODULE_QUERY;
-        
+
         var moduleIdParam = command.CreateParameter();
         moduleIdParam.ParameterName = "@ModuleId";
         moduleIdParam.Value = moduleId;
         command.Parameters.Add(moduleIdParam);
-        
+
         var userIdParam = command.CreateParameter();
         userIdParam.ParameterName = "@UserId";
         userIdParam.Value = userId;
         command.Parameters.Add(userIdParam);
-        
-        await using var reader = await command.ExecuteReaderAsync();
 
-        if (!await reader.ReadAsync())
-        {
-            _logger.LogInformation("No questions found for module {ModuleId}", moduleId);
-            return Array.Empty<ModuleQuestionData>();
-        }
+        await using var reader = await command.ExecuteReaderAsync();
 
         while (await reader.ReadAsync())
         {
@@ -118,7 +112,7 @@ public sealed class GetNextCourseModuleQuery
 
             entry.Answers.Add(new QuestionAnswerData(answerId, answerText));
         }
-        
+
         if (questions.Count == 0)
         {
             _logger.LogInformation("No questions found for module {ModuleId}", moduleId);
@@ -141,43 +135,54 @@ public sealed class GetNextCourseModuleQuery
 
         try
         {
+            Guid moduleId;
+            int position;
+            string content;
+
             _logger.LogInformation("Fetching modules with unanswered or wrong questions for course {CourseId} and user {UserId}", courseId, userId);
 
-            using var connection = _factory.CreateConnection()
-                                   ?? throw new AdriaDatabaseException("DbProviderFactory returned a null DbConnection.");
-        
-            connection.ConnectionString = _connectionString;
-            await connection.OpenAsync();
-        
-            using var command = connection.CreateCommand();
-            command.CommandText = CHECK_FOR_UNANSWERED_OR_WRONG_QUESTIONS_QUERY;
-        
-            var courseIdParam = command.CreateParameter();
-            courseIdParam.ParameterName = "@CourseId";
-            courseIdParam.Value = courseId;
-            command.Parameters.Add(courseIdParam);
-        
-            var userIdParam = command.CreateParameter();
-            userIdParam.ParameterName = "@UserId";
-            userIdParam.Value = userId;
-            command.Parameters.Add(userIdParam);
-        
-            await using var reader = await command.ExecuteReaderAsync();
-
-            if (!await reader.ReadAsync())
+            using (var connection = _factory.CreateConnection()
+                   ?? throw new AdriaDatabaseException("DbProviderFactory returned a null DbConnection."))
             {
-                _logger.LogInformation("No module with wrong or unanswered questions");
-                throw new GenesisException("No module with wrong or unanswered questions");
-            }
+                connection.ConnectionString = _connectionString;
+                await connection.OpenAsync();
 
+                using var command = connection.CreateCommand();
+                command.CommandText = CHECK_FOR_UNANSWERED_OR_WRONG_QUESTIONS_QUERY;
+
+                var courseIdParam = command.CreateParameter();
+                courseIdParam.ParameterName = "@CourseId";
+                courseIdParam.Value = courseId;
+                command.Parameters.Add(courseIdParam);
+
+                var userIdParam = command.CreateParameter();
+                userIdParam.ParameterName = "@UserId";
+                userIdParam.Value = userId;
+                command.Parameters.Add(userIdParam);
+
+                await using var reader = await command.ExecuteReaderAsync();
+
+                if (!await reader.ReadAsync())
+                {
+                    _logger.LogInformation("No module with wrong or unanswered questions");
+                    throw new GenesisException("No module with wrong or unanswered questions");
+                }
+
+                moduleId = reader.GetGuid(reader.GetOrdinal("ModuleID"));
+                position = reader.GetInt32(reader.GetOrdinal("Position"));
+                content  = reader.GetString(reader.GetOrdinal("Content"));
+            } 
+
+            
+            var questions = await GetQuestions(moduleId, userId);
             return new CourseModuleData(
-                ModuleId: reader.GetGuid(reader.GetOrdinal("ModuleID")),
-                Position: reader.GetInt32(reader.GetOrdinal("Position")),
-                Content: reader.GetString(reader.GetOrdinal("Content")),
-                Questions: await GetQuestions(reader.GetGuid(reader.GetOrdinal("ModuleID")), userId)
+                ModuleId: moduleId,
+                Position: position,
+                Content: content,
+                Questions: questions
             );
         }
-        catch (GenesisException e)
+        catch (GenesisException)
         {
             throw new GenesisException("No module found");
         }
