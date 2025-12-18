@@ -1,98 +1,63 @@
 ﻿using System.Data.Common;
 using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
+using Adria.Domain;
 using Microsoft.Extensions.Logging;
+using Taskly.Infrastructure.Persistence.Shared;
 
 namespace Adria.Infrastructure.Persistence.Queries;
 
 public sealed class GetNextCourseModuleQuery 
     : IGetNextCourseModuleQuery
 {
-    private static readonly string sql_moduleWithWrongAnswers = @"
-        SELECT DISTINCT m.ModuleID, m.Position, m.Content
+    private static readonly string CHECK_FOR_UNANSWERED_OR_WRONG_QUESTIONS_QUERY = @"
+        SELECT DISTINCT 
+           m.ModuleID,
+           m.Position,
+           m.Content
         FROM Module m
-        INNER JOIN QuestionAnswer qa ON m.ModuleID = qa.ModuleID
-        WHERE m.CourseID = @courseId
+        JOIN QuestionAnswer qa ON qa.ModuleID = m.ModuleID
+        WHERE m.CourseID = @CourseId
           AND EXISTS (
-              -- User has answered this question wrong
-              SELECT 1 
-              FROM UserQuestionAnswer uqa 
-              WHERE uqa.QAID = qa.QAID 
-                AND uqa.AdriaID = @adriaId
-                AND uqa.IsCorrectlyAnswered = FALSE
-          )
-          AND NOT EXISTS (
-              -- User has NEVER answered this question correctly
               SELECT 1
-              FROM QuestionAnswer qa2
-              INNER JOIN UserQuestionAnswer uqa2 ON qa2.QAID = uqa2.QAID
-              WHERE qa2.QuestionID = qa.QuestionID
-                AND uqa2.AdriaID = @adriaId
-                AND uqa2.IsCorrectlyAnswered = TRUE
+              FROM QuestionAnswer qa1
+              LEFT JOIN UserQuestionAnswer uqa1
+                     ON uqa1.QAID = qa1.QAID AND uqa1.AdriaID = @UserId
+              WHERE qa1.ModuleID = m.ModuleID
+               
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM QuestionAnswer qa2
+                    JOIN UserQuestionAnswer uqa2
+                      ON uqa2.QAID = qa2.QAID
+                     AND uqa2.AdriaID = @UserId
+                     AND uqa2.IsCorrectlyAnswered = 1
+                    WHERE qa2.QuestionID = qa1.QuestionID
+                )
           )
-        ORDER BY m.Position ASC
+        ORDER BY m.Position
         LIMIT 1;
     ";
     
-    private static readonly string sql_nextModule = @"
-        SELECT m.ModuleID, m.Position, m.Content
-        FROM Module m
-        WHERE m.CourseID = @courseId
+    private static readonly string GET_NEXT_MODULE_QUERY = @"
+        SELECT 
+            *
+        FROM QuestionAnswer qa
+        JOIN Question q ON q.QuestionID = qa.QuestionID
+        JOIN Answer   a ON a.AnswerID   = qa.AnswerID
+        WHERE qa.ModuleID = @ModuleId
           AND NOT EXISTS (
-              SELECT 1
-              FROM QuestionAnswer qa
-              INNER JOIN UserQuestionAnswer uqa ON qa.QAID = uqa.QAID
-              WHERE qa.ModuleID = m.ModuleID
-                AND uqa.AdriaID = @adriaId
+                SELECT 1
+                FROM QuestionAnswer qa_ok
+                JOIN UserQuestionAnswer uqa_ok
+                     ON uqa_ok.QAID = qa_ok.QAID
+                WHERE qa_ok.QuestionID = qa.QuestionID
+                  AND uqa_ok.AdriaID = @UserId
+                  AND uqa_ok.IsCorrectlyAnswered = 1
           )
-        ORDER BY m.Position ASC
-        LIMIT 1;
+        ORDER BY q.QuestionID, a.AnswerID;
     ";
-
-    private static readonly string sql_wrongQuestions = @"
-    SELECT DISTINCT 
-        q.QuestionID,
-        q.Question,
-        a.AnswerID,
-        a.Answer
-    FROM QuestionAnswer qa
-    INNER JOIN Question q ON qa.QuestionID = q.QuestionID
-    INNER JOIN Answer a ON qa.AnswerID = a.AnswerID
-    WHERE qa.ModuleID = @moduleId
-      AND EXISTS (
-          -- User answered this question wrong
-          SELECT 1
-          FROM QuestionAnswer qa2
-          INNER JOIN UserQuestionAnswer uqa ON qa2.QAID = uqa.QAID
-          WHERE qa2.QuestionID = q.QuestionID
-            AND uqa.AdriaID = @adriaId
-            AND uqa.IsCorrectlyAnswered = FALSE
-      )
-      AND NOT EXISTS (
-          -- User has NEVER answered this question correctly
-          SELECT 1
-          FROM QuestionAnswer qa3
-          INNER JOIN UserQuestionAnswer uqa2 ON qa3.QAID = uqa2.QAID
-          WHERE qa3.QuestionID = q.QuestionID
-            AND uqa2.AdriaID = @adriaId
-            AND uqa2.IsCorrectlyAnswered = TRUE
-      )
-    ORDER BY q.QuestionID, a.AnswerID;
-";
     
-    private static readonly string sql_moduleQuestions = @"
-    SELECT DISTINCT 
-        q.QuestionID,
-        q.Question,
-        a.AnswerID,
-        a.Answer
-    FROM QuestionAnswer qa
-    INNER JOIN Question q ON qa.QuestionID = q.QuestionID
-    INNER JOIN Answer a ON qa.AnswerID = a.AnswerID
-    WHERE qa.ModuleID = @moduleId
-    ORDER BY q.QuestionID, a.AnswerID;
-";
-
     private readonly DbProviderFactory _factory;
     private readonly string _connectionString;
     private readonly ILogger<GetNextCourseModuleQuery> _logger;
@@ -107,136 +72,115 @@ public sealed class GetNextCourseModuleQuery
         _logger = logger;
     }
     
-    public async Task<CourseModuleData?> Fetch(Guid courseId, Guid userId)
-{
-    _logger.LogInformation(
-        "Fetching next module for user {UserId} in course {CourseId}", 
-        userId, 
-        courseId
-    );
-
-    using var connection = _factory.CreateConnection() 
-        ?? throw new InvalidOperationException("DbProviderFactory returned null connection");
-    
-    connection.ConnectionString = _connectionString;
-    await connection.OpenAsync();
-
-    Guid? moduleId = null;
-    int? position = null;
-    string? content = null;
-    bool isReview = false;
-
-    // Step 1: Check for modules with wrong answers
-    using (var command = connection.CreateCommand())
+    private async Task<IReadOnlyCollection<ModuleQuestionData>> GetQuestions(Guid moduleId, Guid userId)
     {
-        command.CommandText = sql_moduleWithWrongAnswers;
+        var questions = new Dictionary<Guid, (string Question, List<QuestionAnswerData> Answers)>();
         
-        var adriaIdParam = command.CreateParameter();
-        adriaIdParam.ParameterName = "@adriaId";
-        adriaIdParam.Value = userId.ToString();
-        command.Parameters.Add(adriaIdParam);
+        using var connection = _factory.CreateConnection() 
+                               ?? throw new AdriaDatabaseException("DbProviderFactory returned a null DbConnection.");
         
-        var courseIdParam = command.CreateParameter();
-        courseIdParam.ParameterName = "@courseId";
-        courseIdParam.Value = courseId.ToString();
-        command.Parameters.Add(courseIdParam);
-
-        using var reader = await command.ExecuteReaderAsync();
-        if (await reader.ReadAsync())
-        {
-            moduleId = Guid.Parse(reader.GetString(0));
-            position = reader.GetInt32(1);
-            content = reader.GetString(2);
-            isReview = true; // This is a review module
-        }
-    }
-
-    // Step 2: No wrong answers? Get the next fresh module
-    if (moduleId == null)
-    {
+        connection.ConnectionString = _connectionString;
+        await connection.OpenAsync();
+        
         using var command = connection.CreateCommand();
-        command.CommandText = sql_nextModule;
-        
-        var adriaIdParam = command.CreateParameter();
-        adriaIdParam.ParameterName = "@adriaId";
-        adriaIdParam.Value = userId.ToString();
-        command.Parameters.Add(adriaIdParam);
-        
-        var courseIdParam = command.CreateParameter();
-        courseIdParam.ParameterName = "@courseId";
-        courseIdParam.Value = courseId.ToString();
-        command.Parameters.Add(courseIdParam);
-
-        using var reader = await command.ExecuteReaderAsync();
-        if (await reader.ReadAsync())
-        {
-            moduleId = Guid.Parse(reader.GetString(0));
-            position = reader.GetInt32(1);
-            content = reader.GetString(2);
-        }
-    }
-
-    // Step 3: No modules left? Return null
-    if (moduleId == null)
-    {
-        _logger.LogInformation("No more modules to complete for user {UserId} in course {CourseId}", 
-            userId, courseId);
-        return null;
-    }
-
-    // Step 4: Fetch questions - ONLY wrong ones if reviewing, ALL if new module
-    var questions = new Dictionary<Guid, (string Question, List<QuestionAnswerData> Answers)>();
-
-    using (var command = connection.CreateCommand())
-    {
-        // Use different query based on whether it's a review
-        command.CommandText = isReview ? sql_wrongQuestions : sql_moduleQuestions;
+        command.CommandText = GET_NEXT_MODULE_QUERY;
         
         var moduleIdParam = command.CreateParameter();
-        moduleIdParam.ParameterName = "@moduleId";
-        moduleIdParam.Value = moduleId.Value.ToString();
+        moduleIdParam.ParameterName = "@ModuleId";
+        moduleIdParam.Value = moduleId;
         command.Parameters.Add(moduleIdParam);
+        
+        var userIdParam = command.CreateParameter();
+        userIdParam.ParameterName = "@UserId";
+        userIdParam.Value = userId;
+        command.Parameters.Add(userIdParam);
+        
+        await using var reader = await command.ExecuteReaderAsync();
 
-        if (isReview)
+        if (!await reader.ReadAsync())
         {
-            var adriaIdParam = command.CreateParameter();
-            adriaIdParam.ParameterName = "@adriaId";
-            adriaIdParam.Value = userId.ToString();
-            command.Parameters.Add(adriaIdParam);
+            _logger.LogInformation("No questions found for module {ModuleId}", moduleId);
+            return Array.Empty<ModuleQuestionData>();
         }
 
-        using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
-            var questionId = Guid.Parse(reader.GetString(0));
-            var questionText = reader.GetString(1);
-            var answerId = Guid.Parse(reader.GetString(2));
-            var answerText = reader.GetString(3);
+            var questionId = reader.GetGuid(reader.GetOrdinal("QuestionID"));
+            var questionText = reader.GetString(reader.GetOrdinal("Question"));
+            var answerId = reader.GetGuid(reader.GetOrdinal("AnswerID"));
+            var answerText = reader.GetString(reader.GetOrdinal("Answer"));
 
             if (!questions.TryGetValue(questionId, out var entry))
             {
                 entry = (questionText, new List<QuestionAnswerData>());
-                questions[questionId] = entry;
+                questions.Add(questionId, entry);
             }
 
             entry.Answers.Add(new QuestionAnswerData(answerId, answerText));
         }
+        
+        if (questions.Count == 0)
+        {
+            _logger.LogInformation("No questions found for module {ModuleId}", moduleId);
+            return Array.Empty<ModuleQuestionData>();
+        }
+        
+        return questions
+            .Select(questionEntry => new ModuleQuestionData(
+                QuestionId: questionEntry.Key,
+                Question: questionEntry.Value.Question,
+                Answers: questionEntry.Value.Answers.AsReadOnly()
+            ))
+            .ToList()
+            .AsReadOnly();
     }
+    
+    public async Task<CourseModuleData?> Fetch(Guid courseId, Guid userId)
+    {
+        _logger.LogInformation("Fetching next course module for course {CourseId} and user {UserId}", courseId, userId);
 
-    var moduleQuestions = questions
-        .Select(kvp => new ModuleQuestionData(
-            kvp.Key,
-            kvp.Value.Question,
-            kvp.Value.Answers
-        ))
-        .ToList();
+        try
+        {
+            _logger.LogInformation("Fetching modules with unanswered or wrong questions for course {CourseId} and user {UserId}", courseId, userId);
 
-    return new CourseModuleData(
-        moduleId.Value,
-        position!.Value,
-        content!,
-        moduleQuestions
-    );
-}
+            using var connection = _factory.CreateConnection()
+                                   ?? throw new AdriaDatabaseException("DbProviderFactory returned a null DbConnection.");
+        
+            connection.ConnectionString = _connectionString;
+            await connection.OpenAsync();
+        
+            using var command = connection.CreateCommand();
+            command.CommandText = CHECK_FOR_UNANSWERED_OR_WRONG_QUESTIONS_QUERY;
+        
+            var courseIdParam = command.CreateParameter();
+            courseIdParam.ParameterName = "@CourseId";
+            courseIdParam.Value = courseId;
+            command.Parameters.Add(courseIdParam);
+        
+            var userIdParam = command.CreateParameter();
+            userIdParam.ParameterName = "@UserId";
+            userIdParam.Value = userId;
+            command.Parameters.Add(userIdParam);
+        
+            await using var reader = await command.ExecuteReaderAsync();
+
+            if (!await reader.ReadAsync())
+            {
+                _logger.LogInformation("No module with wrong or unanswered questions");
+                throw new GenesisException("No module with wrong or unanswered questions");
+            }
+
+            return new CourseModuleData(
+                ModuleId: reader.GetGuid(reader.GetOrdinal("ModuleID")),
+                Position: reader.GetInt32(reader.GetOrdinal("Position")),
+                Content: reader.GetString(reader.GetOrdinal("Content")),
+                Questions: await GetQuestions(reader.GetGuid(reader.GetOrdinal("ModuleID")), userId)
+            );
+        }
+        catch (GenesisException e)
+        {
+            throw new GenesisException("No module found");
+        }
+    }
 
 }
