@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System.Data;
+using System.Data.Common;
 using Taskly.Infrastructure.Persistence.Shared;
 
 namespace Adria.Infrastructure.Persistence.Shared;
@@ -57,7 +58,8 @@ public abstract class AbstractAdoRepository
             var command = connection.CreateCommand();
             command.CommandText = commandText;
             command.Parameters.AddRange(parameters);
-            return await command.ExecuteReaderAsync();
+            return await command.ExecuteReaderAsync(CommandBehavior.CloseConnection);
+            
         }
         catch (DbException ex)
         {
