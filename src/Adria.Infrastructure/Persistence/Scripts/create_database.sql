@@ -253,10 +253,15 @@ INSERT INTO `Payment` (`TransactionID`, `AdriaCoinAmount`, `TransactionDate`, `A
 
 -- ===== COSMETIC ITEMS =====
 INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('9d2ef6f2-88c6-4cc3-a268-e94a208b5616', 'UltraMax', 'Badge', 0, NULL);
-INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('578cb38c-418e-4460-91ed-bc034c0deb99', 'Jannaholic', 'Badge', 250, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('578cb38c-418e-4460-91ed-bc034c0deb99', 'Jannaholic', 'Badge', 500, NULL);
 INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('ff1c72ac-8781-4d63-b404-6763d1e20d79', 'Holly Jolly Christmas', 'Badge', 500, NULL);
-INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('b95f5e95-c46b-4b95-b671-cfe23b3930fc', 'Cat Lover', 'Badge', 150, NULL);
-INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('051d3efe-97b8-40f6-955c-a3388a39146a', 'Simon Approved', 'Badge', 300, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('b95f5e95-c46b-4b95-b671-cfe23b3930fc', 'Cat Lover', 'Badge', 250, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('dd6049ea-3e30-4d25-82f6-d78d5a00616a', 'Simon Approved', 'Badge', 185, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('e696b7ba-28d9-4d3a-80f1-7af1ff0ad5c8', 'Ik hou van koekjes', 'Badge', 300, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('051d3efe-97b8-40f6-955c-a3388a39146a', 'Wijsneus', 'Badge', 3005, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('35c18dfd-cf4f-448e-9a87-d4f4796e0ad3', 'J1201 Gordijnen', 'Badge', 300, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('22330134-7716-4039-8010-a70e8297c270', 'My First Course', 'Badge', 150, NULL);
+INSERT INTO `CosmeticItem` (`CosmeticItemID`, `ItemName`, `ItemType`, `PointsCost`, `CosmeticImage`) VALUES ('e4c1cf2f-f6f9-4ec9-bea7-da96c7633420', 'Nature Freak', 'Badge', 650, NULL);
 
 -- ===== COURSES =====
 INSERT INTO `Course` (`CourseID`, `CourseName`, `CourseDifficulty`, `CourseDescription`, `CourseCategory`, `CourseTags`, `PointsOnCompletion`, `EstimatedDurationInHours`, `CoverImageID`, `BannerImageID`, `LearnList`, `SubscriptionRequired`) VALUES ('5fe6e3d1-0a74-4759-9bad-a5f0e48a9340', 'Baking bread for the modern household', 1, 'Learn the fundamentals of bread making from scratch, essential for self-sufficient living in the new Earth.', 'Culinary Arts', 'baking, bread, cooking, food preparation, kitchen skills', 50, 4, NULL, NULL, 'Basic dough preparation, Kneading techniques, Yeast activation, Baking temperatures, Bread storage methods', 0);

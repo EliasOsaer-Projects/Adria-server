@@ -36,14 +36,14 @@ public static class UseCases
             // User Use Cases
             .AddScoped<IUseCase<UpdateUserProfilePictureInput, Task>, UpdateUserProfilePicture>()
             .AddScoped<IUseCase<Guid, Task>, DeleteUserProfilePicture>()
-
             .AddScoped<IUseCase<SearchUserByIdInput, Task<UserData>>, SearchUserById>()
             .AddScoped<IUseCase<Task<IEnumerable<LeaderBoardData>>>, Top10Users>()
             .AddScoped<IUseCase<AddOccupationInput, Task>, AddOccupation>()
             .AddScoped<IUseCase<AddInterestsInput, Task>, AddInterests>()
             .AddScoped<IUseCase<Task<IReadOnlyCollection<OccupationData>>>, GetAllOccupations>()
             .AddScoped<IUseCase<Task<IReadOnlyCollection<InterestData>>>, GetAllInterests>()
-
+            .AddScoped<IUseCase<Guid, Task<bool>>, IsActiveUser>()
+            
             // Cosmetic Use Cases
             .AddScoped<IUseCase<AllCosmeticsInput, Task<IReadOnlyCollection<CosmeticItemData>>>, AllCosmetics>()
             .AddScoped<IUseCase<PurchaseCosmeticInput, Task>, PurchaseCosmetic>()

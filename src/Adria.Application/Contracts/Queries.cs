@@ -68,10 +68,15 @@ public interface IGetNextCourseModuleQuery
 }
 public interface IDiscountByPromoCodeQuery
 {
-    Task<decimal> Fetch(string  promoCode);
+    Task<decimal> Fetch(string promoCode);
 }
 
 public interface IGetUserCosmeticsQuery
 {
     Task<IReadOnlyCollection<CosmeticItemData>> Fetch(Guid userId);
+}
+
+public interface IIsActiveUserQuery
+{
+    Task<bool> Fetch(Guid userId);
 }

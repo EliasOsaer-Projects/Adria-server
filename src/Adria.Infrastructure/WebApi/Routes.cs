@@ -165,6 +165,12 @@ public static class Routes
             .WithDescription("Get all possible interests")
             .WithName(nameof(GetAllInterestsController))
             .WithOpenApi();
+
+        userRoutes.MapGet("/{userId}/active", IsActiveUserController.Invoke)
+            .WithDescription("Get whether a user is active or not")
+            .WithName(nameof(IsActiveUserController))
+            .WithMetadata(new ConsumesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
     }
 
     private static void MapSubscriptionRoutes(WebApplication app)

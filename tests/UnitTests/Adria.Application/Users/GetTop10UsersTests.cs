@@ -1,5 +1,6 @@
 ﻿using Adria.Application.Contracts.Data;
 using Adria.Application.Users;
+using Adria.Domain;
 using UnitTests.Mocks;
 
 namespace UnitTests.Adria.Application.Users;
@@ -17,6 +18,7 @@ public sealed class GetTop10UsersTests
             for (int i = 1; i <= 15; i++)
             {
                 mockQuery.AddUser(new LeaderBoardData(
+                    UserId: Guid.NewGuid(), 
                     Name: $"Testuser-{i}",
                     PointsBalance: i,
                     []
@@ -42,6 +44,7 @@ public sealed class GetTop10UsersTests
             for (int i = 1; i <= 5; i++)
             {
                 mockQuery.AddUser(new LeaderBoardData(
+                    UserId: Guid.NewGuid(),
                     Name: $"Testuser-{i}",
                     PointsBalance: i * 10
                     ,[]
