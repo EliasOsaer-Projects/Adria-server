@@ -3215,7 +3215,7 @@ INSERT INTO `QuestionAnswer` (`QAID`, `ModuleID`, `QuestionID`, `AnswerID`) VALU
 -- ===== PROMO CODES =====
 INSERT INTO `PromoCode` (PromoCodeID, Code, Discount, Active) VALUES ('985fd5bc-1c75-43e2-afa5-7d990e6cd728', 'AdriaNightHotel15', 15.00, 1);
 INSERT INTO `PromoCode` (PromoCodeID, Code, Discount, Active) VALUES ('b3c7c6a2-4e9f-4f6a-9b6e-2a8f9a1c4d21', 'L3ErManFan5', 53.43, 1);
-INSERT INTO `PromoCode` (PromoCodeID, Code, Discount, Active) VALUES ('4a2e1f8b-9d3f-4b6a-a7c9-8c6f2e5b1a44', 'SUPERSTEVENFANCLUB', 20.00, 0);
+INSERT INTO `PromoCode` (PromoCodeID, Code, Discount, Active) VALUES ('4a2e1f8b-9d3f-4b6a-a7c9-8c6f2e5b1a44', 'SUPERSTEVENFANCLUB', 80.00, 0);
 
 -- ===== OCCUPATIONS =====
 INSERT INTO `Occupation` (`OccupationID`, `OccupationName`)VALUES ('a1b2c3d4-1111-2222-3333-aaaaaaaaaaaa', 'Software Developer');
