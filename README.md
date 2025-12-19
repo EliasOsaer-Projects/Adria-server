@@ -16,8 +16,8 @@ dotnet run --project src/Adria.Main
 Server listens on `http://localhost:8000` by default; Swagger UI is at `/swagger`.
 
 ## Config
-- Primary settings: `src/Adria.Main/appsettings.json`
-- Local overrides: `src/Adria.Main/appsettings.Development.json`
+- Test environment: `src/Adria.Main/appsettings.json`
+- Local development: `src/Adria.Main/appsettings.Development.json`
 
 ## Tests
 ```bash
