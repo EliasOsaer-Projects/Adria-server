@@ -14,6 +14,7 @@ public sealed class MockPushSubscriptionRepository : IPushSubscriptionRepository
     public Task SaveSubscription(PushSubscription pushSubscription)
     {
         StoredSubscriptions.RemoveAll(subscription => subscription.Endpoint == pushSubscription.Endpoint);
+        
         StoredSubscriptions.Add(pushSubscription);
         return Task.CompletedTask;
     }
