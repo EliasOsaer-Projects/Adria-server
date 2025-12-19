@@ -17,9 +17,10 @@ public class GetLessonsCount
         _query = query;
         _logger = logger;
     }
-    
+
     public async Task<int> Execute(GetLessonsCountInput input)
     {
-        return await _query.Fetch(input.CourseId);   
+        _logger.LogInformation("Fetching lesson count");
+        return await _query.Fetch(input.CourseId);
     }
 }
