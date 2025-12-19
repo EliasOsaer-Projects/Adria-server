@@ -22,7 +22,8 @@ public class GetUserCosmeticsQuery
             c.CosmeticItemID, 
             c.ItemName, 
             c.ItemType, 
-            c.PointsCost
+            c.PointsCost,
+            c.CosmeticImage
         FROM CosmeticItem c
         WHERE c.ItemName = 'UltraMax'
           AND EXISTS (
