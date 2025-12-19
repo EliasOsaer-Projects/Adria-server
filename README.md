@@ -8,7 +8,9 @@ Minimal guide to run the API locally.
 
 ## Run
 ```bash
-dotnet restore
+git clone <server-repo-url>
+cd <server-repo-folder>
+docker compose -f config/docker/docker-compose.yml up -d
 dotnet run --project src/Adria.Main
 ```
 Server listens on `http://localhost:8000` by default; Swagger UI is at `/swagger`.
