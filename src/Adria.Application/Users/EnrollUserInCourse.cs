@@ -8,14 +8,14 @@ namespace Adria.Application.Users;
 
 public sealed record EnrollUserInCourseInput(Guid UserId, Guid CourseId);
 
-public class EnrollUserInCourse 
+public class EnrollUserInCourse
     : IUseCase<EnrollUserInCourseInput, Task<UserCourseRepoData>>
 {
-   private readonly ILogger<EnrollUserInCourse> _logger;
+    private readonly ILogger<EnrollUserInCourse> _logger;
     private readonly IUserCourseRepository _userCourseRepository;
     private readonly IPushSubscriptionRepository _pushSubscriptionRepository;
     private readonly IPushNotificationSender _pushNotificationSender;
-    
+
     public EnrollUserInCourse(
         ILogger<EnrollUserInCourse> logger,
         IUserCourseRepository userCourseRepository,
@@ -32,7 +32,7 @@ public class EnrollUserInCourse
     public async Task<UserCourseRepoData> Execute(EnrollUserInCourseInput input)
     {
         _logger.LogInformation("Enrolling user {UserId} in course {CourseId}", input.UserId, input.CourseId);
-        
+
         UserCourseRepoData repoData = await _userCourseRepository.Save(input.UserId, input.CourseId);
 
         IReadOnlyList<PushSubscription> subscriptions;
@@ -62,7 +62,7 @@ public class EnrollUserInCourse
         {
             try
             {
-                _pushNotificationSender.SendNotification(subscription, title, message, url);
+                await _pushNotificationSender.SendNotification(subscription, title, message, url);
             }
             catch (Exception exception)
             {

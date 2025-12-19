@@ -4,7 +4,6 @@ using Adria.Application.Contracts.Data;
 using Adria.Application.Courses;
 using Adria.Application.Users;
 using Adria.Application.Subscriptions;
-using Mysqlx.Crud;
 using Adria.Application.PushNotifications;
 
 namespace Adria.Main.Modules.UseCases;
@@ -32,7 +31,7 @@ public static class UseCases
             .AddScoped<IUseCase<CheckAnswerInput, Task<Guid>>, CheckAnswer>()
             .AddScoped<IUseCase<GetEnrollmentCountInput, Task<int>>, GetEnrollmentCount>()
             .AddScoped<IUseCase<GetLessonsCountInput, Task<int>>, GetLessonsCount>()
-            
+
             // User Use Cases
             .AddScoped<IUseCase<UpdateUserProfilePictureInput, Task>, UpdateUserProfilePicture>()
             .AddScoped<IUseCase<Guid, Task>, DeleteUserProfilePicture>()
