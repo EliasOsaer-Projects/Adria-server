@@ -19,7 +19,7 @@ public sealed class PushNotificationSender : IPushNotificationSender
         _logger = logger;
     }
 
-    public void SendNotification(Adria.Domain.PushNotifications.PushSubscription pushSubscription, string title, string message, string url)
+    public async Task SendNotification(Adria.Domain.PushNotifications.PushSubscription pushSubscription, string title, string message, string url)
     {
         if (_pushServiceClient.DefaultAuthentication is null)
         {
@@ -45,10 +45,7 @@ public sealed class PushNotificationSender : IPushNotificationSender
             Urgency = PushMessageUrgency.Normal
         };
 
-        _pushServiceClient
-            .RequestPushMessageDeliveryAsync(subscription, pushMessage)
-            .GetAwaiter()
-            .GetResult();
+        await _pushServiceClient.RequestPushMessageDeliveryAsync(subscription, pushMessage);
 
         _logger.LogInformation("Sent push notification to {Endpoint}", pushSubscription.Endpoint);
     }
