@@ -41,7 +41,7 @@ public static class Routes
             .WithDescription("All endpoints todo with courses")
             .WithOpenApi();
 
-        courseRoutes.MapGet("/courses", SearchAllCoursesController.Invoke)
+        courseRoutes.MapGet("/courses/all/{userId}", SearchAllCoursesController.Invoke)
             .WithDescription("Get all courses")
             .WithName(nameof(SearchAllCoursesController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
@@ -66,6 +66,18 @@ public static class Routes
             .WithDescription("Checks the user's answer for a question, returns id of correct answer")
             .WithName(nameof(CheckAnswerController))
             .WithMetadata(new ProducesAttribute(APPLICATION_JSON))
+            .WithOpenApi();
+
+        courseRoutes
+            .MapGet("/courses/{courseId}/enrollment/count", GetEnrollmentCountController.Invoke)
+            .WithDescription("Gets amount of enrolled users of a course")
+            .WithName(nameof(GetEnrollmentCountController))
+            .WithOpenApi();
+        
+        courseRoutes
+            .MapGet("/courses/{courseId}/lessons/count", GetLessonsCountController.Invoke)
+            .WithDescription("Gets amount of enrolled users of a course")
+            .WithName(nameof(GetLessonsCountController))
             .WithOpenApi();
     }
 

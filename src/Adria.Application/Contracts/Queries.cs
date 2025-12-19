@@ -25,7 +25,7 @@ public interface ITopUsersByPointsQuery
 
 public interface IAllCoursesQuery
 {
-    Task<IReadOnlyCollection<CourseData>> Fetch();
+    Task<IReadOnlyCollection<CourseData>> Fetch(Guid userId);
 }
 
 public interface IUserCoursesByUserQuery
@@ -79,4 +79,14 @@ public interface IGetUserCosmeticsQuery
 public interface IIsActiveUserQuery
 {
     Task<bool> Fetch(Guid userId);
+}
+
+public interface IGetEnrollmentCountQuery
+{
+    Task<int> Fetch(Guid courseId);
+}
+
+public interface IGetLessonsCountQuery
+{
+    Task<int> Fetch(Guid courseId);
 }

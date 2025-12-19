@@ -92,7 +92,7 @@ public class MockAllCoursesQuery : IAllCoursesQuery
 {
     private readonly List<CourseData> _courses = new List<CourseData>();
 
-    public Task<IReadOnlyCollection<CourseData>> Fetch()
+    public Task<IReadOnlyCollection<CourseData>> Fetch(Guid UserId)
     {
         return Task.FromResult<IReadOnlyCollection<CourseData>>(_courses.AsReadOnly());
     }

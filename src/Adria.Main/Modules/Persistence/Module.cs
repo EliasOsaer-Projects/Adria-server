@@ -1,6 +1,7 @@
 using Adria.Infrastructure;
 using System.Data.Common;
 using Adria.Application.Contracts;
+using Adria.Application.Courses;
 using Adria.Domain;
 using Adria.Domain.Subscriptions;
 using Adria.Domain.Users;
@@ -224,6 +225,22 @@ public static class PersistenceModule
                     serviceProvider.GetRequiredService<ILogger<IsActiveUserQuery>>(),
                     serviceProvider.GetRequiredService<DbProviderFactory>(),
                     _connectionString
+                );
+            })
+            .AddScoped<IGetEnrollmentCountQuery, GetEnrollmentCountQuery>(serviceProvider =>
+            {
+                return new GetEnrollmentCountQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<GetEnrollmentCountQuery>>()
+                );
+            })
+            .AddScoped<IGetLessonsCountQuery, GetLessonsCountQuery>(serviceProvider =>
+            {
+                return new GetLessonsCountQuery(
+                    serviceProvider.GetRequiredService<DbProviderFactory>(),
+                    _connectionString,
+                    serviceProvider.GetRequiredService<ILogger<GetLessonsCountQuery>>()
                 );
             });
     }

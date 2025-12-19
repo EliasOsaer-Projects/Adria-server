@@ -1,5 +1,6 @@
 ﻿using Adria.Application.Contracts;
 using Adria.Application.Contracts.Data;
+using Adria.Application.Courses;
 using Adria.Domain;
 using Adria.Infrastructure.WebApi.Controllers.Responses;
 using Microsoft.AspNetCore.Http;
@@ -11,18 +12,20 @@ namespace Adria.Infrastructure.WebApi.Controllers;
 public sealed class SearchAllCoursesController
 {
     public static async Task<Results<Ok<List<AllCoursesResponse>>, NotFound>> Invoke(
-        [FromServices] IUseCase<Task<IReadOnlyCollection<CourseData>>> searchAllCourses,
+        [FromServices] IUseCase<SearchAllCoursesInput, Task<IReadOnlyCollection<CourseData>>> searchAllCourses,
+        [FromRoute] Guid userId,
         [FromQuery] string? category = null,
-        [FromQuery] string? tag = null)
+        [FromQuery] string? tag = null
+    )
     {
-        IReadOnlyCollection<CourseData> CourseData = await searchAllCourses.Execute();
+        IReadOnlyCollection<CourseData> courseData = await searchAllCourses.Execute(new SearchAllCoursesInput(userId));
 
-        if (CourseData == null || CourseData.Count == 0)
+        if (courseData == null || courseData.Count == 0)
         {
             return TypedResults.NotFound();
         }
 
-        IEnumerable<CourseData> filteredData = CourseData;
+        IEnumerable<CourseData> filteredData = courseData;
 
        if (!string.IsNullOrWhiteSpace(category))
        {
