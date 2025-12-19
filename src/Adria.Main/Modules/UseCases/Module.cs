@@ -31,6 +31,7 @@ public static class UseCases
             .AddScoped<IUseCase<CheckAnswerInput, Task<Guid>>, CheckAnswer>()
             .AddScoped<IUseCase<GetEnrollmentCountInput, Task<int>>, GetEnrollmentCount>()
             .AddScoped<IUseCase<GetLessonsCountInput, Task<int>>, GetLessonsCount>()
+            .AddScoped<IUseCase<SubscribeToPushNotificationsInput, Task>, SubscribeToPushNotifications>()
 
             // User Use Cases
             .AddScoped<IUseCase<UpdateUserProfilePictureInput, Task>, UpdateUserProfilePicture>()
