@@ -104,7 +104,7 @@ public class MockAllCoursesQuery : IAllCoursesQuery
 
 public class MockSearchUserCourseByUser : IUserCoursesByUserQuery
 {
-    
+
     private readonly List<UserCourseData> _users = new();
 
     public void AddUser(UserCourseData user) => _users.Add(user);
@@ -121,7 +121,7 @@ public class MockSearchCourseByIdQuery : ISearchCourseByIdQuery
     {
         return Task.FromResult(_courses.First(c => c.Id == id));
     }
-    
+
     public void AddCourse(CourseData course) => _courses.Add(course);
 }
 
@@ -197,6 +197,17 @@ public class MockAllCosmeticsQuery : IAllCosmeticsQuery
     {
         _cosmeticItems.Add(item);
     }
+}
+
+public class MockGetLessonCountQuery : IGetLessonsCountQuery
+{
+    int _amount;
+    public Task<int> Fetch(Guid courseId)
+    {
+        return Task.FromResult((int)_amount);
+    }
+
+    public void getAmount(int amount) => _amount = amount;
 }
 
 public class MockGetNextCourseModuleQuery : IGetNextCourseModuleQuery
