@@ -4,7 +4,7 @@ Minimal guide to run the API locally.
 
 ## Prerequisites
 - .NET 8 SDK
-- MySQL reachable with the connection string in `src/Adria.Main/appsettings.Development.json` (update as needed)
+- Docker Desktop
 
 ## Run
 ```bash
