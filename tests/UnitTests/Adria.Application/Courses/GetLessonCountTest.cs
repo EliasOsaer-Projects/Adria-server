@@ -20,7 +20,9 @@ public class GetlessonCountTest
 
         var result = await Usecase.Execute(new GetLessonsCountInput(Guid.NewGuid()));
 
-        Assert.NotNull(result);
+        Assert.NotEqual(0, result);
+        Assert.IsType<int>(result);
+        Assert.IsNotType<DateTime>(result);
     }
 
 }
